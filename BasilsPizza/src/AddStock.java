@@ -15,6 +15,8 @@ import java.text.DecimalFormat;
 
 import javax.swing.*;
 
+import org.sqlite.SQLiteException;
+
 public class AddStock {
 	
 	private JTextField itemField, pricePoundsField, pricePenceField, quantityField;
@@ -95,7 +97,7 @@ public class AddStock {
 			}
 			@Override
 			public void focusLost(FocusEvent e) {
-				System.out.println("Focus lost");
+				//System.out.println("Focus lost");
 			}
         	
         });
@@ -139,7 +141,22 @@ public class AddStock {
         okBtn = new JButton("OK");
         okBtn.addActionListener(new ActionListener() {
         		public void actionPerformed(ActionEvent event) {
-        			validate();
+        			
+        			try {
+						validate();
+						
+					} catch (Exception e) {
+						Database.closeDB();
+						
+					   
+						e.printStackTrace();
+						JOptionPane.showMessageDialog(frame, "Failed to insert into database.",
+								"Error", JOptionPane.ERROR_MESSAGE);
+					}
+					
+        			
+        			GUI.populateStockTable();
+        			
         		}
         });
         
@@ -169,7 +186,7 @@ public class AddStock {
 	
 	}
 	
-	private void validate() {
+	private void validate() throws Exception  {
 		String item = itemField.getText();
 		String pricePounds = pricePoundsField.getText();
 		String pricePence = pricePenceField.getText();
@@ -274,7 +291,7 @@ public class AddStock {
 		}
 	}
 	
-	private void addStock(String item, String pricePounds, String pricePence, String quantity) {
+	private void addStock(String item, String pricePounds, String pricePence, String quantity) throws Exception {
 		inputItem = item;
 		inputPrice = Double.parseDouble(pricePounds + "." + pricePence);
 		inputQuantity = Integer.parseInt(quantity);

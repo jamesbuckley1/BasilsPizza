@@ -4,8 +4,18 @@ import java.util.ArrayList;
 
 public class Database {
 	
+	private static Connection c = null;
+	private static Statement stmt = null;
 	
 	private static ArrayList<Stock> stockArray;
+	
+	private final static String createStockTableSql = "CREATE TABLE IF NOT EXISTS STOCK (ITEM TEXT PRIMARY KEY NOT NULL, PRICE REAL NOT NULL, QUANTITY INT NOT NULL);";
+	private final static String dropStockTableSql = "DROP TABLE STOCK;";
+	private final static String selectStockSql = "SELECT * FROM STOCK;";
+			
+			
+			
+
 	/*
 	public Database() {
 		initialise();
@@ -13,47 +23,58 @@ public class Database {
 	
 	}
 	*/
+	
+	public static void openDB() {
+		try {
+		Class.forName("org.sqlite.JDBC");
+		c = DriverManager.getConnection("jdbc:sqlite:stock.db");
+		c.setAutoCommit(false);
+		stmt = c.createStatement();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		System.out.println("Opened database successfully.");
+	}
+	
+	public static void closeDB() {
+		try {
+			stmt.close(); // Does c.close close this already?
+			c.commit();
+			c.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		System.out.println("Closed database successfully.");
+	}
 	public static void initialise() {
-		Connection c = null;
-		Statement stmt = null;
-		stockArray = new ArrayList<Stock>();
+		
+		//stockArray = new ArrayList<Stock>();
 		
 		try {
-			Class.forName("org.sqlite.JDBC");
-			c = DriverManager.getConnection("jdbc:sqlite:stock.db");
+			openDB();
 			
-			stmt = c.createStatement();
-			String sql = "CREATE TABLE IF NOT EXISTS STOCK " +  // PRIMARY KEY AUTOMATICALLY INCREMENTS
-							"(ITEM TEXT PRIMARY KEY NOT NULL, " + 
-							"PRICE REAL NOT NULL, " +
-							"QUANTITY INT NOT NULL)";
-			stmt.executeUpdate(sql);
-			stmt.close();
-			c.close();
+			
+			stmt.executeUpdate(createStockTableSql);
+			
+			closeDB();
 		} catch (Exception e) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-		System.out.println("Opened database successfully. Initialisation complete.");
+		System.out.println("SQLite database initialisation complete.");
 		
 		
 	}
 	
 	public static void selectStock() {
-		Connection c = null;
-		Statement stmt = null;
-		
 		
 		try {
-			Class.forName("org.sqlite.JDBC");
-			c = DriverManager.getConnection("jdbc:sqlite:stock.db");
-			c.setAutoCommit(false);
+			stockArray = new ArrayList<Stock>();
 			
-			System.out.println("Opened database successfully. Selecting STOCK.");
 			
-			stmt = c.createStatement();
+			openDB();
 			
-			ResultSet rs = stmt.executeQuery("SELECT * FROM STOCK;");
+			ResultSet rs = stmt.executeQuery(selectStockSql);
 			
 			
 			while (rs.next()) {
@@ -67,13 +88,15 @@ public class Database {
 				
 			
 			}
-			
+			/*
 			for (Stock stock : stockArray) {
 				System.out.println(stock);
 			}
+			*/
 			rs.close();
-			stmt.close();
-			c.close();
+			
+			
+			closeDB();
 			
 			
 		} catch (Exception e) {
@@ -81,37 +104,36 @@ public class Database {
 			e.printStackTrace();
 			System.exit(0);
 		}
-		System.out.println("SELECT successful.");
+		System.out.println("SELECT stock successful.");
 		
 		
 		
 		
 	}
 	
-	public static void insertStock(String item, double price, int quantity ) {
-		Connection c = null;
-		Statement stmt = null;
+	public static void insertStock(String item, double price, int quantity ) throws Exception{
 		
-		try {
-			Class.forName("org.sqlite.JDBC");
-			c = DriverManager.getConnection("jdbc:sqlite:stock.db");
-			c.setAutoCommit(false);
+		
+		
+		//try {
+			openDB();
 			
-			System.out.println("Opened database successfully. Inserting stock: " + item + " , " + price + " , " + quantity);
+			System.out.println("Inserting stock: " + item + " , " + price + " , " + quantity);
+			
+			String insertSql = "INSERT INTO STOCK (ITEM,PRICE,QUANTITY) " +
+					"VALUES ('" + item + "', " + price + ", " + quantity+ ");";
 			
 			stmt = c.createStatement();
-			String sql = "INSERT INTO STOCK (ITEM,PRICE,QUANTITY) " +
-						"VALUES ('" + item + "', " + price + ", " + quantity+ ");";
-			stmt.executeUpdate(sql);
 			
-			stmt.close();
-			c.commit();
-			c.close();
-		} catch (Exception e) {
-			System.err.println(e.getClass().getName() + ": " + e.getMessage());
-			System.exit(0);
-		}
-		System.out.println("INSERT successful.");
+			stmt.executeUpdate(insertSql);
+			
+			closeDB();
+			
+		//} catch (Exception e) {
+		//	System.err.println(e.getClass().getName() + ": " + e.getMessage());
+		//	System.exit(0);
+		//}
+		System.out.println("INSERT stock successful.");
 	}
 	
 
@@ -125,7 +147,7 @@ public class Database {
 		Connection c = null;
 		Statement stmt = null;
 		
-		System.out.println("Opened database successfully.");
+		System.out.println("openDBed database successfully.");
 		try {
 			Class.forName("org.sqlite.JDBC");
 			c = DriverManager.getConnection("jdbc:sqlite:stock.db");
@@ -147,24 +169,17 @@ public class Database {
 		
 	
 	
-	public void dropTable() {
+	public static void dropStockTable() {
 		
-		Connection c = null;
-		Statement stmt = null;
-		
-		System.out.println("Opened database successfully.");
 		try {
-			Class.forName("org.sqlite.JDBC");
-			c = DriverManager.getConnection("jdbc:sqlite:stock.db");
-			c.setAutoCommit(false);
+			openDB();
 			
 			stmt = c.createStatement();
-			String sql = "DROP TABLE STOCK;";
-			stmt.executeUpdate(sql);
 			
-			stmt.close();
-			c.commit();
-			c.close();
+			stmt.executeUpdate(dropStockTableSql);
+			
+			
+			closeDB();
 		} catch (Exception e) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);

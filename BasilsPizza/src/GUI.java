@@ -2,6 +2,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,14 +15,15 @@ public class GUI {
 
     private JFrame frame;
     private JTabbedPane tabbedPane;
-    private static Database db;
-    
+    //private static Database db;
+    private static DefaultTableModel model;
+    private static JTable tableStock;
     
     
     public GUI() {
     		frame = new JFrame();
     		tabbedPane = new JTabbedPane();
-    		db = new Database();
+    		//db = new Database();
     		newOrderPanel();
     		ordersPanel();
         tabbedPane("New Order", newOrderPanel());
@@ -65,27 +67,40 @@ public class GUI {
     		JPanel panelStockButtons = new JPanel();
     		
     		
-    		DefaultTableModel model = new DefaultTableModel(new String[]{"Item", "Price", "Quantity"}, 0);
+    		model = new DefaultTableModel(new String[]{"Item", "Price", "Quantity"}, 0);
 	
-    		JTable tableStock = new JTable(model) {
+    		tableStock = new JTable(model) {
+    			
     			//Disables editing of table
-    			public boolean isCellEditable(int data, int columns) {
+    			public boolean isCellEditable(int row, int columns) {
     				return false;
     			}
+    			
+    			
     			// Makes every other row a different colour for readability
-    			public Component prepareRenderer(TableCellRenderer r, int data, int columns) {
-    				Component c = super.prepareRenderer(r, data, columns);
+    			public Component prepareRenderer(TableCellRenderer r, int row, int columns) {
+    				Component c = super.prepareRenderer(r, row, columns);
     				
-    				if (data % 2 == 0) {
+    				
+    				if (row % 2 == 0) {
     					c.setBackground(Color.WHITE);
     				}
     				else {
-    					c.setBackground(Color.LIGHT_GRAY);
+    					c.setBackground(new Color(234, 234, 234));
+    				}
+    				
+    				if (isRowSelected(row)) {
+    					c.setBackground(new Color(24, 134, 254));
     				}
     				
     				return c;
     			}
     		};
+    		
+    		tableStock.setFont(new Font("", 0, 14));
+    		tableStock.setRowHeight(tableStock.getRowHeight() + 10);
+    		
+    		
     		
     		// Stock table mouse listener
     		tableStock.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -102,22 +117,9 @@ public class GUI {
     		});
     		
     		// Loop through result set ArrayList and adds to new array which can be used by TableModel
-    		//db.select();
     		
     		
-	    		for (int i = 0; i < Database.getStockArray().size(); i++) {
-	    			System.out.println("array");
-	    			
-	    			System.out.println(Database.getStockArray().get(i).getItem());
-	    			String item = Database.getStockArray().get(i).getItem();
-	    			double price = Database.getStockArray().get(i).getPrice();
-	    			int quantity = Database.getStockArray().get(i).getQuantity();
-	    			
-	    			Object[] data = {item, price, quantity};
-	    			
-	    			model.addRow(data);
-	    			}
-	    		
+    		populateStockTable();	
     		
     		//tableStock.setPreferredScrollableViewportSize(new Dimension(450, 350)); // 450, 63 - original size
     		tableStock.setFillsViewportHeight(true);
@@ -134,10 +136,7 @@ public class GUI {
     				
     			AddStock addStock = new AddStock(frame);
     				
-    			Object[] data = {addStock.getItem(), addStock.getPrice(), 
-    					addStock.getQuantity()};
     			
-    			model.addRow(data);
     				
     			}
     		});
@@ -165,6 +164,36 @@ public class GUI {
     		
     		return panelStockMain;
     }
+    /*
+    public static void resetStockTable() {
+    		//model = new DefaultTableModel();
+    		int rows = model.getRowCount();
+    		for (int i = rows - 1; i >= 0; i --) {
+    			model.removeRow(i);
+    		}
+    }
+    */
+    public static void populateStockTable() {
+    	int rows = model.getRowCount();
+		for (int i = rows - 1; i >= 0; i --) {
+			model.removeRow(i);
+		}
+    		
+    		Database.selectStock();
+    		
+		for (int i = 0; i < Database.getStockArray().size(); i++) {
+			
+			
+			//System.out.println(Database.getStockArray().get(i).getItem());
+			String item = Database.getStockArray().get(i).getItem();
+			double price = Database.getStockArray().get(i).getPrice();
+			int quantity = Database.getStockArray().get(i).getQuantity();
+			
+			Object[] data = {item, price, quantity};
+			
+			model.addRow(data);
+			}
+	}
     
     private JPanel staffPanel() {
     		JPanel panelStaff = new JPanel();
