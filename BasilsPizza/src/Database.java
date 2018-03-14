@@ -5,17 +5,18 @@ import java.util.ArrayList;
 public class Database {
 	
 	
-	private ArrayList<Stock> stockArray;
-	
+	private static ArrayList<Stock> stockArray;
+	/*
 	public Database() {
 		initialise();
-		stockArray = new ArrayList<Stock>();
+		
 	
 	}
-	
-	public void initialise() {
+	*/
+	public static void initialise() {
 		Connection c = null;
 		Statement stmt = null;
+		stockArray = new ArrayList<Stock>();
 		
 		try {
 			Class.forName("org.sqlite.JDBC");
@@ -38,8 +39,56 @@ public class Database {
 		
 	}
 	
+	public static void selectStock() {
+		Connection c = null;
+		Statement stmt = null;
+		
+		
+		try {
+			Class.forName("org.sqlite.JDBC");
+			c = DriverManager.getConnection("jdbc:sqlite:stock.db");
+			c.setAutoCommit(false);
+			
+			System.out.println("Opened database successfully. Selecting STOCK.");
+			
+			stmt = c.createStatement();
+			
+			ResultSet rs = stmt.executeQuery("SELECT * FROM STOCK;");
+			
+			
+			while (rs.next()) {
+				
+				String item = rs.getString("item");
+				double price = rs.getDouble("price");
+				int quantity = rs.getInt("quantity");
+				
+				Stock st = new Stock(item, price, quantity);
+				stockArray.add(st);
+				
+			
+			}
+			
+			for (Stock stock : stockArray) {
+				System.out.println(stock);
+			}
+			rs.close();
+			stmt.close();
+			c.close();
+			
+			
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		}
+		System.out.println("SELECT successful.");
+		
+		
+		
+		
+	}
 	
-	public void insertStock(String item, double price, int quantity ) {
+	public static void insertStock(String item, double price, int quantity ) {
 		Connection c = null;
 		Statement stmt = null;
 		
@@ -65,55 +114,9 @@ public class Database {
 		System.out.println("INSERT successful.");
 	}
 	
-	public void select() {
-		Connection c = null;
-		Statement stmt = null;
-		
-		
-		try {
-			Class.forName("org.sqlite.JDBC");
-			c = DriverManager.getConnection("jdbc:sqlite:stock.db");
-			c.setAutoCommit(false);
-			
-			System.out.println("Opened database successfully. Selecting STOCK.");
-			
-			stmt = c.createStatement();
-			
-			ResultSet rs = stmt.executeQuery("SELECT * FROM STOCK;");
-			
-			
-			while (rs.next()) {
-				Stock st = new Stock(rs.getString("item"), rs.getDouble("price"), rs.getInt("quantity"));
-				stockArray.add(st);
-				
-				String item = rs.getString("item");
-				double price = rs.getDouble("price");
-				int quantity = rs.getInt("quantity");
-				
-				//System.out.println("ID = " + id);
-				System.out.println("ITEM = " + item);
-				System.out.println("PRICE = " + price);
-				System.out.println("QUANTITY = " + quantity);
-			}
-			rs.close();
-			stmt.close();
-			c.close();
-			
-			
-		} catch (Exception e) {
-			System.err.println(e.getClass().getName() + ": " + e.getMessage());
-			System.exit(0);
-		}
-		System.out.println("SELECT successful.");
-		
-		for (Stock object: stockArray) {
-			System.out.println(object);
-		}
-		
-		
-	}
+
 	
-	public ArrayList<Stock> getStockArray() {
+	public static ArrayList<Stock> getStockArray() {
 		return stockArray;
 	}
 	

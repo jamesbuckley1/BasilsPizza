@@ -282,8 +282,8 @@ public class AddStock {
 		//DecimalFormat df = new DecimalFormat("#.00");
 		//validatedPrice = df.format(validatedPrice);
 		
-		Database db = new Database();
-		db.insertStock(inputItem, inputPrice, inputQuantity);
+		//Stock s = new Stock(inputItem, inputPrice, inputQuantity);
+		Database.insertStock(inputItem, inputPrice, inputQuantity);
 		
 	}
 	

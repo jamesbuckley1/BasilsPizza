@@ -5,14 +5,14 @@ import javax.swing.SwingUtilities;
 public class Launcher {
 
 	public static void main(String[] args) throws SQLException {
-		Database db = new Database();
+		//Database db = new Database();
 		//db.addStock("test2", 12.56, 19);
+		Database.initialise();
+		Database.selectStock();
 		
 		
 		
-		
-		
-		//db.dropTable();
+		//Database.dropTable();
 		//db.select();
 		
 		SwingUtilities.invokeLater(new Runnable() {

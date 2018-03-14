@@ -105,15 +105,19 @@ public class GUI {
     		//db.select();
     		
     		
-    		for (int i = 0; i < db.getStockArray().size(); i++) {
-    			String item = db.getStockArray().get(i).getItem();
-    			double price = db.getStockArray().get(i).getPrice();
-    			int quantity = db.getStockArray().get(i).getQuantity();
-    			
-    			Object[] data = {item, price, quantity};
-    			
-    			model.addRow(data);
-    		}
+	    		for (int i = 0; i < Database.getStockArray().size(); i++) {
+	    			System.out.println("array");
+	    			
+	    			System.out.println(Database.getStockArray().get(i).getItem());
+	    			String item = Database.getStockArray().get(i).getItem();
+	    			double price = Database.getStockArray().get(i).getPrice();
+	    			int quantity = Database.getStockArray().get(i).getQuantity();
+	    			
+	    			Object[] data = {item, price, quantity};
+	    			
+	    			model.addRow(data);
+	    			}
+	    		
     		
     		//tableStock.setPreferredScrollableViewportSize(new Dimension(450, 350)); // 450, 63 - original size
     		tableStock.setFillsViewportHeight(true);
