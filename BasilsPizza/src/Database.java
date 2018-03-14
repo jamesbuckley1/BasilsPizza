@@ -142,19 +142,14 @@ public class Database {
 		return stockArray;
 	}
 	
-	public void deleteStock(String stockItem) {
+	public static void deleteStock(String stockItem) {
+		System.out.println("WORD DELETED = " + stockItem);
 		
-		Connection c = null;
-		Statement stmt = null;
-		
-		System.out.println("openDBed database successfully.");
 		try {
-			Class.forName("org.sqlite.JDBC");
-			c = DriverManager.getConnection("jdbc:sqlite:stock.db");
-			c.setAutoCommit(false);
+			openDB();
 			
 			stmt = c.createStatement();
-			String sql = "DELETE from STOCK where ITEM=" + stockItem + ";";
+			String sql = "DELETE FROM STOCK WHERE ITEM = '" + stockItem + "';";
 			stmt.executeUpdate(sql);
 			
 			stmt.close();
@@ -164,7 +159,7 @@ public class Database {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-		System.out.println("STOCK table dropped successfully");
+		System.out.println("Deleted successfully.");
 	}
 		
 	

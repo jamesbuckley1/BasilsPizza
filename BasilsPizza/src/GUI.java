@@ -17,7 +17,7 @@ public class GUI {
     private JTabbedPane tabbedPane;
     //private static Database db;
     private static DefaultTableModel model;
-    private static JTable tableStock;
+    private static JTable stockTable;
     
     
     public GUI() {
@@ -69,7 +69,7 @@ public class GUI {
     		
     		model = new DefaultTableModel(new String[]{"Item", "Price", "Quantity"}, 0);
 	
-    		tableStock = new JTable(model) {
+    		stockTable = new JTable(model) {
     			
     			//Disables editing of table
     			public boolean isCellEditable(int row, int columns) {
@@ -97,17 +97,17 @@ public class GUI {
     			}
     		};
     		
-    		tableStock.setFont(new Font("", 0, 14));
-    		tableStock.setRowHeight(tableStock.getRowHeight() + 10);
+    		stockTable.setFont(new Font("", 0, 14));
+    		stockTable.setRowHeight(stockTable.getRowHeight() + 10);
     		
     		
     		
     		// Stock table mouse listener
-    		tableStock.addMouseListener(new java.awt.event.MouseAdapter() {
+    		stockTable.addMouseListener(new java.awt.event.MouseAdapter() {
     			@Override
     			public void mouseClicked(java.awt.event.MouseEvent event) {
-    				int row = tableStock.getSelectedRow();
-    				int col = tableStock.getSelectedColumn();
+    				int row = stockTable.getSelectedRow();
+    				int col = stockTable.getSelectedColumn();
     				System.out.println("Row = " + row);
     				System.out.println("Col = " + col);
     				
@@ -121,13 +121,14 @@ public class GUI {
     		
     		populateStockTable();	
     		
-    		//tableStock.setPreferredScrollableViewportSize(new Dimension(450, 350)); // 450, 63 - original size
-    		tableStock.setFillsViewportHeight(true);
+    		//stockTable.setPreferredScrollableViewportSize(new Dimension(450, 350)); // 450, 63 - original size
+    		stockTable.setFillsViewportHeight(true);
     		
-    		JScrollPane jsp = new JScrollPane(tableStock);
+    		JScrollPane jsp = new JScrollPane(stockTable);
     		panelStockTable.add(jsp, BorderLayout.CENTER);
     		
     		// Buttons
+    		
     		JButton addBtn = new JButton();
     		addBtn.setText("Add");
     		addBtn.addActionListener(new ActionListener() {
@@ -143,12 +144,31 @@ public class GUI {
     		
     		JButton editBtn = new JButton();
     		editBtn.setText("Edit");
+    		editBtn.addActionListener(new ActionListener() {
+    			@Override
+    			public void actionPerformed(ActionEvent event) {
+    				
+    			}
+    		});
+    		
     		
         JButton deleteBtn = new JButton();
         deleteBtn.setText("Delete");
         deleteBtn.addActionListener(new ActionListener() {
         		@Override
         		public void actionPerformed(ActionEvent event) {
+        			try {
+        			int row = stockTable.getSelectedRow();
+        			String cellData = stockTable.getModel().getValueAt(row, 0).toString();
+        			System.out.println(cellData);
+        			Database.deleteStock(cellData);
+        			populateStockTable();
+        			} catch (Exception e) {
+        				JOptionPane.showMessageDialog(frame, "Please select an item to delete.",
+        						"Error", JOptionPane.ERROR_MESSAGE);
+        						
+        			}
+        			
         			
         		}
         });
@@ -164,15 +184,7 @@ public class GUI {
     		
     		return panelStockMain;
     }
-    /*
-    public static void resetStockTable() {
-    		//model = new DefaultTableModel();
-    		int rows = model.getRowCount();
-    		for (int i = rows - 1; i >= 0; i --) {
-    			model.removeRow(i);
-    		}
-    }
-    */
+    
     public static void populateStockTable() {
     	int rows = model.getRowCount();
 		for (int i = rows - 1; i >= 0; i --) {
