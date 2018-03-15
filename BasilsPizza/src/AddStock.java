@@ -33,8 +33,33 @@ public class AddStock {
 	private double inputPrice;
 	private int inputQuantity;
 	
+	//VARIABLES FOR ITEM EDIT/UPDATE
+	private boolean editFlag = false;
+	private String currentItem = "";
+	private String currentPrice = "";
+	private String currentQuantity = "";
+	private String pricePoundsAfterSplit;
+	private String pricePenceAfterSplit;
 
 	public AddStock(JFrame frame) {
+		buildGUI(frame);
+        
+        
+	
+	}
+	// CONSTRUCTOR FOR UPDATE ITEM
+	public AddStock(JFrame frame, String cellDataItem, String cellDataPrice, String cellDataQuantity) {
+		editFlag = true;
+		currentItem = cellDataItem;
+		currentPrice = cellDataPrice;
+		currentQuantity = cellDataQuantity;
+		
+		buildGUI(frame);
+		//editCheck();
+		
+	}
+	
+	public void buildGUI(JFrame frame) {
 		mainPanel = new JPanel(new BorderLayout());
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 		formPanel = new JPanel();
@@ -51,10 +76,28 @@ public class AddStock {
         lblQuantity = new JLabel(" Quantity:");
         lblDot = new JLabel(".");
 
-        itemField = new JTextField();
         
-        // FOCUS LISTENER ON TEXT FIELDS TO REMOVE PLACEHOLDER TEXT ON CLICK
-        pricePoundsField = new JTextField("0");
+        
+        // SET ITEM FIELD TEXT
+        itemField = new JTextField();
+        if (editFlag) {
+        	itemField.setText(currentItem);
+        } else {
+        	itemField.setText("0");
+        }
+        
+        // PRICE (POUNDS) TEXT FIELD
+        
+        pricePoundsField = new JTextField();
+        if (editFlag) {
+        		splitPrice();
+        	System.out.println("EDIT FLAG TRUE " + pricePoundsAfterSplit);
+        	pricePoundsField.setText(pricePoundsAfterSplit);
+        } else {
+        	pricePoundsField.setText("0");
+        }
+        
+     // FOCUS LISTENER ON TEXT FIELDS TO REMOVE PLACEHOLDER TEXT ON CLICK
         pricePoundsField.addFocusListener(new FocusListener() {
 			@Override
 			public void focusGained(FocusEvent e) {
@@ -69,7 +112,15 @@ public class AddStock {
 			}
         	
         });
-        pricePenceField = new JTextField("00");
+        
+        // SET PRICE (PENCE) FIELD TEXT
+        pricePenceField = new JTextField();
+        if (editFlag) {
+        	pricePenceField.setText(pricePenceAfterSplit);
+        } else {
+        	pricePenceField.setText("00");
+        }
+        
         pricePenceField.addFocusListener(new FocusListener() {
 			@Override
 			public void focusGained(FocusEvent e) {
@@ -85,7 +136,12 @@ public class AddStock {
         	
         });
         
-        quantityField = new JTextField("0");
+        quantityField = new JTextField();
+        if (editFlag) {
+        	quantityField.setText(currentQuantity);
+        } else {
+        	quantityField.setText("0");
+        }
         quantityField.addFocusListener(new FocusListener() {
 			@Override
 			public void focusGained(FocusEvent e) {
@@ -154,36 +210,33 @@ public class AddStock {
 								"Error", JOptionPane.ERROR_MESSAGE);
 					}
 					
-        			
         			GUI.populateStockTable();
-        			
         		}
         });
         
-        
         buttonPanel.add(cancelBtn);
         buttonPanel.add(okBtn);
         
-        
-        
-    
-        
         buttonPanel.add(cancelBtn);
         buttonPanel.add(okBtn);
-        
-        
-       
         
         mainPanel.add(formPanel, BorderLayout.CENTER);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
-        
         
         dialog.add(mainPanel);
         dialog.setSize(300, 180);
         dialog.setModal(true); // Always on top
         dialog.setLocationRelativeTo(frame);
         dialog.setVisible(true);
+	}
 	
+	public void splitPrice() {
+		
+		String[] price = currentPrice.split("\\.");
+		pricePoundsAfterSplit = price[0];
+		pricePenceAfterSplit = price[1];
+		
+		
 	}
 	
 	private void validate() throws Exception  {
@@ -207,6 +260,8 @@ public class AddStock {
 		String errorStr = "";
 		
 		// ITEM FIELD VALIDATION
+		
+		System.out.println("VALIDATE - ITEM:" + item);
 		
 		item = item.toUpperCase();
 		
@@ -299,10 +354,24 @@ public class AddStock {
 		//DecimalFormat df = new DecimalFormat("#.00");
 		//validatedPrice = df.format(validatedPrice);
 		
-		//Stock s = new Stock(inputItem, inputPrice, inputQuantity);
+		if (editFlag) {
+			Database.updateStock(currentItem, inputItem, inputPrice, inputQuantity);
+		} else {
 		Database.insertStock(inputItem, inputPrice, inputQuantity);
+		}
+		
 		
 	}
+	
+	/*
+	public void editStock(String item, String pricePounds, String pricePence, String quantity) {
+		inputItem = item;
+		inputPrice = Double.parseDouble(pricePounds + "." + pricePence);
+		inputQuantity = Integer.parseInt(quantity);
+		
+		Database.editStock(inputItem, inputPrice, inputQuantity)
+	}
+	*/
 	
 	public String getItem() {
 		return inputItem;

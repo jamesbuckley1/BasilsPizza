@@ -147,7 +147,12 @@ public class GUI {
     		editBtn.addActionListener(new ActionListener() {
     			@Override
     			public void actionPerformed(ActionEvent event) {
-    				
+    				int row = stockTable.getSelectedRow();
+    				String cellDataItem = stockTable.getModel().getValueAt(row, 0).toString();
+    				String cellDataPrice = stockTable.getModel().getValueAt(row, 1).toString();
+    				String cellDataQuantity = stockTable.getModel().getValueAt(row, 2).toString();
+    				AddStock edit = new AddStock(frame, cellDataItem, cellDataPrice, cellDataQuantity);
+    				//edit.editCheck(cellData);
     			}
     		});
     		

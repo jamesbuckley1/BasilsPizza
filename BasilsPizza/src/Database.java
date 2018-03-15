@@ -4,32 +4,27 @@ import java.util.ArrayList;
 
 public class Database {
 	
-	private static Connection c = null;
-	private static Statement stmt = null;
+	private static Connection conn = null;
+	//private static Statement stmt = null;
 	
 	private static ArrayList<Stock> stockArray;
 	
-	private final static String createStockTableSql = "CREATE TABLE IF NOT EXISTS STOCK (ITEM TEXT PRIMARY KEY NOT NULL, PRICE REAL NOT NULL, QUANTITY INT NOT NULL);";
-	private final static String dropStockTableSql = "DROP TABLE STOCK;";
-	private final static String selectStockSql = "SELECT * FROM STOCK;";
-			
-			
-			
-
-	/*
-	public Database() {
-		initialise();
-		
+	private final static String createStockTableSql = "CREATE TABLE IF NOT EXISTS stock (item TEXT PRIMARY KEY NOT NULL, price REAL NOT NULL, quantity INT NOT NULL);";
+	private final static String dropStockTableSql = "DROP TABLE stock;";
+	private final static String selectStockSql = "SELECT * FROM stock;";
+	private final static String insertStockSql = "INSERT INTO stock (item, price, quantity) VALUES (?, ?, ?);";
+	private final static String updateStockSql = "UPDATE stock SET item = ?, price = ?, quantity = ? WHERE item = ?";
+	private final static String deleteStockSql = "DELETE FROM stock WHERE item = ?";
 	
-	}
-	*/
+	//String sql = "DELETE FROM STOCK WHERE ITEM = '" + stockItem + "';";
+	
 	
 	public static void openDB() {
 		try {
 		Class.forName("org.sqlite.JDBC");
-		c = DriverManager.getConnection("jdbc:sqlite:stock.db");
-		c.setAutoCommit(false);
-		stmt = c.createStatement();
+		conn = DriverManager.getConnection("jdbc:sqlite:stock.db");
+		conn.setAutoCommit(false);
+		//stmt = conn.createStatement();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -38,9 +33,9 @@ public class Database {
 	
 	public static void closeDB() {
 		try {
-			stmt.close(); // Does c.close close this already?
-			c.commit();
-			c.close();
+			//stmt.close(); // Does conn.close close this already?
+			conn.commit();
+			conn.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -53,8 +48,9 @@ public class Database {
 		try {
 			openDB();
 			
-			
-			stmt.executeUpdate(createStockTableSql);
+			PreparedStatement createStockTable = conn.prepareStatement(createStockTableSql);
+			createStockTable.executeUpdate();
+			createStockTable.close();
 			
 			closeDB();
 		} catch (Exception e) {
@@ -73,8 +69,9 @@ public class Database {
 			
 			
 			openDB();
+			PreparedStatement selectStock = conn.prepareStatement(selectStockSql);
 			
-			ResultSet rs = stmt.executeQuery(selectStockSql);
+			ResultSet rs = selectStock.executeQuery();
 			
 			
 			while (rs.next()) {
@@ -94,7 +91,7 @@ public class Database {
 			}
 			*/
 			rs.close();
-			
+			selectStock.close();
 			
 			closeDB();
 			
@@ -120,14 +117,20 @@ public class Database {
 			
 			System.out.println("Inserting stock: " + item + " , " + price + " , " + quantity);
 			
-			String insertSql = "INSERT INTO STOCK (ITEM,PRICE,QUANTITY) " +
-					"VALUES ('" + item + "', " + price + ", " + quantity+ ");";
+			PreparedStatement insert = conn.prepareStatement(insertStockSql);
+				
+			insert.setString(1, item);
+			insert.setDouble(2, price);
+			insert.setInt(3, quantity);
 			
-			stmt = c.createStatement();
+			//stmt = conn.createStatement();
 			
-			stmt.executeUpdate(insertSql);
+			insert.executeUpdate();
+			insert.close();
 			
 			closeDB();
+			
+			
 			
 		//} catch (Exception e) {
 		//	System.err.println(e.getClass().getName() + ": " + e.getMessage());
@@ -143,23 +146,46 @@ public class Database {
 	}
 	
 	public static void deleteStock(String stockItem) {
-		System.out.println("WORD DELETED = " + stockItem);
+		
 		
 		try {
 			openDB();
 			
-			stmt = c.createStatement();
-			String sql = "DELETE FROM STOCK WHERE ITEM = '" + stockItem + "';";
-			stmt.executeUpdate(sql);
+			PreparedStatement deleteStock = conn.prepareStatement(deleteStockSql);
+			deleteStock.setString(1, stockItem);
 			
-			stmt.close();
-			c.commit();
-			c.close();
+			deleteStock.executeUpdate();
+			
+			deleteStock.close();
+			
+			closeDB();
 		} catch (Exception e) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
 		System.out.println("Deleted successfully.");
+	}
+	
+	public static void updateStock(String currentItem, String newItem, double newPrice, int newQuantity) {
+		try {
+		openDB();
+		
+		PreparedStatement update = conn.prepareStatement(updateStockSql);
+		
+		update.setString(1, newItem);
+		update.setDouble(2, newPrice);
+		update.setInt(3, newQuantity);
+		update.setString(4, currentItem);
+		update.executeUpdate();
+		
+		update.close();
+		conn.commit();
+		conn.close();
+	} catch (Exception e) {
+		System.err.println(e.getClass().getName() + ": " + e.getMessage());
+		System.exit(0);
+	}
+	System.out.println("UPDATED " + currentItem + " successfully.");
 	}
 		
 	
@@ -169,9 +195,11 @@ public class Database {
 		try {
 			openDB();
 			
-			stmt = c.createStatement();
+			PreparedStatement dropStockTable = conn.prepareStatement(dropStockTableSql);
+			dropStockTable.executeUpdate();
 			
-			stmt.executeUpdate(dropStockTableSql);
+			
+			dropStockTable.close();
 			
 			
 			closeDB();
