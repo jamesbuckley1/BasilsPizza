@@ -7,7 +7,6 @@ public class Launcher {
 	public static void main(String[] args) throws Exception {
 		
 		Database.initialise();
-		//Database.deleteStock("TEST9");
 		
 		//Database.dropStockTable();
 		

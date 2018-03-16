@@ -9,7 +9,7 @@ public class Database {
 	
 	private static ArrayList<Stock> stockArray;
 	
-	private final static String createStockTableSql = "CREATE TABLE IF NOT EXISTS stock (item TEXT PRIMARY KEY NOT NULL, price REAL NOT NULL, quantity INT NOT NULL);";
+	private final static String createStockTableSql = "CREATE TABLE IF NOT EXISTS stock (item TEXT PRIMARY KEY NOT NULL, price DOUBLE NOT NULL, quantity INT NOT NULL);";
 	private final static String dropStockTableSql = "DROP TABLE stock;";
 	private final static String selectStockSql = "SELECT * FROM stock ORDER BY item ASC;";
 	private final static String insertStockSql = "INSERT INTO stock (item, price, quantity) VALUES (?, ?, ?);";

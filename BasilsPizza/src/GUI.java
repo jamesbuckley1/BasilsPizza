@@ -36,6 +36,7 @@ public class GUI {
         tabbedPane("Orders", ordersPanel());
         tabbedPane("Tables", tablesPanel());
         tabbedPane("Stock", stockPanel());
+        tabbedPane("Customers", customersPanel());
         tabbedPane("Staff", staffPanel());
         createAndShowGUI();
     }
@@ -189,6 +190,15 @@ public class GUI {
     		panelStockTable.add(panelStockButtons, BorderLayout.SOUTH);
     		
     		return panelStockMain;
+    }
+    
+    private JPanel customersPanel() {
+		JPanel panelCustomers = new JPanel(new BorderLayout());
+		JLabel lbl1 = new JLabel("New Orders.");
+		panelCustomers.add(lbl1, BorderLayout.NORTH);
+	
+		return panelCustomers;
+	
     }
     
     public static void editItem(JFrame frame) {
