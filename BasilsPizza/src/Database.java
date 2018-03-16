@@ -11,7 +11,7 @@ public class Database {
 	
 	private final static String createStockTableSql = "CREATE TABLE IF NOT EXISTS stock (item TEXT PRIMARY KEY NOT NULL, price REAL NOT NULL, quantity INT NOT NULL);";
 	private final static String dropStockTableSql = "DROP TABLE stock;";
-	private final static String selectStockSql = "SELECT * FROM stock;";
+	private final static String selectStockSql = "SELECT * FROM stock ORDER BY item ASC;";
 	private final static String insertStockSql = "INSERT INTO stock (item, price, quantity) VALUES (?, ?, ?);";
 	private final static String updateStockSql = "UPDATE stock SET item = ?, price = ?, quantity = ? WHERE item = ?";
 	private final static String deleteStockSql = "DELETE FROM stock WHERE item = ?";
@@ -142,6 +142,7 @@ public class Database {
 
 	
 	public static ArrayList<Stock> getStockArray() {
+		//stockArray.sort();
 		return stockArray;
 	}
 	
@@ -166,7 +167,7 @@ public class Database {
 		System.out.println("Deleted successfully.");
 	}
 	
-	public static void updateStock(String currentItem, String newItem, double newPrice, int newQuantity) {
+	public static void updateStock(String currentItem, String newItem, Double newPrice, int newQuantity) {
 		try {
 		openDB();
 		

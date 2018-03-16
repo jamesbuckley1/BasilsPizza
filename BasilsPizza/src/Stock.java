@@ -1,3 +1,4 @@
+import java.text.DecimalFormat;
 
 public class Stock {
 	
@@ -21,6 +22,14 @@ public class Stock {
 
 	public double getPrice() {
 		return price;
+	}
+	
+	public String getFormattedPrice() { // Needed for table to display 1.00 format instead of 1.0
+		String pattern = "###.00";
+		DecimalFormat df = new DecimalFormat(pattern);
+		String formattedPrice = df.format(price);
+		
+		return formattedPrice;
 	}
 
 	public void setPrice(double price) {

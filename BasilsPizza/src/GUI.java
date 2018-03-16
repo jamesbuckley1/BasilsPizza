@@ -6,10 +6,16 @@ import java.awt.Font;
 import java.awt.event.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 public class GUI {
 
@@ -105,12 +111,11 @@ public class GUI {
     		// Stock table mouse listener
     		stockTable.addMouseListener(new java.awt.event.MouseAdapter() {
     			@Override
-    			public void mouseClicked(java.awt.event.MouseEvent event) {
-    				int row = stockTable.getSelectedRow();
-    				int col = stockTable.getSelectedColumn();
-    				System.out.println("Row = " + row);
-    				System.out.println("Col = " + col);
-    				
+    			public void mouseClicked(MouseEvent event) {
+    				if (event.getClickCount() == 2) {
+    					editItem(frame);
+    				}
+    			
     				
     				
     			}
@@ -147,12 +152,8 @@ public class GUI {
     		editBtn.addActionListener(new ActionListener() {
     			@Override
     			public void actionPerformed(ActionEvent event) {
-    				int row = stockTable.getSelectedRow();
-    				String cellDataItem = stockTable.getModel().getValueAt(row, 0).toString();
-    				String cellDataPrice = stockTable.getModel().getValueAt(row, 1).toString();
-    				String cellDataQuantity = stockTable.getModel().getValueAt(row, 2).toString();
-    				AddStock edit = new AddStock(frame, cellDataItem, cellDataPrice, cellDataQuantity);
-    				//edit.editCheck(cellData);
+    				editItem(frame);
+    				
     			}
     		});
     		
@@ -190,6 +191,19 @@ public class GUI {
     		return panelStockMain;
     }
     
+    public static void editItem(JFrame frame) {
+    	try {
+			int row = stockTable.getSelectedRow();
+			String cellDataItem = stockTable.getModel().getValueAt(row, 0).toString();
+			String cellDataPrice = stockTable.getModel().getValueAt(row, 1).toString();
+			String cellDataQuantity = stockTable.getModel().getValueAt(row, 2).toString();
+			AddStock edit = new AddStock(frame, cellDataItem, cellDataPrice, cellDataQuantity);
+			} catch (Exception e){
+				JOptionPane.showMessageDialog(frame, "Please select an item to edit.",
+						"Error", JOptionPane.ERROR_MESSAGE);
+			}
+    }
+    
     public static void populateStockTable() {
     	int rows = model.getRowCount();
 		for (int i = rows - 1; i >= 0; i --) {
@@ -203,12 +217,24 @@ public class GUI {
 			
 			//System.out.println(Database.getStockArray().get(i).getItem());
 			String item = Database.getStockArray().get(i).getItem();
-			double price = Database.getStockArray().get(i).getPrice();
+			String price = Database.getStockArray().get(i).getFormattedPrice(); 
 			int quantity = Database.getStockArray().get(i).getQuantity();
 			
+			
 			Object[] data = {item, price, quantity};
+			//Arrays.sort(data);
+				
 			
 			model.addRow(data);
+			
+			/*
+			TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(stockTable.getModel());
+			stockTable.setRowSorter(sorter);
+			
+			List<RowSorter.SortKey> sortKeys = new ArrayList<RowSorter.SortKey>();
+			sortKeys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+			sorter.setSortKeys(sortKeys);
+			*/
 			}
 	}
     

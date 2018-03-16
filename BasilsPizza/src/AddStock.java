@@ -12,6 +12,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 import javax.swing.*;
 
@@ -223,6 +224,11 @@ public class AddStock {
         mainPanel.add(formPanel, BorderLayout.CENTER);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
         
+        if (editFlag) {
+        	dialog.setTitle("Edit Stock");
+        } else {
+        	dialog.setTitle("Add Stock");
+        }
         dialog.add(mainPanel);
         dialog.setSize(300, 180);
         dialog.setModal(true); // Always on top
@@ -347,12 +353,19 @@ public class AddStock {
 	}
 	
 	private void addStock(String item, String pricePounds, String pricePence, String quantity) throws Exception {
+		System.out.println("INPUT PRICE!!!: " + inputPrice);
+		
 		inputItem = item;
 		inputPrice = Double.parseDouble(pricePounds + "." + pricePence);
-		inputQuantity = Integer.parseInt(quantity);
+		/*
+		String pattern = "###.00";
+		DecimalFormat df = new DecimalFormat(pattern);
+		String formattedPrice = df.format(inputPrice);
+		*/
+		//System.out.println("FORMATTED PRICE: " + formattedPrice);
+		//inputPrice = Double.parseDouble(formattedPrice);
 		
-		//DecimalFormat df = new DecimalFormat("#.00");
-		//validatedPrice = df.format(validatedPrice);
+		inputQuantity = Integer.parseInt(quantity);
 		
 		if (editFlag) {
 			Database.updateStock(currentItem, inputItem, inputPrice, inputQuantity);
