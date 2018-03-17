@@ -25,15 +25,20 @@ public class GUI {
 
     private JFrame frame;
     private JTabbedPane tabbedPane;
-    //private static Database db;
-    private static DefaultTableModel model;
+    
+    private static DefaultTableModel stockTableModel;
+    private static DefaultTableModel customersTableModel;
+    
     private static JTable stockTable;
+    private static JTable customersTable;
+    
+    private static GridBagConstraints gbc;
     
     
     public GUI() {
     		frame = new JFrame();
     		tabbedPane = new JTabbedPane();
-    		//db = new Database();
+    		gbc = new GridBagConstraints();
     		newOrderPanel();
     		ordersPanel();
         tabbedPane("New Order", newOrderPanel());
@@ -82,9 +87,9 @@ public class GUI {
     		JPanel panelStockButtons = new JPanel();
     		
     		
-    		model = new DefaultTableModel(new String[]{"Item", "Price", "Quantity"}, 0);
+    		stockTableModel = new DefaultTableModel(new String[]{"Item", "Price", "Quantity"}, 0);
 	
-    		stockTable = new JTable(model) {
+    		stockTable = new JTable(stockTableModel) {
     			
     			//Disables editing of table
     			public boolean isCellEditable(int row, int columns) {
@@ -229,9 +234,9 @@ public class GUI {
     }
     
     public static void populateStockTable() {
-    	int rows = model.getRowCount();
+    	int rows = stockTableModel.getRowCount();
 		for (int i = rows - 1; i >= 0; i --) {
-			model.removeRow(i);
+			stockTableModel.removeRow(i);
 		}
     		
     		Database.selectStock();
@@ -249,7 +254,7 @@ public class GUI {
 			//Arrays.sort(data);
 				
 			
-			model.addRow(data);
+			stockTableModel.addRow(data);
 			
 			/*
 			TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(stockTable.getModel());
@@ -270,10 +275,186 @@ public class GUI {
     
     private JPanel customersPanel() {
 		JPanel panelCustomersMain = new JPanel(new BorderLayout());
-		JPanel panelCustomersGrid = new JPanel(new GridLayout(1, 2));
-		JPanel panelCustomerTable = new JPanel(new BorderLayout());
-		JPanel panelCustomerForm = new JPanel(new GridBagLayout());
-		JPanel panelCustomerMap = new JPanel(); // Panel for google maps
+		JPanel panelCustomersMainGrid = new JPanel(new GridLayout(1, 2));
+		JPanel panelCustomersFormMapGrid = new JPanel(new GridLayout(2, 1));
+		JPanel panelCustomersTable = new JPanel(new BorderLayout());
+		JPanel panelCustomersForm = new JPanel(new GridBagLayout());
+		JPanel panelCustomersMap = new JPanel(); // Panel for google maps
+		
+		customersTableModel = new DefaultTableModel(new String[] {
+				"First Name", "Last Name", "House Number", "Address",
+				"Postcode", "Phone Number"
+		}, 0);
+		
+		customersTable = new JTable(customersTableModel ) {
+			
+			public boolean isCellEditable(int row, int col) {
+				return false;
+			}
+			
+			public Component prepareRenderer(TableCellRenderer r, int row, int col) {
+				Component c = super.prepareRenderer(r, row, col);
+				
+				if (row % 2 == 0) {
+					c.setBackground(Color.WHITE);
+				} else {
+					c.setBackground(new Color(234, 234, 234));
+				}
+				
+				if (isRowSelected(row)) {
+					c.setBackground(new Color(24, 134, 254));
+				}
+				
+				return c;
+			}
+		};
+		
+		customersTable.setFont(new Font("", 0, 14));
+		customersTable.setRowHeight(customersTable.getRowHeight() + 10);
+		customersTable.setAutoCreateRowSorter(true);
+		
+		customersTable.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent event) {
+				if (event.getClickCount() == 2) {
+					//editCustomer(frame?)
+				}
+			}
+		});
+		
+		//populateCustomerTable()
+		
+		customersTable.setFillsViewportHeight(true);
+		
+		JScrollPane jsp = new JScrollPane(customersTable);
+		
+		JButton addCustomerBtn = new JButton();
+		addCustomerBtn.setText("Add New Customer"); //Is this line needed?
+		addCustomerBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				//AddCustomer addCustomer = new AddCustomer(frame?);
+			}
+		});
+		
+		JButton editCustomerBtn = new JButton();
+		editCustomerBtn.setText("Edit");
+		editCustomerBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				//editCustomer(frame?);
+			}
+		});
+		
+		JButton deleteCustomerBtn = new JButton();
+		deleteCustomerBtn.setText("Delete");
+		deleteCustomerBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				//do stuff
+			}
+		});
+		
+		//ADD THE BUTTONS!!!
+		
+		
+		// CUSTOMER FORM
+		
+		JLabel lblCustomerFirstName = new JLabel("First name: ");
+		JLabel lblCustomerLastName = new JLabel("Last name: ");
+		JLabel lblCustomerHouseNumber = new JLabel("House number: ");
+		JLabel lblCustomerAddress = new JLabel("Address: ");
+		JLabel lblCustomerPostcode = new JLabel("Postcode: ");
+		JLabel lblCustomerPhoneNumber = new JLabel("Phone number: ");
+		
+		JTextField txtCustomerFirstName = new JTextField(20);
+		JTextField txtCustomerLastName = new JTextField(20);
+		JTextField txtCustomerHouseNumber = new JTextField(5);
+		JTextField txtCustomerAddress = new JTextField(20);
+		JTextField txtCustomerPostcode = new JTextField(10);
+		JTextField txtCustomerPhoneNumber = new JTextField(15);
+		
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gbc.insets = new Insets(10,0,0,0);
+		gbc.anchor = GridBagConstraints.LINE_END;
+		panelCustomersForm.add(lblCustomerFirstName, gbc);
+		
+		gbc.gridx = 0;
+		gbc.gridy = 1;
+		panelCustomersForm.add(lblCustomerLastName, gbc);
+		
+		gbc.gridx = 0;
+		gbc.gridy = 2;
+		panelCustomersForm.add(lblCustomerHouseNumber, gbc);
+		
+		gbc.gridx = 0;
+		gbc.gridy = 3;
+		panelCustomersForm.add(lblCustomerAddress, gbc);
+		
+		gbc.gridx = 0;
+		gbc.gridy = 4;
+		panelCustomersForm.add(lblCustomerPostcode, gbc);
+		
+		gbc.gridx = 0;
+		gbc.gridy = 5;
+		panelCustomersForm.add(lblCustomerPhoneNumber, gbc);
+		
+		// TEXT FIELDS
+		gbc.gridx = 1;
+		gbc.gridy = 0;
+		gbc.anchor = GridBagConstraints.LINE_START;
+		panelCustomersForm.add(txtCustomerFirstName, gbc);
+		
+		gbc.gridx = 1;
+		gbc.gridy = 1;
+		panelCustomersForm.add(txtCustomerLastName, gbc);
+		
+		gbc.gridx = 1;
+		gbc.gridy = 2;
+		panelCustomersForm.add(txtCustomerHouseNumber, gbc);
+		
+		gbc.gridx = 1;
+		gbc.gridy = 3;
+		panelCustomersForm.add(txtCustomerAddress, gbc);
+		
+		gbc.gridx = 1;
+		gbc.gridy = 4;
+		panelCustomersForm.add(txtCustomerPostcode, gbc);
+		
+		gbc.gridx = 1;
+		gbc.gridy = 5;
+		panelCustomersForm.add(txtCustomerPhoneNumber, gbc);
+		
+		// BUTTON
+		
+		gbc.gridx = 1;
+		gbc.gridy = 6;
+		gbc.gridwidth = 2;
+		gbc.anchor = GridBagConstraints.LINE_END;
+		panelCustomersForm.add(addCustomerBtn, gbc);
+		
+		
+		
+		
+		gbc.gridx = 0;
+		gbc.gridy = 20;
+		gbc.weightx = 1.0;
+		gbc.weighty = 1.0;
+		panelCustomersForm.add(new JLabel(), gbc);
+		
+		
+		
+		
+		panelCustomersTable.add(jsp, BorderLayout.CENTER);
+		
+		
+		panelCustomersMainGrid.add(panelCustomersTable);
+		panelCustomersMainGrid.add(panelCustomersFormMapGrid);
+		
+		panelCustomersFormMapGrid.add(panelCustomersForm);
+		
+		panelCustomersMain.add(panelCustomersMainGrid);
 		
 		
 		
