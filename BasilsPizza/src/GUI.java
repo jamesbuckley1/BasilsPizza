@@ -3,6 +3,10 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.event.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -68,8 +72,12 @@ public class GUI {
     		JPanel panelStockMain = new JPanel();
     		panelStockMain.setLayout(new BorderLayout());
     		
-    		JPanel panelStockTable = new JPanel();
-    		panelStockTable.setLayout(new BorderLayout());
+    		JPanel panelStockGrid = new JPanel(new GridLayout(1, 2));
+    		
+    		JPanel panelStockTable = new JPanel(new BorderLayout());
+    		JPanel panelStockForm = new JPanel(new GridBagLayout());
+    		
+    		
     		
     		JPanel panelStockButtons = new JPanel();
     		
@@ -89,6 +97,9 @@ public class GUI {
     				Component c = super.prepareRenderer(r, row, columns);
     				
     				
+    					
+    				//String cellData = stockTable.getModel().getValueAt(row, 0).toString();
+    				
     				if (row % 2 == 0) {
     					c.setBackground(Color.WHITE);
     				}
@@ -104,8 +115,10 @@ public class GUI {
     			}
     		};
     		
+    		//stockTable font and cell height
     		stockTable.setFont(new Font("", 0, 14));
     		stockTable.setRowHeight(stockTable.getRowHeight() + 10);
+    		stockTable.setAutoCreateRowSorter(true);
     		
     		
     		
@@ -114,7 +127,7 @@ public class GUI {
     			@Override
     			public void mouseClicked(MouseEvent event) {
     				if (event.getClickCount() == 2) {
-    					editItem(frame);
+    					editItem(frame); // OPEN EDIT ITEM DIALOG ON DOUBLE CLICK
     				}
     			
     				
@@ -131,7 +144,12 @@ public class GUI {
     		stockTable.setFillsViewportHeight(true);
     		
     		JScrollPane jsp = new JScrollPane(stockTable);
-    		panelStockTable.add(jsp, BorderLayout.CENTER);
+    		
+    		
+    		
+    	
+    		
+    		
     		
     		// Buttons
     		
@@ -184,22 +202,18 @@ public class GUI {
         panelStockButtons.add(editBtn);
         panelStockButtons.add(deleteBtn);
         
+    		panelStockTable.add(jsp, BorderLayout.CENTER);
+    		panelStockTable.add(panelStockButtons, BorderLayout.SOUTH);
     		
     		
     		panelStockMain.add(panelStockTable, BorderLayout.CENTER);
-    		panelStockTable.add(panelStockButtons, BorderLayout.SOUTH);
+    		//panelStockMain.add(panelStockTable, BorderLayout.CENTER);
+    		//panelStockTable.add(panelStockButtons, BorderLayout.SOUTH);
     		
     		return panelStockMain;
     }
     
-    private JPanel customersPanel() {
-		JPanel panelCustomers = new JPanel(new BorderLayout());
-		JLabel lbl1 = new JLabel("New Orders.");
-		panelCustomers.add(lbl1, BorderLayout.NORTH);
-	
-		return panelCustomers;
-	
-    }
+    
     
     public static void editItem(JFrame frame) {
     	try {
@@ -247,11 +261,27 @@ public class GUI {
 			*/
 			}
 	}
-    
+   
     private JPanel staffPanel() {
     		JPanel panelStaff = new JPanel();
     		
     		return panelStaff;
+    }
+    
+    private JPanel customersPanel() {
+		JPanel panelCustomersMain = new JPanel(new BorderLayout());
+		JPanel panelCustomersGrid = new JPanel(new GridLayout(1, 2));
+		JPanel panelCustomerTable = new JPanel(new BorderLayout());
+		JPanel panelCustomerForm = new JPanel(new GridBagLayout());
+		JPanel panelCustomerMap = new JPanel(); // Panel for google maps
+		
+		
+		
+		//panelCustomersMain.add(, BorderLayout.NORTH);
+		
+	
+		return panelCustomersMain;
+	
     }
     
     public void tabbedPane(String title, JPanel panel) {

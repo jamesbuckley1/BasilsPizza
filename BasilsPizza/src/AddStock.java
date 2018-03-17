@@ -84,7 +84,7 @@ public class AddStock {
         if (editFlag) {
         	itemField.setText(currentItem);
         } else {
-        	itemField.setText("0");
+        	//itemField.setText("0");
         }
         
         // PRICE (POUNDS) TEXT FIELD
