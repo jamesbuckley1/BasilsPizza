@@ -279,16 +279,17 @@ public class GUI {
 		JPanel panelCustomersMainGrid = new JPanel(new GridLayout(1, 2));
 		JPanel panelCustomersFormMapGrid = new JPanel(new GridLayout(2, 1));
 		JPanel panelCustomersTable = new JPanel(new BorderLayout());
-		JPanel panelCustomersTableButtons = new JPanel(new FlowLayout());
+		JPanel panelCustomersTableButtons = new JPanel(new GridBagLayout()); //
 		JPanel panelCustomersFormBorder = new JPanel(new BorderLayout());
 		JPanel panelCustomersForm = new JPanel(new GridBagLayout());
 		JPanel panelCustomersFormButtons = new JPanel(new FlowLayout());
 		JPanel panelCustomersMap = new JPanel(new BorderLayout());
-		JPanel panelCustomersMapButtons = new JPanel(new FlowLayout());
+		JPanel panelCustomersMapButtons = new JPanel(new GridBagLayout());
+		JPanel panelCustomersMapZoomButtons = new JPanel(new GridBagLayout());
 		
 		customersTableModel = new DefaultTableModel(new String[] {
 				"First Name", "Last Name", "House Number", "Address",
-				"Postcode", "Phone Number"
+				"City", "Postcode", "Phone Number"
 		}, 0);
 		
 		customersTable = new JTable(customersTableModel ) {
@@ -327,14 +328,14 @@ public class GUI {
 			}
 		});
 		
-		//populateCustomerTable()
+		populateCustomersTable();
 		
 		customersTable.setFillsViewportHeight(true);
 		
 		JScrollPane jsp = new JScrollPane(customersTable);
 		
 		JButton addCustomerBtn = new JButton();
-		addCustomerBtn.setText("Add New Customer"); //Is this line needed?
+		addCustomerBtn.setText("Add"); //Is this line needed?
 		addCustomerBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
@@ -369,11 +370,52 @@ public class GUI {
 			}
 		});
 		
+		JButton mapZoomInBtn = new JButton();
+		mapZoomInBtn.setText("+");
+		mapZoomInBtn.setPreferredSize(new Dimension(40,40));
+		mapZoomInBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				//do shit
+			}
+		});
+		
+		JButton mapZoomOutBtn = new JButton("-");
+		mapZoomOutBtn.setPreferredSize(new Dimension(40,40));
+		mapZoomOutBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				//do shit
+			}
+		});
+		
 		//ADD THE BUTTONS!!!
+		
+		// TABLE BUTTONS
+		
+
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gbc.weightx = 1.0;
+		gbc.weighty = 1.0;
+		panelCustomersTableButtons.add(new JLabel(), gbc);
+		
+		gbc.gridx++;
+		gbc.gridy = 0;
+		gbc.weightx = 0;
+		gbc.weighty = 0;
+		gbc.anchor = GridBagConstraints.LINE_END;
+		panelCustomersTableButtons.add(editCustomerBtn, gbc);
+		
+		gbc.gridx++;
+		gbc.gridy = 0;
+		panelCustomersTableButtons.add(deleteCustomerBtn, gbc);
+		
 		
 		
 		// CUSTOMER FORM
 		
+		JLabel lblCustomerFormTitle = new JLabel("Add new customer: ");
 		JLabel lblCustomerFirstName = new JLabel("First name: ");
 		JLabel lblCustomerLastName = new JLabel("Last name: ");
 		JLabel lblCustomerHouseNumber = new JLabel("House number: ");
@@ -392,12 +434,19 @@ public class GUI {
 		
 		gbc.gridx = 0;
 		gbc.gridy = 0;
-		gbc.insets = new Insets(5,0,0,0);
+		gbc.insets = new Insets(5,10,0,0); //TOP, LEFT 
+		gbc.anchor = GridBagConstraints.LINE_END;
+		panelCustomersForm.add(lblCustomerFormTitle, gbc);
+		
+		gbc.gridx = 0;
+		gbc.gridy++;
+		gbc.insets = new Insets(20,10,0,0); //TOP, LEFT 
 		gbc.anchor = GridBagConstraints.LINE_END;
 		panelCustomersForm.add(lblCustomerFirstName, gbc);
 		
 		gbc.gridx = 0;
 		gbc.gridy++;
+		gbc.insets = new Insets(5,10,0,0); //TOP, LEFT 
 		panelCustomersForm.add(lblCustomerLastName, gbc);
 		
 		gbc.gridx = 0;
@@ -422,12 +471,14 @@ public class GUI {
 		
 		// TEXT FIELDS
 		gbc.gridx = 1;
-		gbc.gridy = 0;
+		gbc.gridy = 1;
 		gbc.anchor = GridBagConstraints.LINE_START;
+		gbc.insets = new Insets(20,10,0,0); //TOP, LEFT 
 		panelCustomersForm.add(txtCustomerFirstName, gbc);
 		
 		gbc.gridx = 1;
 		gbc.gridy++;
+		gbc.insets = new Insets(5,10,0,0); //TOP, LEFT 
 		panelCustomersForm.add(txtCustomerLastName, gbc);
 		
 		gbc.gridx = 1;
@@ -451,7 +502,7 @@ public class GUI {
 		panelCustomersForm.add(txtCustomerPhoneNumber, gbc);
 		
 		
-		/*
+		
 		// FORM BUTTON - ADD
 		
 		gbc.gridx = 1;
@@ -459,20 +510,9 @@ public class GUI {
 		gbc.gridwidth = 2;
 		gbc.anchor = GridBagConstraints.LINE_END;
 		panelCustomersForm.add(addCustomerBtn, gbc);
+
 		
-		*/
-		
-		
-		// FORM BUTTON - ADD
-		
-		
-		
-		
-		
-		
-		
-		
-		
+		//TRICK
 		gbc.gridx = 0;
 		gbc.gridy = 20;
 		gbc.weightx = 1.0;
@@ -480,10 +520,48 @@ public class GUI {
 		panelCustomersForm.add(new JLabel(), gbc);
 		
 		
-		panelCustomersTableButtons.add(editCustomerBtn);
-		panelCustomersTableButtons.add(deleteCustomerBtn);
-		panelCustomersFormButtons.add(addCustomerBtn); 
-		panelCustomersMapButtons.add(mapExpandBtn);
+		// MAP BUTTONS
+		
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gbc.weightx = 1.0;
+		gbc.weighty = 1.0;
+		gbc.anchor = GridBagConstraints.LINE_END;
+		panelCustomersMapButtons.add(new JLabel(), gbc);
+		
+		
+		
+		
+		gbc.gridx++;
+		gbc.gridy = 0;
+		panelCustomersMapButtons.add(mapExpandBtn, gbc);
+		
+		
+		// MAP ZOOM BUTTONS
+		
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gbc.weightx = 1.0;
+		gbc.weighty = 1.0;
+		gbc.anchor = GridBagConstraints.LINE_END;
+		panelCustomersMapZoomButtons.add(new JLabel(), gbc);
+		
+		gbc.gridx = 0;
+		gbc.gridy++;
+		gbc.weightx = 0;
+		gbc.weighty = 0;
+		panelCustomersMapZoomButtons.add(mapZoomInBtn, gbc);
+		
+		gbc.gridx = 0;
+		gbc.gridy++;
+		panelCustomersMapZoomButtons.add(mapZoomOutBtn, gbc);
+		
+		
+		
+		//panelCustomersTableButtons.add(editCustomerBtn);
+		//panelCustomersTableButtons.add(deleteCustomerBtn);
+		//panelCustomersFormButtons.add(addCustomerBtn); 
+		//panelCustomersMapButtons.add(mapExpandBtn);
 		
 		
 		
@@ -508,6 +586,7 @@ public class GUI {
 		
 		
 		panelCustomersMap.add(home.getImage(), BorderLayout.CENTER);
+		panelCustomersMap.add(panelCustomersMapZoomButtons, BorderLayout.EAST);
 		panelCustomersMap.add(panelCustomersMapButtons, BorderLayout.SOUTH);
 		panelCustomersFormMapGrid.add(panelCustomersMap);
 		
@@ -521,6 +600,38 @@ public class GUI {
 		return panelCustomersMain;
 	
     }
+    
+    public static void populateCustomersTable() {
+    	int rows = customersTableModel.getRowCount();
+		for (int i = rows - 1; i >= 0; i --) {
+			customersTableModel.removeRow(i);
+		}
+    		
+    		Database.selectCustomers();
+    		
+		for (int i = 0; i < Database.getCustomersArray().size(); i++) {
+			
+			
+			String firstName = Database.getCustomersArray().get(i).getFirstName();
+			String lastName = Database.getCustomersArray().get(i).getLastName(); 
+			String houseNumber = Database.getCustomersArray().get(i).getHouseNumber();
+			String address = Database.getCustomersArray().get(i).getAddress();
+			String city = Database.getCustomersArray().get(i).getCity();
+			String postcode = Database.getCustomersArray().get(i).getPostcode();
+			String phoneNumber = Database.getCustomersArray().get(i).getPhoneNumber();
+			
+			
+			Object[] data = {firstName, lastName, houseNumber, address, city,
+					postcode, phoneNumber
+					};
+			
+				
+			
+			customersTableModel.addRow(data);
+			
+			
+			}
+	}
     
     public void tabbedPane(String title, JPanel panel) {
     		tabbedPane.addTab(title, panel);
