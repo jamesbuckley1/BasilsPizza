@@ -2,6 +2,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -278,8 +279,12 @@ public class GUI {
 		JPanel panelCustomersMainGrid = new JPanel(new GridLayout(1, 2));
 		JPanel panelCustomersFormMapGrid = new JPanel(new GridLayout(2, 1));
 		JPanel panelCustomersTable = new JPanel(new BorderLayout());
+		JPanel panelCustomersTableButtons = new JPanel(new FlowLayout());
+		JPanel panelCustomersFormBorder = new JPanel(new BorderLayout());
 		JPanel panelCustomersForm = new JPanel(new GridBagLayout());
-		JPanel panelCustomersMap = new JPanel(); // Panel for google maps
+		JPanel panelCustomersFormButtons = new JPanel(new FlowLayout());
+		JPanel panelCustomersMap = new JPanel(new BorderLayout());
+		JPanel panelCustomersMapButtons = new JPanel(new FlowLayout());
 		
 		customersTableModel = new DefaultTableModel(new String[] {
 				"First Name", "Last Name", "House Number", "Address",
@@ -355,6 +360,15 @@ public class GUI {
 			}
 		});
 		
+		JButton mapExpandBtn = new JButton();
+		mapExpandBtn.setText("Expand");
+		mapExpandBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				//do stuff
+			}
+		});
+		
 		//ADD THE BUTTONS!!!
 		
 		
@@ -364,6 +378,7 @@ public class GUI {
 		JLabel lblCustomerLastName = new JLabel("Last name: ");
 		JLabel lblCustomerHouseNumber = new JLabel("House number: ");
 		JLabel lblCustomerAddress = new JLabel("Address: ");
+		JLabel lblCustomerCity = new JLabel("City: ");
 		JLabel lblCustomerPostcode = new JLabel("Postcode: ");
 		JLabel lblCustomerPhoneNumber = new JLabel("Phone number: ");
 		
@@ -371,33 +386,38 @@ public class GUI {
 		JTextField txtCustomerLastName = new JTextField(20);
 		JTextField txtCustomerHouseNumber = new JTextField(5);
 		JTextField txtCustomerAddress = new JTextField(20);
+		JTextField txtCustomerCity = new JTextField(20);
 		JTextField txtCustomerPostcode = new JTextField(10);
 		JTextField txtCustomerPhoneNumber = new JTextField(15);
 		
 		gbc.gridx = 0;
 		gbc.gridy = 0;
-		gbc.insets = new Insets(10,0,0,0);
+		gbc.insets = new Insets(5,0,0,0);
 		gbc.anchor = GridBagConstraints.LINE_END;
 		panelCustomersForm.add(lblCustomerFirstName, gbc);
 		
 		gbc.gridx = 0;
-		gbc.gridy = 1;
+		gbc.gridy++;
 		panelCustomersForm.add(lblCustomerLastName, gbc);
 		
 		gbc.gridx = 0;
-		gbc.gridy = 2;
+		gbc.gridy++;
 		panelCustomersForm.add(lblCustomerHouseNumber, gbc);
 		
 		gbc.gridx = 0;
-		gbc.gridy = 3;
+		gbc.gridy++;
 		panelCustomersForm.add(lblCustomerAddress, gbc);
 		
 		gbc.gridx = 0;
-		gbc.gridy = 4;
+		gbc.gridy++;
+		panelCustomersForm.add(lblCustomerCity, gbc);
+		
+		gbc.gridx = 0;
+		gbc.gridy++;
 		panelCustomersForm.add(lblCustomerPostcode, gbc);
 		
 		gbc.gridx = 0;
-		gbc.gridy = 5;
+		gbc.gridy++;
 		panelCustomersForm.add(lblCustomerPhoneNumber, gbc);
 		
 		// TEXT FIELDS
@@ -407,32 +427,48 @@ public class GUI {
 		panelCustomersForm.add(txtCustomerFirstName, gbc);
 		
 		gbc.gridx = 1;
-		gbc.gridy = 1;
+		gbc.gridy++;
 		panelCustomersForm.add(txtCustomerLastName, gbc);
 		
 		gbc.gridx = 1;
-		gbc.gridy = 2;
+		gbc.gridy++;
 		panelCustomersForm.add(txtCustomerHouseNumber, gbc);
 		
 		gbc.gridx = 1;
-		gbc.gridy = 3;
+		gbc.gridy++;
 		panelCustomersForm.add(txtCustomerAddress, gbc);
 		
 		gbc.gridx = 1;
-		gbc.gridy = 4;
+		gbc.gridy++;
+		panelCustomersForm.add(txtCustomerCity, gbc);
+		
+		gbc.gridx = 1;
+		gbc.gridy++;
 		panelCustomersForm.add(txtCustomerPostcode, gbc);
 		
 		gbc.gridx = 1;
-		gbc.gridy = 5;
+		gbc.gridy++;
 		panelCustomersForm.add(txtCustomerPhoneNumber, gbc);
 		
-		// BUTTON
+		
+		/*
+		// FORM BUTTON - ADD
 		
 		gbc.gridx = 1;
-		gbc.gridy = 6;
+		gbc.gridy++;
 		gbc.gridwidth = 2;
 		gbc.anchor = GridBagConstraints.LINE_END;
 		panelCustomersForm.add(addCustomerBtn, gbc);
+		
+		*/
+		
+		
+		// FORM BUTTON - ADD
+		
+		
+		
+		
+		
 		
 		
 		
@@ -444,15 +480,36 @@ public class GUI {
 		panelCustomersForm.add(new JLabel(), gbc);
 		
 		
+		panelCustomersTableButtons.add(editCustomerBtn);
+		panelCustomersTableButtons.add(deleteCustomerBtn);
+		panelCustomersFormButtons.add(addCustomerBtn); 
+		panelCustomersMapButtons.add(mapExpandBtn);
 		
 		
+		
+		panelCustomersTable.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 		panelCustomersTable.add(jsp, BorderLayout.CENTER);
-		
+		panelCustomersTable.add(panelCustomersTableButtons, BorderLayout.SOUTH);
 		
 		panelCustomersMainGrid.add(panelCustomersTable);
 		panelCustomersMainGrid.add(panelCustomersFormMapGrid);
 		
-		panelCustomersFormMapGrid.add(panelCustomersForm);
+		panelCustomersFormBorder.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+		panelCustomersFormBorder.add(panelCustomersForm, BorderLayout.CENTER);
+		panelCustomersFormBorder.add(panelCustomersFormButtons, BorderLayout.SOUTH);
+		
+		//panelCustomersFormMapGrid.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+		//panelCustomersFormMapGrid.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+		panelCustomersFormMapGrid.add(panelCustomersFormBorder);
+		
+		
+		
+		CustomerMap home = new CustomerMap("163", "Shelbourne Road", "Bournemouth");
+		
+		
+		panelCustomersMap.add(home.getImage(), BorderLayout.CENTER);
+		panelCustomersMap.add(panelCustomersMapButtons, BorderLayout.SOUTH);
+		panelCustomersFormMapGrid.add(panelCustomersMap);
 		
 		panelCustomersMain.add(panelCustomersMainGrid);
 		
@@ -473,7 +530,8 @@ public class GUI {
     private void createAndShowGUI() {
     		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setTitle("Basil's Pizza Ordering System");
-        frame.setSize(800, 600);
+        //frame.setSize(900, 700);
+        frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
