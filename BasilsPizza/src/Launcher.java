@@ -10,7 +10,7 @@ public class Launcher {
 		
 		//Database.dropStockTable();
 		//Database.dropCustomersTable();
-		Database.insertCustomer("James", "Buckley", "88", "Longdown Lane South", "Epsom", "KT17 4JR", "07783021170");
+		//Database.insertCustomer("James", "Buckley", "88", "Longdown Lane South", "Epsom", "KT17 4JR", "07783021170");
 		
 		SwingUtilities.invokeLater(new Runnable() {
             @Override

@@ -27,11 +27,23 @@ public class GUI {
     private JFrame frame;
     private JTabbedPane tabbedPane;
     
+    private JPanel panelCustomersMap;
+    private JPanel panelCustomersMapButtons;
+    private JPanel panelCustomersMapZoomButtons;
+    
     private static DefaultTableModel stockTableModel;
     private static DefaultTableModel customersTableModel;
     
     private static JTable stockTable;
     private static JTable customersTable;
+    
+    private JTextField txtCustomerFirstName;
+    private JTextField txtCustomerLastName;
+    private JTextField txtCustomerHouseNumber;
+    private JTextField txtCustomerAddress;
+    private JTextField txtCustomerCity;
+    private JTextField txtCustomerPostcode;
+    private JTextField txtCustomerPhoneNumber;
     
     private static GridBagConstraints gbc;
     
@@ -165,8 +177,8 @@ public class GUI {
     			@Override
     			public void actionPerformed(ActionEvent event) {
     				
-    			AddStock addStock = new AddStock(frame);
-    				
+    			AddStock as = new AddStock(frame);
+    			populateStockTable();
     			
     				
     			}
@@ -283,9 +295,9 @@ public class GUI {
 		JPanel panelCustomersFormBorder = new JPanel(new BorderLayout());
 		JPanel panelCustomersForm = new JPanel(new GridBagLayout());
 		JPanel panelCustomersFormButtons = new JPanel(new FlowLayout());
-		JPanel panelCustomersMap = new JPanel(new BorderLayout());
-		JPanel panelCustomersMapButtons = new JPanel(new GridBagLayout());
-		JPanel panelCustomersMapZoomButtons = new JPanel(new GridBagLayout());
+		panelCustomersMap = new JPanel(new BorderLayout());
+		panelCustomersMapButtons = new JPanel(new GridBagLayout());
+		panelCustomersMapZoomButtons = new JPanel(new GridBagLayout());
 		
 		customersTableModel = new DefaultTableModel(new String[] {
 				"First Name", "Last Name", "House Number", "Address",
@@ -325,6 +337,21 @@ public class GUI {
 				if (event.getClickCount() == 2) {
 					//editCustomer(frame?)
 				}
+				
+				try {
+        			int row = customersTable.getSelectedRow();
+        			String houseNumber = customersTable.getModel().getValueAt(row, 2).toString();
+        			String address = customersTable.getModel().getValueAt(row, 3).toString();
+        			String city = customersTable.getModel().getValueAt(row, 4).toString();
+        			//System.out.println(cellData);
+        			populateMap(houseNumber, address, city);
+        			} catch (Exception e) {
+        				/*
+        				JOptionPane.showMessageDialog(frame, "Please select an item to delete.",
+        						"Error", JOptionPane.ERROR_MESSAGE);
+        						*/
+        						
+        			}
 			}
 		});
 		
@@ -339,7 +366,14 @@ public class GUI {
 		addCustomerBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
-				//AddCustomer addCustomer = new AddCustomer(frame?);
+				AddCustomer ac = new AddCustomer(getCustomerTextFieldValues());
+				try {
+					ac.validate();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				populateCustomersTable();
 			}
 		});
 		
@@ -424,13 +458,13 @@ public class GUI {
 		JLabel lblCustomerPostcode = new JLabel("Postcode: ");
 		JLabel lblCustomerPhoneNumber = new JLabel("Phone number: ");
 		
-		JTextField txtCustomerFirstName = new JTextField(20);
-		JTextField txtCustomerLastName = new JTextField(20);
-		JTextField txtCustomerHouseNumber = new JTextField(5);
-		JTextField txtCustomerAddress = new JTextField(20);
-		JTextField txtCustomerCity = new JTextField(20);
-		JTextField txtCustomerPostcode = new JTextField(10);
-		JTextField txtCustomerPhoneNumber = new JTextField(15);
+		txtCustomerFirstName = new JTextField(20);
+		txtCustomerLastName = new JTextField(20);
+		txtCustomerHouseNumber = new JTextField(5);
+		txtCustomerAddress = new JTextField(20);
+		txtCustomerCity = new JTextField(20);
+		txtCustomerPostcode = new JTextField(10);
+		txtCustomerPhoneNumber = new JTextField(15);
 		
 		gbc.gridx = 0;
 		gbc.gridy = 0;
@@ -582,10 +616,10 @@ public class GUI {
 		
 		
 		
-		CustomerMap home = new CustomerMap("163", "Shelbourne Road", "Bournemouth");
+		//CustomerMap home = new CustomerMap("163", "Shelbourne Road", "Bournemouth");
 		
 		
-		panelCustomersMap.add(home.getImage(), BorderLayout.CENTER);
+		//panelCustomersMap.add(home.getImage(), BorderLayout.CENTER);
 		panelCustomersMap.add(panelCustomersMapZoomButtons, BorderLayout.EAST);
 		panelCustomersMap.add(panelCustomersMapButtons, BorderLayout.SOUTH);
 		panelCustomersFormMapGrid.add(panelCustomersMap);
@@ -599,6 +633,23 @@ public class GUI {
 	
 		return panelCustomersMain;
 	
+    }
+    
+    public void populateMap(String houseNumber, String address, String city) {
+	    	System.out.println("PopulateMap run");
+	    	System.out.println(houseNumber + address + city);
+	    	CustomerMap cm = new CustomerMap(houseNumber, address, city);
+	    panelCustomersMap.removeAll();
+	    	
+	    	
+	    	panelCustomersMap.add(cm.getImage(), BorderLayout.CENTER);
+	    	panelCustomersMap.add(panelCustomersMapZoomButtons, BorderLayout.EAST);
+		panelCustomersMap.add(panelCustomersMapButtons, BorderLayout.SOUTH);
+	    	
+	    	panelCustomersMap.validate();
+	    	panelCustomersMap.repaint();
+    	
+    	
     }
     
     public static void populateCustomersTable() {
@@ -620,6 +671,15 @@ public class GUI {
 			String postcode = Database.getCustomersArray().get(i).getPostcode();
 			String phoneNumber = Database.getCustomersArray().get(i).getPhoneNumber();
 			
+			System.out.println("POPULATECUSTMERTABLE");
+			System.out.println(firstName);
+			System.out.println(lastName);
+			System.out.println(houseNumber);
+			System.out.println(address);
+			System.out.println(city);
+			System.out.println(postcode);
+			System.out.println(phoneNumber);
+			
 			
 			Object[] data = {firstName, lastName, houseNumber, address, city,
 					postcode, phoneNumber
@@ -632,6 +692,20 @@ public class GUI {
 			
 			}
 	}
+    
+    public ArrayList<String> getCustomerTextFieldValues() {
+    		ArrayList<String> customerTextFieldsArray = new ArrayList<String>();
+    		
+    		customerTextFieldsArray.add(txtCustomerFirstName.getText());
+    		customerTextFieldsArray.add(txtCustomerLastName.getText());
+    		customerTextFieldsArray.add(txtCustomerHouseNumber.getText());
+    		customerTextFieldsArray.add(txtCustomerAddress.getText());
+    		customerTextFieldsArray.add(txtCustomerCity.getText());
+    		customerTextFieldsArray.add(txtCustomerPostcode.getText());
+    		customerTextFieldsArray.add(txtCustomerPhoneNumber.getText());
+    		
+    		return customerTextFieldsArray;
+    }
     
     public void tabbedPane(String title, JPanel panel) {
     		tabbedPane.addTab(title, panel);

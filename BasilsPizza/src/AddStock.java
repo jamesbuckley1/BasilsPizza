@@ -211,7 +211,7 @@ public class AddStock {
 								"Error", JOptionPane.ERROR_MESSAGE);
 					}
 					
-        			GUI.populateStockTable();
+        			//GUI.populateStockTable();
         		}
         });
         
