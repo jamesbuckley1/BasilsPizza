@@ -8,7 +8,8 @@ public class Database {
 
 	private static ArrayList<Stock> stockArray;
 	private static ArrayList<Customer> customersArray;
-
+	
+	// STOCK SQL STRINGS
 	private final static String createStockTableSql = "CREATE TABLE IF NOT EXISTS stock (item TEXT PRIMARY KEY NOT NULL, price DOUBLE NOT NULL, quantity INT NOT NULL);";
 	private final static String selectStockSql = "SELECT * FROM stock ORDER BY item ASC;";
 	private final static String insertStockSql = "INSERT INTO stock (item, price, quantity) VALUES (?, ?, ?);";
@@ -16,7 +17,7 @@ public class Database {
 	private final static String deleteStockSql = "DELETE FROM stock WHERE item = ?";
 	private final static String dropStockTableSql = "DROP TABLE stock;";
 
-	//CUSTOMERS SQL STRINGS
+	// CUSTOMERS SQL STRINGS
 	private final static String createCustomersTableSql = "CREATE TABLE IF NOT EXISTS customers (first_name TEXT NOT NULL, last_name TEXT NOT NULL, house_number TEXT NOT NULL, address TEXT NOT NULL, city TEXT NOT NULL, postcode TEXT NOT NULL, phone_number TEXT NOT NULL, PRIMARY KEY(first_name, last_name, postcode));";
 	private final static String selectCustomersSql = "SELECT * FROM customers ORDER BY last_name ASC;";
 	private final static String insertCustomersSql = "INSERT INTO customers (first_name, last_name, house_number, address, city, postcode, phone_number) VALUES (?, ?, ?, ?, ?, ?, ?);";
@@ -90,7 +91,7 @@ public class Database {
 		System.out.println("SELECT stock successful.");
 	}
 
-	public static void insertStock(String item, String price, String quantity ) throws Exception{
+	public static void insertStock(String item, Double price, int quantity ) throws Exception{
 
 		openDB();
 		System.out.println("Inserting stock: " + item + " , " + price + " , " + quantity);
@@ -98,8 +99,8 @@ public class Database {
 		PreparedStatement insert = conn.prepareStatement(insertStockSql);
 
 		insert.setString(1, item);
-		insert.setString(2, price);
-		insert.setString(3, quantity);
+		insert.setDouble(2, price);
+		insert.setInt(3, quantity);
 
 		insert.executeUpdate();
 		insert.close();

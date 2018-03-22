@@ -60,19 +60,29 @@ public class Stock {
 		return true;
 	}
 	
-	public void addStockToDatabase() throws Exception {
-		Database.insertStock(item, price, quantity);
+	public static String[] splitPrice(String price) {
+		String[] priceSplit = price.split("[.]");
+		
+		return priceSplit;
 	}
-
 	
-
-	/* COME BACK TO THIS IT MIGHT BE FOR EDIT
-	public void splitPrice() {
-		String[] price = price.split("\\.").toString();
-		pricePoundsAfterSplit = price[0];
-		pricePenceAfterSplit = price[1];
+	// Adding price instead of getFormattedPrice because database will store to one decimal place anyway.
+	public void addStockToDatabase() throws Exception {
+		Database.insertStock(item, Double.parseDouble(price), Integer.parseInt(quantity));
 	}
-	 */
+	
+	public void editStockToDatabase(String currentItem) throws Exception {
+		Database.updateStock(currentItem, item, Double.parseDouble(price), Integer.parseInt(quantity));
+	}
+	
+	public static String getFormattedPrice(String price) {
+		String pattern = "##.00";
+		DecimalFormat df = new DecimalFormat(pattern);
+		
+		String formattedPrice = df.format(Double.parseDouble(price));
+		System.out.println("DUH" + formattedPrice);
+		return formattedPrice;
+	}
 
 	public String getItem() {
 		return item;
