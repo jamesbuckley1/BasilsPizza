@@ -105,14 +105,14 @@ public class StockGUI {
 			@Override
 			public void actionPerformed(ActionEvent event) {
 				
-					
+					try {
 					AddStockDialog a = new AddStockDialog(frame, getTextFieldValues());
 					a.createDialog();
-
-				/*
-					JOptionPane.showMessageDialog(frame, "Please select an item to edit.",
-							"Error", JOptionPane.ERROR_MESSAGE);
-					*/
+					} catch (Exception e) {
+						JOptionPane.showMessageDialog(frame, "Please select an item to edit.",
+								"Error", JOptionPane.ERROR_MESSAGE);
+					}
+				
 				
 				populateStockTable();
 			}

@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
@@ -18,16 +19,20 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 public class AddStockDialog {
+	
+	//SQLite error codes
+	private static final int SQLITE_CONSTRAINT_PRIMARYKEY = 19;
 
 	private JFrame frame;
 	private JTextField textFieldItem, textFieldPricePounds, textFieldPricePence, textFieldQuantity;
 	private JDialog dialogAddStock;
 
+	// Boolean variables used for automatically replacing text in JTextFields when clicked on
 	private boolean boolPricePoundsPlaceholderText = false;
 	private boolean boolPricePencePlaceholderText = false;
 	private boolean boolQuantityPlaceholderText = false;
 
-	// EDIT STOCK ITEM VARIABLES
+	// EDIT STOCK ITEM VARIABLES - Used to set text on JTextFields when editing stock items
 	private boolean editFlag = false;
 	private String item = "";
 	private String pricePounds = "";
@@ -43,8 +48,8 @@ public class AddStockDialog {
 		editFlag = true;
 		item = textFieldValuesArray.get(0);
 		String[] splitPrice = Stock.splitPrice(textFieldValuesArray.get(1));
-		this.pricePounds = splitPrice[0];
-		this.pricePence = splitPrice[1];
+		pricePounds = splitPrice[0];
+		pricePence = splitPrice[1];
 		quantity = textFieldValuesArray.get(2);
 	}
 
@@ -179,23 +184,24 @@ public class AddStockDialog {
 						dialogAddStock.dispose();
 					} else if (!s.validateItem()){
 						JOptionPane.showMessageDialog(frame, "Invalid item.",
-								"Error", JOptionPane.ERROR_MESSAGE);
+								"Invalid Entry", JOptionPane.ERROR_MESSAGE);
 					} else if (!s.validatePrice()){
 						JOptionPane.showMessageDialog(frame,  "Invalid price.",
-								"Error", JOptionPane.ERROR_MESSAGE);
+								"Invalid Entry", JOptionPane.ERROR_MESSAGE);
 					} else if (!s.validateQuantity()) {
 						JOptionPane.showMessageDialog(frame,  "Invalid quantity.",
-								"Error", JOptionPane.ERROR_MESSAGE);
+								"Invalid Entry", JOptionPane.ERROR_MESSAGE);
 					}
-
+				} catch (SQLException e) {
+					if (e.getErrorCode() == SQLITE_CONSTRAINT_PRIMARYKEY) {
+						JOptionPane.showMessageDialog(frame,  "Item already exists.",
+								"Duplicate Entry", JOptionPane.ERROR_MESSAGE);
+					}
 				} catch (Exception e) {
 					Database.closeDB();
-
-					e.printStackTrace();
 					JOptionPane.showMessageDialog(frame, "Failed to insert into database.",
 							"Error", JOptionPane.ERROR_MESSAGE);
 				}
-
 			}
 		});
 
