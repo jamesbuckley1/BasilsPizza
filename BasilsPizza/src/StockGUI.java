@@ -22,18 +22,29 @@ import javax.swing.table.TableCellRenderer;
 public class StockGUI {
 
 	private static JFrame frame;
-
-	private static JTable stockTable;
-	private static JPanel panelStockTable;
-	private static DefaultTableModel stockTableModel;
+	private JPanel panelStockMain;
+	private JTable stockTable;
+	private JPanel panelStockTable;
+	private DefaultTableModel stockTableModel;
+	
+	
 
 	public StockGUI() {
 		// Get frame of panelStockTable
 		frame = (JFrame)SwingUtilities.getRoot(panelStockTable);
+		initGUI();
 	}
 
-	private JPanel stockPanel(){
-		JPanel panelStockMain = new JPanel();
+	private void initGUI(){
+		
+		// Check if running on event dispatch thread.
+		if (SwingUtilities.isEventDispatchThread()) { 
+		    System.err.println("Is running on EDT");
+		} else {
+		    System.err.println("Is not running on EDT");
+		}
+		
+		panelStockMain = new JPanel();
 		JPanel panelStockButtons = new JPanel();
 		panelStockTable = new JPanel(new BorderLayout());
 
@@ -93,8 +104,12 @@ public class StockGUI {
 		addBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
+				SwingUtilities.invokeLater(new Runnable() {
+					public void run() {
+						
+					}
+				});
 				AddStockDialog a = new AddStockDialog(frame);
-				a.createDialog();
 				populateStockTable();
 			}
 		});
@@ -107,7 +122,6 @@ public class StockGUI {
 				
 					try {
 					AddStockDialog a = new AddStockDialog(frame, getTextFieldValues());
-					a.createDialog();
 					} catch (Exception e) {
 						JOptionPane.showMessageDialog(frame, "Please select an item to edit.",
 								"Error", JOptionPane.ERROR_MESSAGE);
@@ -150,13 +164,13 @@ public class StockGUI {
 		// Add stock table panel to main panel
 		panelStockMain.add(panelStockTable, BorderLayout.CENTER);
 
-		return panelStockMain;
+		
 	}
 
 	/**
 	 * Clears stockTableModel then retrieves fresh data
 	 */
-	public static void populateStockTable() {
+	private void populateStockTable() {
 		int rows = stockTableModel.getRowCount();
 		for (int i = rows - 1; i >= 0; i --) {
 			stockTableModel.removeRow(i);
@@ -176,7 +190,7 @@ public class StockGUI {
 		}
 	}
 
-	public ArrayList<String> getTextFieldValues() {
+	private ArrayList<String> getTextFieldValues() {
 		int row = stockTable.getSelectedRow();
 		String cellDataItem = stockTable.getModel().getValueAt(row, 0).toString();
 		String cellDataPrice = stockTable.getModel().getValueAt(row, 1).toString();
@@ -192,9 +206,9 @@ public class StockGUI {
 		return textFieldValuesArray;
 	}
 
-	public JPanel getPanel() {
+	public JPanel getStockPanel() {
 
-		return stockPanel();
+		return panelStockMain;
 	}
 
 }

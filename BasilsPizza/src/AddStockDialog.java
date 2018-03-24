@@ -19,7 +19,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 public class AddStockDialog {
-	
+
 	//SQLite error codes
 	private static final int SQLITE_CONSTRAINT_PRIMARYKEY = 19;
 
@@ -41,6 +41,7 @@ public class AddStockDialog {
 
 	public AddStockDialog(JFrame frame) {
 		this.frame = frame;
+		initDialog();
 	}
 	// Constructor for edit stock item
 	public AddStockDialog(JFrame frame, ArrayList<String> textFieldValuesArray) {
@@ -51,16 +52,25 @@ public class AddStockDialog {
 		pricePounds = splitPrice[0];
 		pricePence = splitPrice[1];
 		quantity = textFieldValuesArray.get(2);
+
+		initDialog();
 	}
 
-	public void createDialog() {
+	private void initDialog() {
+
+		// Check if running on event dispatch thread.
+		if (SwingUtilities.isEventDispatchThread()) { 
+			System.err.println("AddStockDialog running on EDT");
+		} else {
+			System.err.println("AddStockDialog not running on EDT");
+		}
+
 		JPanel panelMain = new JPanel(new BorderLayout());
 		panelMain.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 		JPanel panelForm = new JPanel();
 		JPanel panelButtons = new JPanel(new FlowLayout());
 
 		dialogAddStock = new JDialog();
-		//frame = (JFrame)SwingUtilities.getRoot(dialogAddStock);
 
 		GroupLayout layout = new GroupLayout(panelForm);
 		layout.setAutoCreateGaps(true);
@@ -122,7 +132,7 @@ public class AddStockDialog {
 			}
 			@Override
 			public void focusLost(FocusEvent e) {
-				
+
 			}
 
 		});
@@ -166,42 +176,69 @@ public class AddStockDialog {
 		JButton buttonOk = new JButton("OK");
 		buttonOk.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
-				try {
-					String currentItem = item;
-					String item = textFieldItem.getText();
-					String pricePounds = textFieldPricePounds.getText();
-					String pricePence = textFieldPricePence.getText();
-					String quantity = textFieldQuantity.getText();
+				Thread t = new Thread(new Runnable() {
+					public void run() {
+						try {
+							// Check if running on event dispatch thread.
+							if (SwingUtilities.isEventDispatchThread()) { 
+								System.err.println("AddStockDialog press ok running on EDT");
+							} else {
+								System.err.println("AddStockDialog press ok not running on EDT");
+							}
 
-					Stock s = new Stock(item, pricePounds, pricePence, quantity);
+							String currentItem = item;
+							String item = textFieldItem.getText();
+							String pricePounds = textFieldPricePounds.getText();
+							String pricePence = textFieldPricePence.getText();
+							String quantity = textFieldQuantity.getText();
 
-					if (s.validateItem() && s.validatePrice() && s.validateQuantity()) {
-						if (editFlag) {
-							s.editStockToDatabase(currentItem);
-						} else {
-						s.addStockToDatabase();
+
+							Stock s = new Stock(item, pricePounds, pricePence, quantity);
+
+							boolean boolError = false;
+							String errorMsg = "";
+
+							if (!s.validateItem()){
+								showError("Invalid item.");
+
+							} else if (!s.validatePrice()){
+								showError("Invalid price.");
+
+							} else if (!s.validateQuantity()) {
+								showError("Invalid quantity");
+
+
+							} else {
+								if (editFlag) {
+									s.editStockToDatabase(currentItem);
+								} else {
+									s.addStockToDatabase();
+								}
+								dialogAddStock.dispose();
+							}
+						} catch (SQLException e) {
+							if (e.getErrorCode() == SQLITE_CONSTRAINT_PRIMARYKEY) {
+								showError("Duplicate entry - Item already exists.");
+							}
+						} catch (Exception e) {
+							Database.closeDB();
+							showError("Failed to insert into database.");
 						}
-						dialogAddStock.dispose();
-					} else if (!s.validateItem()){
-						JOptionPane.showMessageDialog(frame, "Invalid item.",
-								"Invalid Entry", JOptionPane.ERROR_MESSAGE);
-					} else if (!s.validatePrice()){
-						JOptionPane.showMessageDialog(frame,  "Invalid price.",
-								"Invalid Entry", JOptionPane.ERROR_MESSAGE);
-					} else if (!s.validateQuantity()) {
-						JOptionPane.showMessageDialog(frame,  "Invalid quantity.",
-								"Invalid Entry", JOptionPane.ERROR_MESSAGE);
+						return;
+
 					}
-				} catch (SQLException e) {
-					if (e.getErrorCode() == SQLITE_CONSTRAINT_PRIMARYKEY) {
-						JOptionPane.showMessageDialog(frame,  "Item already exists.",
-								"Duplicate Entry", JOptionPane.ERROR_MESSAGE);
-					}
-				} catch (Exception e) {
-					Database.closeDB();
-					JOptionPane.showMessageDialog(frame, "Failed to insert into database.",
-							"Error", JOptionPane.ERROR_MESSAGE);
-				}
+
+
+
+				});
+
+				t.start();
+
+
+
+
+
+
 			}
 		});
 
@@ -231,8 +268,18 @@ public class AddStockDialog {
 		dialogAddStock.setLocationRelativeTo(frame); // Open dialog in middle of frame
 		dialogAddStock.setVisible(true);
 
-
 	}
+
+
+	public void showError(String error) {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				JOptionPane.showMessageDialog(frame,  error,
+						"Error", JOptionPane.ERROR_MESSAGE);
+			}
+		});
+	}
+
 
 	public String getItemTextField() {
 		return textFieldItem.getText();

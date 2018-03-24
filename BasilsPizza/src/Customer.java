@@ -18,6 +18,70 @@ public class Customer {
 		this.postcode = postcode;
 		this.phoneNumber = phoneNumber;
 	}
+	
+	public boolean validateFirstName() {
+		System.out.println("WORD TO BE VALIDATED: " + firstName);
+		
+		String pattern = "\\w{20}";
+		if (!firstName.matches(pattern)) {
+			return false;
+		}
+		
+		return true;
+		//addCustomer();
+	}
+	
+	public boolean validateLastName() {
+		String pattern = "\\w{1,20}";
+		if (!lastName.matches(pattern)) {
+			return false;
+		}
+		return true;
+	}
+	
+	public boolean validateHouseNumber() {
+		String pattern = "\\d{1,5}";
+		if (!houseNumber.matches(pattern)) {
+			return false;
+		}
+		return true;
+	}
+	
+	public boolean validateAddress() {
+		String pattern = "[\\w\\s]+";
+		if (!address.matches(pattern)) {
+			return false;
+		}
+		return true;
+	}
+	
+	public boolean validateCity() {
+		String pattern = "\\w{1,20}";
+		if (!city.matches(pattern)) {
+			return false;
+		}
+		return true;
+	}
+	
+	public boolean validatePostcode() {
+		String pattern = "\\w{7,8}";
+		if (!postcode.matches(pattern)) {
+			return false;
+		}
+		return true;
+	}
+	
+	public boolean validatePhoneNumber() {
+		String pattern = "\\d{11}";
+		if (!phoneNumber.matches(pattern)) {
+			return false;
+		}
+		return true;
+	}
+	
+	public void addCustomerToDatabase() throws Exception {
+		Database.insertCustomer(firstName, lastName, houseNumber, address, city, postcode, phoneNumber);
+	}
 
 	public String getFirstName() {
 		return firstName;
