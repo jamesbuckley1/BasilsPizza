@@ -22,7 +22,7 @@ public class Customer {
 	public boolean validateFirstName() {
 		System.out.println("WORD TO BE VALIDATED: " + firstName);
 		
-		String pattern = "\\w{20}";
+		String pattern = "\\w{1,20}";
 		if (!firstName.matches(pattern)) {
 			return false;
 		}

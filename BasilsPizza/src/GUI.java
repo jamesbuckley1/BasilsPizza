@@ -28,8 +28,7 @@ public class GUI {
     private JTabbedPane tabbedPane;
     
     public GUI() {
-    		SwingUtilities.invokeLater(new Runnable() {
-    			public void run() {
+    		
     				frame = new JFrame();
     	    		tabbedPane = new JTabbedPane();
     	    		
@@ -42,8 +41,7 @@ public class GUI {
     	        tabbedPane("Customers", new CustomerGUI().getCustomerPanel());
     	        tabbedPane("Staff", staffPanel());
     	        createAndShowGUI();
-    			}
-    		});
+    			
     		
     }
     

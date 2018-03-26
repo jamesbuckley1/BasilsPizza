@@ -12,10 +12,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -27,11 +29,19 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 
+import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
+import javafx.scene.Scene;
+import javafx.scene.web.WebView;
+
 public class CustomerGUI {
 
 	private static DefaultTableModel customersTableModel;
 	private static JTable customersTable;
 	private static GridBagConstraints gbc;
+	
+	//SQLite error codes:
+	private static final int SQLITE_CONSTRAINT_PRIMARYKEY = 19;
 
 	private JFrame frame;
 
@@ -46,20 +56,24 @@ public class CustomerGUI {
 	private JPanel panelCustomersMain;
 	private JPanel panelCustomersMap;
 	private JPanel panelCustomersMapButtons;
-	private JPanel panelCustomersMapZoomButtons;
+	//private JPanel panelCustomersMapZoomButtons;
 
 	private JLabel labelMapStatus;
+	
+	
 
 	public CustomerGUI() {
 		initGUI();
 	}
 
 	private void initGUI() {
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				
-			}
-		});
+		// Check if running on event dispatch thread.
+		if (SwingUtilities.isEventDispatchThread()) { 
+			System.err.println("CustomerGUI running on EDT");
+		} else {
+			System.err.println("CustomerGUI not running on EDT");
+		}
+
 		frame = (JFrame)SwingUtilities.getRoot(panelCustomersMain);
 		panelCustomersMain = new JPanel(new BorderLayout());
 		JPanel panelCustomersMainGrid = new JPanel(new GridLayout(1, 2));
@@ -71,7 +85,8 @@ public class CustomerGUI {
 		JPanel panelCustomersFormButtons = new JPanel(new FlowLayout());
 		panelCustomersMap = new JPanel(new BorderLayout());
 		panelCustomersMapButtons = new JPanel(new GridBagLayout());
-		panelCustomersMapZoomButtons = new JPanel(new GridBagLayout());
+		//panelCustomersMapZoomButtons = new JPanel(new GridBagLayout());
+		
 
 		customersTableModel = new DefaultTableModel(new String[] {
 				"First Name", "Last Name", "House Number", "Address",
@@ -138,46 +153,54 @@ public class CustomerGUI {
 		addCustomerBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
-				Customer c = new Customer(textFieldCustomerFirstName.getText(),
-						textFieldCustomerLastName.getText(),
-						textFieldCustomerHouseNumber.getText(),
-						textFieldCustomerAddress.getText(),
-						textFieldCustomerCity.getText(),
-						textFieldCustomerPostcode.getText(),
-						textFieldCustomerPhoneNumber.getText());
-				try {
-						if (!c.validateFirstName()) {
-							JOptionPane.showMessageDialog(frame, "Invalid first name.",
-									"Invalid Entry", JOptionPane.ERROR_MESSAGE);
-						} else if (!c.validateLastName()) {
-							JOptionPane.showMessageDialog(frame, "Invalid last name.",
-									"Invalid Entry", JOptionPane.ERROR_MESSAGE);
-						} else if (!c.validateHouseNumber()) {
-							JOptionPane.showMessageDialog(frame, "Invalid house number.",
-									"Invalid Entry", JOptionPane.ERROR_MESSAGE);
-						} else if (!c.validateAddress()) {
-							JOptionPane.showMessageDialog(frame, "Invalid address.",
-									"Invalid Entry", JOptionPane.ERROR_MESSAGE);
-						} else if (!c.validateCity()) {
-							JOptionPane.showMessageDialog(frame, "Invalid city.",
-									"Invalid Entry", JOptionPane.ERROR_MESSAGE);
-						} else if (!c.validatePostcode()) {
-							JOptionPane.showMessageDialog(frame, "Invalid postcode.",
-									"Invalid Entry", JOptionPane.ERROR_MESSAGE);
-						} else if (!c.validatePhoneNumber()) {
-							JOptionPane.showMessageDialog(frame, "Invalid phone number.",
-									"Invalid Entry", JOptionPane.ERROR_MESSAGE);
-						} else {
-							c.addCustomerToDatabase();
+				
+				String firstName = textFieldCustomerFirstName.getText();
+				String lastName = textFieldCustomerLastName.getText();
+				String houseNumber = textFieldCustomerHouseNumber.getText();
+				String address = textFieldCustomerAddress.getText();
+				String city = textFieldCustomerCity.getText();
+				String postcode = textFieldCustomerPostcode.getText();
+				String phoneNumber = textFieldCustomerPhoneNumber.getText();
+
+				
+						Customer c = new Customer(firstName, lastName, houseNumber,
+								address, city, postcode, phoneNumber);
+
+						try {
+							if (!c.validateFirstName()) {
+								showError("Invalid first name.");
+							} else if (!c.validateLastName()) {
+								showError("Invalid last name.");
+							} else if (!c.validateHouseNumber()) {
+								showError("Invalid house number.");
+							} else if (!c.validateAddress()) {
+								showError("Invalid address.");
+							} else if (!c.validateCity()) {
+								showError("Invalid city.");
+							} else if (!c.validatePostcode()) {
+								showError("Invalid postcode.");
+							} else if (!c.validatePhoneNumber()) {
+								showError("Invalid phone number.");
+							} else {
+								try {
+									c.addCustomerToDatabase();
+								} catch (SQLException e) {
+									if (e.getErrorCode() == SQLITE_CONSTRAINT_PRIMARYKEY) {
+										showError("Duplicate entry - Customer already exists.");
+									}
+								}
+								
+							}
+						} catch (Exception e) {
+							showError("Error.");
+							e.printStackTrace();
 						}
-					} catch (Exception e) {
-						JOptionPane.showMessageDialog(frame, "Error",
-								"Error", JOptionPane.ERROR_MESSAGE);
-						e.printStackTrace();
-					}
-					populateCustomersTable();
-				}
-			});
+						
+				
+				populateCustomersTable();
+				clearCustomerForm();
+			}
+		});
 
 		JButton editCustomerBtn = new JButton();
 		editCustomerBtn.setText("Edit");
@@ -197,33 +220,38 @@ public class CustomerGUI {
 			}
 		});
 
-		JButton mapExpandBtn = new JButton();
-		mapExpandBtn.setText("Expand");
-		mapExpandBtn.addActionListener(new ActionListener() {
+		JButton directionsBtn = new JButton();
+		directionsBtn.setText("Directions");
+		directionsBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
-				//do stuff
+				System.out.println("SENT TO MAP: " + getSelectedHouseNumber() + " " + getSelectedAddress() + " " + getSelectedCity());
+				new CustomerMapFullView(getSelectedHouseNumber(), getSelectedAddress(), getSelectedCity());
 			}
 		});
 
+		/*
 		JButton mapZoomInBtn = new JButton();
 		mapZoomInBtn.setText("+");
 		mapZoomInBtn.setPreferredSize(new Dimension(40,40));
 		mapZoomInBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
-				
+
 			}
 		});
+		
 
 		JButton mapZoomOutBtn = new JButton("-");
 		mapZoomOutBtn.setPreferredSize(new Dimension(40,40));
 		mapZoomOutBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
-				//do shit
+				//do stuff
 			}
 		});
+		
+		*/
 
 		// TABLE BUTTONS
 		gbc = new GridBagConstraints();
@@ -356,8 +384,9 @@ public class CustomerGUI {
 
 		gbc.gridx++;
 		gbc.gridy = 0;
-		panelCustomersMapButtons.add(mapExpandBtn, gbc);
+		panelCustomersMapButtons.add(directionsBtn, gbc);
 
+		/*
 		// MAP ZOOM BUTTONS
 		gbc.gridx = 0;
 		gbc.gridy = 0;
@@ -375,6 +404,7 @@ public class CustomerGUI {
 		gbc.gridx = 0;
 		gbc.gridy++;
 		panelCustomersMapZoomButtons.add(mapZoomOutBtn, gbc);
+		*/
 
 		panelCustomersTable.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 		panelCustomersTable.add(jsp, BorderLayout.CENTER);
@@ -391,88 +421,149 @@ public class CustomerGUI {
 
 		labelMapStatus = new JLabel("Select a customer to see map."); // Get this to change while downloading image?
 		panelCustomersMap.add(labelMapStatus, BorderLayout.NORTH);
-		panelCustomersMap.add(panelCustomersMapZoomButtons, BorderLayout.EAST);
+		//panelCustomersMap.add(panelCustomersMapZoomButtons, BorderLayout.EAST);
 		panelCustomersMap.add(panelCustomersMapButtons, BorderLayout.SOUTH);
 
 		panelCustomersFormMapGrid.add(panelCustomersMap);
 
 		panelCustomersMain.add(panelCustomersMainGrid);
 
-		}
+	}
 
-		private static void populateCustomersTable() {
-			int rows = customersTableModel.getRowCount();
-			for (int i = rows - 1; i >= 0; i --) {
-				customersTableModel.removeRow(i);
+	private void showError(String error) {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				JOptionPane.showMessageDialog(frame, error,
+						"Error", JOptionPane.ERROR_MESSAGE);
 			}
-
-			Database.selectCustomers();
-
-			for (int i = 0; i < Database.getCustomersArray().size(); i++) {
-
-
-				String firstName = Database.getCustomersArray().get(i).getFirstName();
-				String lastName = Database.getCustomersArray().get(i).getLastName(); 
-				String houseNumber = Database.getCustomersArray().get(i).getHouseNumber();
-				String address = Database.getCustomersArray().get(i).getAddress();
-				String city = Database.getCustomersArray().get(i).getCity();
-				String postcode = Database.getCustomersArray().get(i).getPostcode();
-				String phoneNumber = Database.getCustomersArray().get(i).getPhoneNumber();
-
-				System.out.println("POPULATECUSTMERTABLE");
-				System.out.println(firstName);
-				System.out.println(lastName);
-				System.out.println(houseNumber);
-				System.out.println(address);
-				System.out.println(city);
-				System.out.println(postcode);
-				System.out.println(phoneNumber);
-
-
-				Object[] data = {firstName, lastName, houseNumber, address, city,
-						postcode, phoneNumber
-				};
-
-
-
-				customersTableModel.addRow(data);
-
-
-			}
-		}
-
-		private void populateMap(String houseNumber, String address, String city) {
-
-			CustomerMap cm = new CustomerMap(houseNumber, address, city);
-			panelCustomersMap.removeAll();
-
-
-			panelCustomersMap.add(cm.getImage(), BorderLayout.CENTER);
-			panelCustomersMap.add(panelCustomersMapZoomButtons, BorderLayout.EAST);
-			panelCustomersMap.add(panelCustomersMapButtons, BorderLayout.SOUTH);
-
-			panelCustomersMap.validate();
-			panelCustomersMap.repaint();
-
-
-		}
-
-		private ArrayList<String> getCustomerTextFieldValues() {
-			ArrayList<String> customerTextFieldsArray = new ArrayList<String>();
-
-			customerTextFieldsArray.add(textFieldCustomerFirstName.getText());
-			customerTextFieldsArray.add(textFieldCustomerLastName.getText());
-			customerTextFieldsArray.add(textFieldCustomerHouseNumber.getText());
-			customerTextFieldsArray.add(textFieldCustomerAddress.getText());
-			customerTextFieldsArray.add(textFieldCustomerCity.getText());
-			customerTextFieldsArray.add(textFieldCustomerPostcode.getText());
-			customerTextFieldsArray.add(textFieldCustomerPhoneNumber.getText());
-
-			return customerTextFieldsArray;
-		}
-
-		public JPanel getCustomerPanel() {
-			return panelCustomersMain;
-		}
+		});
 
 	}
+
+	private static void populateCustomersTable() {
+		int rows = customersTableModel.getRowCount();
+		for (int i = rows - 1; i >= 0; i --) {
+			customersTableModel.removeRow(i);
+		}
+
+		Database.selectCustomers();
+
+		for (int i = 0; i < Database.getCustomersArray().size(); i++) {
+
+
+			String firstName = Database.getCustomersArray().get(i).getFirstName();
+			String lastName = Database.getCustomersArray().get(i).getLastName(); 
+			String houseNumber = Database.getCustomersArray().get(i).getHouseNumber();
+			String address = Database.getCustomersArray().get(i).getAddress();
+			String city = Database.getCustomersArray().get(i).getCity();
+			String postcode = Database.getCustomersArray().get(i).getPostcode();
+			String phoneNumber = Database.getCustomersArray().get(i).getPhoneNumber();
+
+			System.out.println("POPULATECUSTMERTABLE");
+			System.out.println(firstName);
+			System.out.println(lastName);
+			System.out.println(houseNumber);
+			System.out.println(address);
+			System.out.println(city);
+			System.out.println(postcode);
+			System.out.println(phoneNumber);
+
+
+			Object[] data = {firstName, lastName, houseNumber, address, city,
+					postcode, phoneNumber
+			};
+
+
+
+			customersTableModel.addRow(data);
+
+
+		}
+	}
+
+	private void populateMap(String houseNumber, String address, String city) {
+
+		CustomerMap cm = new CustomerMap(houseNumber, address, city);
+		panelCustomersMap.removeAll();
+
+
+		panelCustomersMap.add(cm.getImage(), BorderLayout.CENTER);
+		//panelCustomersMap.add(panelCustomersMapZoomButtons, BorderLayout.EAST);
+		panelCustomersMap.add(panelCustomersMapButtons, BorderLayout.SOUTH);
+
+		panelCustomersMap.validate();
+		panelCustomersMap.repaint();
+
+
+	}
+	
+	private void expandMap(String url) {
+		JEditorPane jep = new JEditorPane();
+		jep.setEditable(false);
+		
+		try {
+			jep.setPage(url);
+		} catch (Exception e) {
+			jep.setContentType("text/html");
+			jep.setText("<html>Could not load page.</html>");
+		}
+		
+		JScrollPane jsp = new JScrollPane(jep);
+		JFrame frame = new JFrame("Google Maps");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.add(jsp);
+		frame.setPreferredSize(new Dimension(800,600));
+		frame.pack();
+		frame.setVisible(true);
+	}
+
+	private ArrayList<String> getCustomerTextFieldValues() {
+		ArrayList<String> customerTextFieldsArray = new ArrayList<String>();
+
+		customerTextFieldsArray.add(textFieldCustomerFirstName.getText());
+		customerTextFieldsArray.add(textFieldCustomerLastName.getText());
+		customerTextFieldsArray.add(textFieldCustomerHouseNumber.getText());
+		customerTextFieldsArray.add(textFieldCustomerAddress.getText());
+		customerTextFieldsArray.add(textFieldCustomerCity.getText());
+		customerTextFieldsArray.add(textFieldCustomerPostcode.getText());
+		customerTextFieldsArray.add(textFieldCustomerPhoneNumber.getText());
+
+		return customerTextFieldsArray;
+	}
+	
+	private String getSelectedHouseNumber() {
+		int row = customersTable.getSelectedRow();
+		String selectedHouseNumber = customersTable.getModel().getValueAt(row, 2).toString();
+		
+		return selectedHouseNumber;
+	}
+	
+	private String getSelectedAddress() {
+		int row = customersTable.getSelectedRow();
+		String selectedAddress = customersTable.getModel().getValueAt(row, 3).toString();
+		
+		return selectedAddress;
+	}
+	
+	private String getSelectedCity() {
+		int row = customersTable.getSelectedRow();
+		String selectedCity = customersTable.getModel().getValueAt(row, 4).toString();
+		
+		return selectedCity;
+	}
+	
+	private void clearCustomerForm() {
+		textFieldCustomerFirstName.setText("");
+		textFieldCustomerLastName.setText("");
+		textFieldCustomerHouseNumber.setText("");
+		textFieldCustomerAddress.setText("");
+		textFieldCustomerCity.setText("");
+		textFieldCustomerPostcode.setText("");
+		textFieldCustomerPhoneNumber.setText("");
+	}
+
+	public JPanel getCustomerPanel() {
+		return panelCustomersMain;
+	}
+
+}

@@ -104,12 +104,9 @@ public class StockGUI {
 		addBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
-				SwingUtilities.invokeLater(new Runnable() {
-					public void run() {
-						
-					}
-				});
-				AddStockDialog a = new AddStockDialog(frame);
+				
+				
+				AddStockDialogGUI a = new AddStockDialogGUI(frame);
 				populateStockTable();
 			}
 		});
@@ -121,7 +118,7 @@ public class StockGUI {
 			public void actionPerformed(ActionEvent event) {
 				
 					try {
-					AddStockDialog a = new AddStockDialog(frame, getTextFieldValues());
+					AddStockDialogGUI a = new AddStockDialogGUI(frame, getTextFieldValues());
 					} catch (Exception e) {
 						JOptionPane.showMessageDialog(frame, "Please select an item to edit.",
 								"Error", JOptionPane.ERROR_MESSAGE);
