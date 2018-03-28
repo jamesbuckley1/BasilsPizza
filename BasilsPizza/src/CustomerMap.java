@@ -17,7 +17,11 @@ public class CustomerMap {
 	String houseNumber;
 	String address;
 	String city;
-	int zoomLevel = 13;
+	String polyline;
+	String distanceKm;
+	String duration;
+	int zoomLevel = 13; //?
+	
 
 	public CustomerMap(int  zoomLevel) {
 
@@ -40,8 +44,6 @@ public class CustomerMap {
 
 	public void getDirections() {
 		try {
-			
-			String polyline = "";
 			
 			URL url = new URL("https://maps.googleapis.com/maps/api/directions/json?origin=Bournemouth+University&destination=" + houseNumber + "+" + address + "+" + city + "&key=AIzaSyBn2qYJcHoNCgNQZv1mcycnUo06sJDZPBs");
 			HttpURLConnection conn = (HttpURLConnection)url.openConnection();
@@ -71,101 +73,43 @@ public class CustomerMap {
 				
 				
 				for (int i = 0; i < routesArray.size(); i ++) {
-					JSONObject objOverviewPolyline = (JSONObject) routesArray.get(i);
-					JSONObject objPoints = (JSONObject) objOverviewPolyline.get("overview_polyline");
+					
+					
+					
+					JSONObject objRoutes = (JSONObject) routesArray.get(i);
+					
+					JSONArray legsArray = (JSONArray) objRoutes.get("legs");
+					for (int j = 0; j < legsArray.size(); j ++) {
+						JSONObject objLegs = (JSONObject) legsArray.get(j);
+						JSONObject objDistance = (JSONObject) objLegs.get("distance");
+						JSONObject objDuration = (JSONObject) objLegs.get("duration");
+						distanceKm = (String) objDistance.get("text");
+						duration = (String) objDuration.get("text");
+					}
+					
+					
+					JSONObject objPoints = (JSONObject) objRoutes.get("overview_polyline");
 					polyline = (String) objPoints.get("points");
 				}
 				
 				System.out.println("POLYLINE " + polyline);
-				
+				System.out.println("DISTANCE " + distanceKm);
+				System.out.println("DURATION" + duration);
+				System.out.println("DURATION MILES " + convertKmToMiles(distanceKm));
 			}
 			
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+			
+
+	}
 	
-			
-			
-			
-			/*
-			
-			String polyline = "";
-			
-			URL url = new URL("https://maps.googleapis.com/maps/api/directions/json?origin=Bournemouth+University&destination=" + houseNumber + "+" + address + "+" + city + "&key=AIzaSyBn2qYJcHoNCgNQZv1mcycnUo06sJDZPBs");
-			HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-			conn.setRequestMethod("GET");
-			conn.connect();
-			int responseCode = conn.getResponseCode();
-
-			if (responseCode != 200) {
-				throw new RuntimeException("HttpResponseCode: " + responseCode);
-			} else {
-
-				String result = "";
-
-				Scanner scan = new Scanner(url.openStream());
-				while (scan.hasNext()) {
-					result = scan.nextLine();
-					System.out.println(result);
-
-				}
-				scan.close();
-
-				JSONParser parser = new JSONParser();
-				Object jObj = parser.parse(result);
-				//JSONArray jsonRoutesArray = (JSONArray)jObj.get("routes");
-				/*
-				for (int i = 0; i < jsonRoutesArray.size(); i ++) {
-					JSONObject jObjPolyline = (JSONObject)jsonRoutesArray.get(i);
-					JSONArray jsonPolylineArray = (JSONArray)jObjPolyline.get("overview_polyline");
-					
-					
-					for (int j = 0; j < jsonPolylineArray.size(); j ++) {
-						polyline = jsonPolylineArray.get(j).toString();
-					}
-					
-				}
-				
-				
-			}
-			
-			*/
-			
-			//System.out.println("POLYLINE: " + polyline);
-			
-			/*
-			 JSONParser parser = new JSONParser();
-				JSONObject jObj = (JSONObject)parser.parse(result);
-				JSONArray jsonArray = (JSONArray)jObj.get("resourceSets");
-				// Get resourcesSets data
-				for (int i = 0; i < jsonArray.size(); i ++) {
-					JSONObject jObjResourceSets = (JSONObject)jsonArray.get(i);
-					JSONArray jsonResourcesArray = (JSONArray)jObjResourceSets.get("resources");
-
-					for (int j = 0; j < jsonResourcesArray.size(); j ++) {
-						JSONObject jObjResources = (JSONObject)jsonResourcesArray.get(j);
-						JSONObject jObjPoint = (JSONObject)jObjResources.get("point");
-						JSONArray jsonCoordinatesArray = (JSONArray)jObjPoint.get("coordinates");
-
-						for (int k = 0; k < jsonCoordinatesArray.size(); k ++) {
-							coordinates += jsonCoordinatesArray.get(k).toString() + ",";
-
-						}
-
-					}
-				}
-			 
-			 
-
-		}catch (Exception e) {
-			e.printStackTrace();
-
-		}
-
-		*/
-
-
+	public String convertKmToMiles(String distanceKm) {
+		String processedDistanceKm = distanceKm.replace(" km", "");
+		Double miles = Double.parseDouble(processedDistanceKm) * 0.621;
+		processedDistanceKm = miles.toString() + " miles";
+		return processedDistanceKm;
 	}
 
 	/*
@@ -228,72 +172,5 @@ public class CustomerMap {
 */
 
 
-	/*
-	private void getCoordinates() {
-		String coordinates = "";
-		String latitude = "";
-		String longitude = "";
-
-		try {
-			URL url = new URL("http://dev.virtualearth.net/REST/v1/Locations?countryRegion=GB&locality=EPSOM&addressLine=71%20ASHLEY%20ROAD&key=AohJR4zT55zAon5RVlB_1WCX1XcTjYR06yeTKCn87jvads5MCU904rLvHoqBg9Hy");
-			HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-			conn.setRequestMethod("GET");
-			conn.connect();
-			int responseCode = conn.getResponseCode();
-
-			if (responseCode != 200) {
-				throw new RuntimeException("HttpResponseCode: " + responseCode);
-			} else {
-
-				String result = "";
-
-				Scanner scan = new Scanner(url.openStream());
-				while (scan.hasNext()) {
-					result = scan.nextLine();
-					System.out.println(result);
-
-				}
-				scan.close();
-
-				JSONParser parser = new JSONParser();
-				JSONObject jObj = (JSONObject)parser.parse(result);
-				JSONArray jsonArray = (JSONArray)jObj.get("resourceSets");
-				// Get resourcesSets data
-				for (int i = 0; i < jsonArray.size(); i ++) {
-					JSONObject jObjResourceSets = (JSONObject)jsonArray.get(i);
-					JSONArray jsonResourcesArray = (JSONArray)jObjResourceSets.get("resources");
-
-					for (int j = 0; j < jsonResourcesArray.size(); j ++) {
-						JSONObject jObjResources = (JSONObject)jsonResourcesArray.get(j);
-						JSONObject jObjPoint = (JSONObject)jObjResources.get("point");
-						JSONArray jsonCoordinatesArray = (JSONArray)jObjPoint.get("coordinates");
-
-						for (int k = 0; k < jsonCoordinatesArray.size(); k ++) {
-							coordinates += jsonCoordinatesArray.get(k).toString() + ",";
-
-						}
-
-					}
-				}
-
-
-				System.out.println("COORDINATES BEFORE SPLIT " + coordinates);
-				String[] coords = coordinates.split(",");
-				latitude = coords[0];
-				longitude = coords[1];
-
-				//System.out.println("COORDS " + coords[0]);
-				System.out.println("latitude " + latitude);
-				System.out.println("logitude " + longitude);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-	}
-
-
-
-	 */
-
+	
 }
