@@ -25,9 +25,14 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.RowFilter;
 import javax.swing.SwingUtilities;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
@@ -169,6 +174,15 @@ public class CustomerGUI {
 	}
 	
 	private JPanel customersTableButtons() {
+		JButton customerInfoBtn = new JButton();
+		customerInfoBtn.setText("Info & Directions");
+		customerInfoBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				new CustomerInfoDialogGUI(getSelectedCellValues());
+			}
+		});
+		
 		JButton editCustomerBtn = new JButton();
 		editCustomerBtn.setText("Edit");
 		editCustomerBtn.addActionListener(new ActionListener() {
@@ -183,19 +197,18 @@ public class CustomerGUI {
 		deleteCustomerBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
-				//do stuff
+				try {
+					//CONFIRMATION DIALOG w/ manager password?
+					Database.deleteCustomer(getSelectedCellValues());
+					populateCustomersTable();
+				} catch (SQLException e) {
+					// NEEDS ERROR DIALOG
+					e.printStackTrace();
+				}
 			}
 		});
 
-		JButton directionsBtn = new JButton();
-		directionsBtn.setText("Directions");
-		directionsBtn.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				System.out.println("SENT TO MAP: " + getSelectedHouseNumber() + " " + getSelectedAddress() + " " + getSelectedCity());
-				new CustomerMapFullView(getSelectedHouseNumber(), getSelectedAddress(), getSelectedCity());
-			}
-		});
+		
 		
 		JPanel panelCustomersTableButtons = new JPanel(new GridBagLayout());
 
@@ -204,16 +217,17 @@ public class CustomerGUI {
 		gbc.weightx = 1.0;
 		gbc.weighty = 1.0;
 		panelCustomersTableButtons.add(new JLabel(), gbc);
-
+		
 		gbc.gridx++;
-		gbc.gridy = 0;
 		gbc.weightx = 0;
 		gbc.weighty = 0;
+		panelCustomersTableButtons.add(customerInfoBtn, gbc);
+		
+		gbc.gridx++;
 		gbc.anchor = GridBagConstraints.LINE_END;
 		panelCustomersTableButtons.add(editCustomerBtn, gbc);
 
 		gbc.gridx++;
-		gbc.gridy = 0;
 		panelCustomersTableButtons.add(deleteCustomerBtn, gbc);
 		
 		
@@ -223,36 +237,76 @@ public class CustomerGUI {
 	
 	private JPanel customersTableSearch() {
 		
-		JButton btnSearch = new JButton();
-		btnSearch.setText("Search");
-		btnSearch.addActionListener(new ActionListener() {
+		JButton searchClearBtn = new JButton();
+		searchClearBtn.setText("Clear");
+		searchClearBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
-
+				textFieldCustomersSearch.setText("");
 			}
 		});
 		
 		
 		JPanel panelCustomersTableSearch = new JPanel(new GridBagLayout());
+		
+		textFieldCustomersSearch = new JTextField(20);
+		TableRowSorter<TableModel> rowSorter = new TableRowSorter<>(customersTable.getModel());
+		customersTable.setRowSorter(rowSorter);
+		
+		textFieldCustomersSearch.getDocument().addDocumentListener(new DocumentListener() {
+
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				String text = textFieldCustomersSearch.getText();
+				
+				if(text.trim().length() == 0) {
+					rowSorter.setRowFilter(null);
+				} else {
+					rowSorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
+				}
+			}
+
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				String text = textFieldCustomersSearch.getText();
+				
+				if (text.trim().length() == 0) {
+					rowSorter.setRowFilter(null);
+				} else {
+					rowSorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
+				}
+			}
+
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				throw new UnsupportedOperationException("Exception");
+			}
+			
+		});
 
 		
 		//TRICK
-		gbc.gridx = 0;
-		gbc.gridy = 20;
+		gbc.gridx = 20;
+		gbc.gridy = 0;
 		gbc.weightx = 1.0;
 		gbc.weighty = 1.0;
 		panelCustomersTableSearch.add(new JLabel(), gbc);
-	
-		textFieldCustomersSearch = new JTextField(20);
+		
 		gbc.gridx++;
 		gbc.gridy = 0;
 		gbc.weightx = 0;
 		gbc.weighty = 0;
+		gbc.anchor = GridBagConstraints.LINE_END;
+		panelCustomersTableSearch.add(new JLabel("Filter: "));
+	
+		
+		gbc.gridx++;
 		panelCustomersTableSearch.add(textFieldCustomersSearch, gbc);
 
 		gbc.gridx++;
-		gbc.gridy = 0;;
-		panelCustomersTableSearch.add(btnSearch, gbc);
+		panelCustomersTableSearch.add(searchClearBtn, gbc);
+		
+		
 		
 		return panelCustomersTableSearch;
 	}
@@ -299,7 +353,8 @@ public class CustomerGUI {
 								showError("Duplicate entry - Customer already exists.");
 							}
 						}
-
+						populateCustomersTable();
+						clearCustomerForm();
 					}
 				} catch (Exception e) {
 					showError("Error.");
@@ -307,8 +362,7 @@ public class CustomerGUI {
 				}
 
 
-				populateCustomersTable();
-				clearCustomerForm();
+				
 			}
 		});
 		
@@ -529,7 +583,7 @@ public class CustomerGUI {
 		return panelCustomersOrdersButtons;
 	}
 	
-	private void populateCustomersOrdersTable() {
+	private void populateCustomersOrdersTable() { // TO DO
 		/*
 	}
 		int rows = customersTableModel.getRowCount();
@@ -563,25 +617,6 @@ public class CustomerGUI {
 			
 			*/
 	}
-
-	/*
-		// MAP BUTTONS
-		gbc.gridx = 0;
-		gbc.gridy = 0;
-		gbc.weightx = 1.0;
-		gbc.weighty = 1.0;
-		gbc.anchor = GridBagConstraints.LINE_END;
-		panelCustomersMapButtons.add(new JLabel(), gbc);
-
-		gbc.gridx++;
-		gbc.gridy = 0;
-		panelCustomersMapButtons.add(directionsBtn, gbc);
-*/
-		
-
-		
-
-	
 
 	private void showError(String error) {
 		SwingUtilities.invokeLater(new Runnable() {
@@ -683,8 +718,32 @@ public class CustomerGUI {
 
 		return customerTextFieldsArray;
 	}
+	
+	private ArrayList<String> getSelectedCellValues() { // Col: 0 = First name, 1 = Last name, 2 = House number, 3 = Address, 4 = City, 5 = Postcode, 6 = Phone number.
+		ArrayList<String> selectedCellValuesArray = new ArrayList<String>();
+		int row = customersTable.getSelectedRow();
+		String firstName = customersTable.getModel().getValueAt(row, 0).toString();
+		String lastName = customersTable.getModel().getValueAt(row, 1).toString();
+		String houseNumber = customersTable.getModel().getValueAt(row, 2).toString();
+		String address = customersTable.getModel().getValueAt(row, 3).toString();
+		String city = customersTable.getModel().getValueAt(row, 4).toString();
+		String postcode = customersTable.getModel().getValueAt(row, 5).toString();
+		String phoneNumber = customersTable.getModel().getValueAt(row, 6).toString();
+		
+		selectedCellValuesArray.add(firstName);
+		selectedCellValuesArray.add(lastName);
+		selectedCellValuesArray.add(houseNumber);
+		selectedCellValuesArray.add(address);
+		selectedCellValuesArray.add(city);
+		selectedCellValuesArray.add(postcode);
+		selectedCellValuesArray.add(phoneNumber);
 
-	private String getSelectedHouseNumber() {
+		return selectedCellValuesArray;
+	}
+	
+	/*
+	
+	private String getSelectedHouseNumber() { // REPLACE WITH getSelectedCellValue() !!!!!
 		int row = customersTable.getSelectedRow();
 		String selectedHouseNumber = customersTable.getModel().getValueAt(row, 2).toString();
 
@@ -704,6 +763,8 @@ public class CustomerGUI {
 
 		return selectedCity;
 	}
+	
+	*/
 
 	private void clearCustomerForm() {
 		textFieldCustomerFirstName.setText("");
