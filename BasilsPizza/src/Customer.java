@@ -1,13 +1,20 @@
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Scanner;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 public class Customer {
 	
-	String firstName;
-	String lastName;
-	String houseNumber;
-	String address;
-	String city;
-	String postcode;
-	String phoneNumber;
+	private String firstName;
+	private String lastName;
+	private String houseNumber;
+	private String address;
+	private String city;
+	private String postcode;
+	private String phoneNumber;
 	
 	public Customer(String firstName, String lastName, String houseNumber, String address, String city, String postcode, String phoneNumber) {
 		this.firstName = firstName;
@@ -82,7 +89,8 @@ public class Customer {
 	public void addCustomerToDatabase() throws Exception {
 		Database.insertCustomer(firstName, lastName, houseNumber, address, city, postcode, phoneNumber);
 	}
-
+	
+	
 	public String getFirstName() {
 		return firstName;
 	}

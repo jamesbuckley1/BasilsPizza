@@ -60,6 +60,8 @@ public class Database {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
+		//selectStock();
+		//selectCustomers();
 		System.out.println("SQLite database initialisation complete.");
 	}
 
@@ -188,7 +190,7 @@ public class Database {
 		}
 		System.out.println("SELECT customers successful.");
 	}
-
+	
 	public static void insertCustomer(String firstName, String lastName, String houseNumber, String address, String city, String postcode, String phoneNumber) throws Exception {
 		openDB();
 		//System.out.println("Inserting customer: " + item + " , " + price + " , " + quantity);

@@ -329,6 +329,9 @@ public class CustomerGUI {
 
 				Customer c = new Customer(firstName, lastName, houseNumber,
 						address, city, postcode, phoneNumber);
+				CustomerMap cm = new CustomerMap(c);
+				
+				
 
 				try {
 					if (!c.validateFirstName()) {

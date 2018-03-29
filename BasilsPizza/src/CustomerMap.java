@@ -41,14 +41,14 @@ public class CustomerMap {
 
 	}
 
-	public CustomerMap(String houseNumber, String address, String city) {
-		this.houseNumber = houseNumber;
-		this.address = address.replace(" ", "+");
-		this.city = city.replace(" ", "+");
+	public CustomerMap(Customer c) {
+		this.houseNumber = c.getHouseNumber();
+		this.address = c.getAddress().replace(" ", "+");
+		this.city = c.getCity().replace(" ", "+");
 		
 		//latch = new CountDownLatch(1);
 
-		getDirectionsData();
+		//getDirectionsData();
 		//getStaticMapImage();
 
 	}
@@ -59,7 +59,7 @@ public class CustomerMap {
 	
 
 
-	private void getDirectionsData() {
+	public void getDirectionsData() {
 		directionsThread = new Thread() {
 			public void run() {
 				try {
