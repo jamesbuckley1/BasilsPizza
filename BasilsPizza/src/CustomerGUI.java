@@ -193,7 +193,7 @@ public class CustomerGUI {
 			@Override
 			public void actionPerformed(ActionEvent event) {
 				
-				new CustomerInfoDialogGUI(getSelectedCellValues());
+				new CustomerInfoDialogGUI(frame, getSelectedCellValues());
 				
 			}
 		});
@@ -346,8 +346,13 @@ public class CustomerGUI {
 						address, city, postcode, phoneNumber);
 				CustomerMap cm = new CustomerMap(c);
 				
-				cm.getDirectionsData();
-				cm.getStaticMapImage();
+				Thread t = new Thread() {
+					public void run() {
+						cm.getDirectionsData();
+						cm.getStaticMapImage();
+					}
+				};
+				t.start();
 				
 				
 				//c.setDistance(cm.getDistance)
@@ -568,7 +573,7 @@ public class CustomerGUI {
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		
 		panelCustomersOrders.add(new JLabel("Customer orders:"), BorderLayout.NORTH);
-		panelCustomersOrders.setBorder(BorderFactory.createEmptyBorder(0,0,9,0));
+		panelCustomersOrders.setBorder(BorderFactory.createEmptyBorder(0,0,10,0));
 		panelCustomersOrders.add(jsp, BorderLayout.CENTER);
 		panelCustomersOrders.add(customersOrdersButtons(), BorderLayout.SOUTH);
 		

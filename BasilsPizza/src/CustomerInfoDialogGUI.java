@@ -8,14 +8,19 @@ import java.util.ArrayList;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 public class CustomerInfoDialogGUI {
+	
+	private JFrame frame;
 
-	private Thread mapInfoThread;
-	private Thread t1;
+	private Thread getMapInfoThread;
+	private Thread customerInfoThread;
+	
+	private CustomerMap cm;
 
 	private String firstName;
 	private String lastName;
@@ -27,7 +32,7 @@ public class CustomerInfoDialogGUI {
 	private String distance;
 	private String duration;
 
-	public CustomerInfoDialogGUI(ArrayList<String> selectedCellValues) {
+	public CustomerInfoDialogGUI(JFrame frame, ArrayList<String> selectedCellValues) {
 		this.firstName = selectedCellValues.get(0);
 		this.lastName = selectedCellValues.get(1);
 		this.houseNumber = selectedCellValues.get(2);
@@ -36,6 +41,9 @@ public class CustomerInfoDialogGUI {
 		this.postcode = selectedCellValues.get(5);
 		this.phoneNumber = selectedCellValues.get(6);
 
+		this.frame = frame;
+		cm = new CustomerMap(houseNumber, address, city);
+		
 		getMapInfo();
 		
 
@@ -58,7 +66,9 @@ public class CustomerInfoDialogGUI {
 		dialog.add(panelMain);
 		dialog.setSize(300, 180);
 		dialog.setModal(true); // Always on top
-		//dialog.setLocationRelativeTo(frame); // Open dialog in middle of frame
+		dialog.pack();
+		dialog.setLocationRelativeTo(frame); // Open dialog in middle of frame
+		
 		dialog.setVisible(true);
 	}
 
@@ -90,22 +100,27 @@ public class CustomerInfoDialogGUI {
 	private JPanel customerInfo() {
 		JPanel panelInfo = new JPanel(new BorderLayout());
 
-		t1 = new Thread() {
+		customerInfoThread = new Thread() {
 			public void run() {
 				try {
-					mapInfoThread.join();
+					getMapInfoThread.join();
+					
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+
+							panelInfo.add(new JLabel("TEST"), BorderLayout.CENTER);
+							panelInfo.add(new JLabel(distance), BorderLayout.NORTH);
+						}
+					});
+					
 				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 				
-				System.out.println("DISSSSSSATTATANCE: " + distance);
 			}
 		};
-		t1.start();
+		customerInfoThread.start();
 
-		panelInfo.add(new JLabel("TEST"), BorderLayout.CENTER);
-		panelInfo.add(new JLabel(distance), BorderLayout.NORTH);
 
 		return panelInfo;
 	}
@@ -113,30 +128,25 @@ public class CustomerInfoDialogGUI {
 
 
 	private void getMapInfo() {
-		CustomerMap cm = new CustomerMap(houseNumber, address, city);
-		mapInfoThread = new Thread() {
+		
+		getMapInfoThread = new Thread() {
 			public void run() {
 				
 				cm.getDirectionsData();
-				notify();
+				distance = cm.getDistance();
+				duration = cm.getDuration();
 			}
 		};
 		
 		
-			
-		distance = cm.getDistance();
-		duration = cm.getDuration();
-		System.out.println("THREAD 2 DONE");
-	
-		//t2.start();
-		mapInfoThread.start();
+		getMapInfoThread.start();
 		
-		
-		System.out.println("DISTANCE AFTER: " + distance);
 
 
 
 	}
+	
+	
 	
 	
 
