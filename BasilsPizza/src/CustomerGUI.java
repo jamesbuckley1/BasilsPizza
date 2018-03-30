@@ -25,6 +25,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
@@ -56,6 +57,10 @@ public class CustomerGUI {
 						textFieldCustomerHouseNumber, textFieldCustomerAddress,
 						textFieldCustomerCity, textFieldCustomerPostcode,
 						textFieldCustomerPhoneNumber, textFieldCustomersSearch;
+	
+	private CustomerMap cm;
+	
+	
 
 	public CustomerGUI() {
 		initGUI();
@@ -108,6 +113,7 @@ public class CustomerGUI {
 
 		customersTable = new JTable(customersTableModel ) {
 
+			
 			public boolean isCellEditable(int row, int col) {
 				return false;
 			}
@@ -128,11 +134,12 @@ public class CustomerGUI {
 				return c;
 			}
 		};
-
+		
 		customersTable.setFont(new Font("", 0, 14));
 		customersTable.setRowHeight(customersTable.getRowHeight() + 10);
 		customersTable.setAutoCreateRowSorter(true);
 		customersTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		
 
 		customersTable.addMouseListener(new MouseAdapter() {
 			@Override
@@ -155,10 +162,16 @@ public class CustomerGUI {
 				}
 			}
 		});
+		
+		
 
 		populateCustomersTable();
+		
+		
+		// SET FOCUS TO FIRST ROW!!!
 
 		customersTable.setFillsViewportHeight(true);
+		
 		
 		JScrollPane jsp = new JScrollPane(customersTable,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
@@ -179,7 +192,9 @@ public class CustomerGUI {
 		customerInfoBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
+				
 				new CustomerInfoDialogGUI(getSelectedCellValues());
+				
 			}
 		});
 		
@@ -331,7 +346,11 @@ public class CustomerGUI {
 						address, city, postcode, phoneNumber);
 				CustomerMap cm = new CustomerMap(c);
 				
+				cm.getDirectionsData();
+				cm.getStaticMapImage();
 				
+				
+				//c.setDistance(cm.getDistance)
 
 				try {
 					if (!c.validateFirstName()) {
@@ -641,7 +660,6 @@ public class CustomerGUI {
 
 		for (int i = 0; i < Database.getCustomersArray().size(); i++) {
 
-
 			String firstName = Database.getCustomersArray().get(i).getFirstName();
 			String lastName = Database.getCustomersArray().get(i).getLastName(); 
 			String houseNumber = Database.getCustomersArray().get(i).getHouseNumber();
@@ -650,25 +668,17 @@ public class CustomerGUI {
 			String postcode = Database.getCustomersArray().get(i).getPostcode();
 			String phoneNumber = Database.getCustomersArray().get(i).getPhoneNumber();
 
-			System.out.println("POPULATECUSTMERTABLE");
-			System.out.println(firstName);
-			System.out.println(lastName);
-			System.out.println(houseNumber);
-			System.out.println(address);
-			System.out.println(city);
-			System.out.println(postcode);
-			System.out.println(phoneNumber);
-
 
 			Object[] data = {firstName, lastName, houseNumber, address, city,
 					postcode, phoneNumber
 			};
 
 
-
 			customersTableModel.addRow(data);
-
-
+			customersTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			customersTable.getSelectionModel().setSelectionInterval(0, 0);
+			customersTable.setColumnSelectionInterval(0, 0);
+			customersTable.requestFocusInWindow();
 		}
 	}
 	/*

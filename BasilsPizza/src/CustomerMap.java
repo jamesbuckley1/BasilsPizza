@@ -1,20 +1,17 @@
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.concurrent.CountDownLatch;
 
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
+import javax.imageio.ImageIO;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+
+import com.mysql.fabric.xmlrpc.base.Data;
 
 
 
@@ -31,39 +28,39 @@ public class CustomerMap {
 	String distanceKm;
 	String distanceMiles;
 	String duration;
-	int zoomLevel = 13; //?
 	Thread directionsThread;
 	Thread mapImageThread;
-	//CountDownLatch latch;
+	
+	private boolean directionsDataDownloaded = false;
+	
 	
 
-	public CustomerMap(int  zoomLevel) {
+	public CustomerMap() {
 
 	}
-
+	// Add customer constructor
 	public CustomerMap(Customer c) {
 		this.houseNumber = c.getHouseNumber();
 		this.address = c.getAddress().replace(" ", "+");
 		this.city = c.getCity().replace(" ", "+");
 		
-		//latch = new CountDownLatch(1);
-
-		//getDirectionsData();
-		//getStaticMapImage();
-
+	}
+	// Constructor for customer info dialog 
+	public CustomerMap(String houseNumber, String address, String city) {
+		this.houseNumber = houseNumber;
+		this.address = address.replace(" ", "+");
+		this.city = city;
 	}
 
-	public void setZoom() {
-		//zoomLevel
-	}
 	
 
-
-	public void getDirectionsData() {
+	public boolean getDirectionsData() {
+		
 		directionsThread = new Thread() {
 			public void run() {
+				
 				try {
-					
+					System.out.println("Downloading directions data...");
 					URL url = new URL("https://maps.googleapis.com/maps/api/directions/json?origin=Bournemouth+University&destination=" + houseNumber + "+" + address + "+" + city + "&key=AIzaSyBn2qYJcHoNCgNQZv1mcycnUo06sJDZPBs");
 					System.out.println("DIRECTIONS URL");
 					System.out.println(url);
@@ -114,14 +111,13 @@ public class CustomerMap {
 						}
 						
 						distanceMiles = convertKmToMiles(distanceKm);
-						//polyline = polyline.replace("\\", "\\\\"); // This was fun figuring out
 						System.out.println("POLYLINE " + polyline);
 						System.out.println("DISTANCE " + distanceKm);
 						System.out.println("DURATION" + duration);
 						System.out.println("DURATION MILES " + convertKmToMiles(distanceKm));
+						directionsDataDownloaded = true;
 					}
 					
-					//latch.await();
 					
 				}catch (Exception e) {
 					e.printStackTrace();
@@ -136,7 +132,7 @@ public class CustomerMap {
 		
 		directionsThread.start();
 		
-		
+		return directionsDataDownloaded;
 			
 
 	}
@@ -149,53 +145,45 @@ public class CustomerMap {
 	}
 
 	
-	public JPanel getStaticMapImage() {
+	public void getStaticMapImage() {
 		
 		
-		JPanel panelMap = new JPanel();
+		//JPanel panelMap = new JPanel();
 		
 			mapImageThread = new Thread() {
 				public void run() {
+					/*
 					try {
 						directionsThread.join();
-					} catch (InterruptedException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
 					}
+					*/
 					try {
+					
 					String mapImgUrl = "https://maps.googleapis.com/maps/api/staticmap?size=300x300&path=enc:";
-					String imageFileName = houseNumber + " " + address + ".jpg";
+					String formattedAddress = address.replace("+", " "); // Remove + character from address
+					String imageFileName = houseNumber + " " + formattedAddress + " " + city + ".jpg";
 					String key = "&key=AIzaSyBn2qYJcHoNCgNQZv1mcycnUo06sJDZPBs";
 					
 					StringBuilder sb = new StringBuilder();
 					sb.append(mapImgUrl);
 					sb.append(polyline);
 					sb.append(key);
-					URL url = new URL(mapImgUrl + polyline + key);
-					System.out.println("UUURRRRLL" + url.toString());
-					InputStream is = url.openStream();
-					OutputStream os = new FileOutputStream(imageFileName);
 					
-					byte[] b = new byte[2048];
-					int length;
-					
-					while ((length = is.read(b)) != -1) {
-						os.write(b, 0, length);
+					boolean fileExists = new File("Customer Maps/", imageFileName).exists();
+					if (fileExists) {
+						System.out.println("Image file already exists.");
+					} else {
+						System.out.println("Downloading image...");
+						URL url = new URL(mapImgUrl + polyline + key);
+						BufferedImage img = ImageIO.read(url);
+						File file = new File("Customer Maps/" + imageFileName);
+						ImageIO.write(img, "jpg", file);
 					}
 					
-					is.close();
-					os.close();
 					
-					ImageIcon imgIcon = new ImageIcon((new ImageIcon(imageFileName))
-							.getImage().getScaledInstance(400, 400, java.awt.Image.SCALE_SMOOTH));
 					
-					SwingUtilities.invokeLater(new Runnable() {
-						public void run() {
-							JLabel labelMap = new JLabel();
-							labelMap.setIcon(imgIcon);
-							panelMap.add(labelMap);
-						}
-					});
 					System.out.println("URL");
 					System.out.println(mapImgUrl);
 					System.out.println("STRINGBUILDER");
@@ -216,14 +204,17 @@ public class CustomerMap {
 
 			mapImageThread.start();
 
-		
-
-		return panelMap;
 	
 
 	}
 
-
+	public String getDistance() {
+		return distanceMiles;
+	}
+	
+	public String getDuration() {
+		return duration;
+	}
 
 	
 }
