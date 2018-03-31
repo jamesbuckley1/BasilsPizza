@@ -1,8 +1,6 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -15,9 +13,9 @@ import java.awt.event.MouseEvent;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import javax.swing.BorderFactory;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JButton;
-import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -28,17 +26,13 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
 import javax.swing.SwingUtilities;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-
-import javafx.application.Platform;
-import javafx.embed.swing.JFXPanel;
-import javafx.scene.Scene;
-import javafx.scene.web.WebView;
 
 public class CustomerGUI {
 
@@ -178,10 +172,18 @@ public class CustomerGUI {
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		
 		
-		panelCustomersTable.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+		//panelCustomersTable.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 		panelCustomersTable.add(jsp, BorderLayout.CENTER);
 		panelCustomersTable.add(customersTableButtons(), BorderLayout.SOUTH);
 		panelCustomersTable.add(customersTableSearch(), BorderLayout.NORTH);
+		
+		
+		TitledBorder border = new TitledBorder("Search:");
+		border.setTitleJustification(TitledBorder.LEFT);
+		border.setTitlePosition(TitledBorder.TOP);
+		
+		panelCustomersTable.setBorder(border);
+		
 		
 		return panelCustomersTable;
 	}
@@ -312,7 +314,7 @@ public class CustomerGUI {
 		gbc.weightx = 0;
 		gbc.weighty = 0;
 		gbc.anchor = GridBagConstraints.LINE_END;
-		panelCustomersTableSearch.add(new JLabel("Filter: "));
+		//panelCustomersTableSearch.add(new JLabel("Filter: "));
 	
 		
 		gbc.gridx++;
@@ -321,18 +323,20 @@ public class CustomerGUI {
 		gbc.gridx++;
 		panelCustomersTableSearch.add(searchClearBtn, gbc);
 		
+		/*
+		TitledBorder border = new TitledBorder("Filter:");
+		border.setTitleJustification(TitledBorder.LEFT);
+		border.setTitlePosition(TitledBorder.TOP);
 		
+		panelCustomersTableSearch.setBorder(border);
+		*/
 		
 		return panelCustomersTableSearch;
 	}
 	
 	private JPanel customersForm() {
-		JButton addCustomerBtn = new JButton();
-		addCustomerBtn.setText("Add"); //Is this line needed?
-		addCustomerBtn.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-
+		Action addCustomerAction = new AbstractAction() {
+			public void actionPerformed(ActionEvent e) {
 				String firstName = textFieldCustomerFirstName.getText();
 				String lastName = textFieldCustomerLastName.getText();
 				String houseNumber = textFieldCustomerHouseNumber.getText();
@@ -375,23 +379,24 @@ public class CustomerGUI {
 					} else {
 						try {
 							c.addCustomerToDatabase();
-						} catch (SQLException e) {
-							if (e.getErrorCode() == SQLITE_CONSTRAINT_PRIMARYKEY) {
+						} catch (SQLException e1) {
+							if (e1.getErrorCode() == SQLITE_CONSTRAINT_PRIMARYKEY) {
 								showError("Duplicate entry - Customer already exists.");
+								e1.printStackTrace();
 							}
 						}
 						populateCustomersTable();
 						clearCustomerForm();
 					}
-				} catch (Exception e) {
+				} catch (Exception e2) {
 					showError("Error.");
-					e.printStackTrace();
+					e2.printStackTrace();
 				}
-
-
-				
 			}
-		});
+		};
+		JButton addCustomerBtn = new JButton();
+		addCustomerBtn.setText("Add"); //Is this line needed?
+		addCustomerBtn.addActionListener(addCustomerAction);
 		
 		JLabel lblCustomerFormTitle = new JLabel("Add new customer: ");
 		JLabel lblCustomerFirstName = new JLabel("First name: ");
@@ -403,30 +408,45 @@ public class CustomerGUI {
 		JLabel lblCustomerPhoneNumber = new JLabel("Phone number: ");
 
 		textFieldCustomerFirstName = new JTextField(20);
+		textFieldCustomerFirstName.addActionListener(addCustomerAction);
+		
 		textFieldCustomerLastName = new JTextField(20);
+		textFieldCustomerLastName.addActionListener(addCustomerAction);
+		
 		textFieldCustomerHouseNumber = new JTextField(5);
+		textFieldCustomerHouseNumber.addActionListener(addCustomerAction);
+		
 		textFieldCustomerAddress = new JTextField(20);
+		textFieldCustomerAddress.addActionListener(addCustomerAction);
+		
 		textFieldCustomerCity = new JTextField(20);
+		textFieldCustomerCity.addActionListener(addCustomerAction);
+		
 		textFieldCustomerPostcode = new JTextField(10);
+		textFieldCustomerPostcode.addActionListener(addCustomerAction);
+		
 		textFieldCustomerPhoneNumber = new JTextField(15);
+		textFieldCustomerPhoneNumber.addActionListener(addCustomerAction);
 		
 		JPanel panelCustomersForm = new JPanel(new GridBagLayout());
 
+		/*
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		gbc.insets = new Insets(15,0,0,0); //TOP, LEFT 
 		gbc.anchor = GridBagConstraints.LINE_END;
 		panelCustomersForm.add(lblCustomerFormTitle, gbc);
+		*/
 
 		gbc.gridx = 0;
 		gbc.gridy++;
-		gbc.insets = new Insets(40,10,0,0); //TOP, LEFT 
+		gbc.insets = new Insets(30,0,0,0); //TOP, LEFT 
 		gbc.anchor = GridBagConstraints.LINE_END;
 		panelCustomersForm.add(lblCustomerFirstName, gbc);
 
 		gbc.gridx = 0;
 		gbc.gridy++;
-		gbc.insets = new Insets(5,10,0,0); //TOP, LEFT 
+		gbc.insets = new Insets(5,0,0,0); //TOP, LEFT 
 		panelCustomersForm.add(lblCustomerLastName, gbc);
 
 		gbc.gridx = 0;
@@ -453,12 +473,12 @@ public class CustomerGUI {
 		gbc.gridx = 1;
 		gbc.gridy = 1;
 		gbc.anchor = GridBagConstraints.LINE_START;
-		gbc.insets = new Insets(40,10,0,0); //TOP, LEFT 
+		gbc.insets = new Insets(30,0,0,0); //TOP, LEFT 
 		panelCustomersForm.add(textFieldCustomerFirstName, gbc);
 
 		gbc.gridx = 1;
 		gbc.gridy++;
-		gbc.insets = new Insets(5,10,0,0); //TOP, LEFT 
+		gbc.insets = new Insets(5,0,0,0); //TOP, LEFT 
 		panelCustomersForm.add(textFieldCustomerLastName, gbc);
 
 		gbc.gridx = 1;
@@ -481,6 +501,12 @@ public class CustomerGUI {
 		gbc.gridy++;
 		panelCustomersForm.add(textFieldCustomerPhoneNumber, gbc);
 
+		gbc.gridx = 0;
+		gbc.gridy = 20;
+		gbc.weightx = 1.0;
+		gbc.weighty = 1.0;
+		panelCustomersForm.add(new JLabel(), gbc);
+		
 		// FORM BUTTON - ADD
 		gbc.gridx = 1;
 		gbc.gridy++;
@@ -495,13 +521,11 @@ public class CustomerGUI {
 		gbc.weighty = 1.0;
 		panelCustomersForm.add(new JLabel(), gbc);
 		
+		TitledBorder border = new TitledBorder("Add a New Customer:");
+		border.setTitleJustification(TitledBorder.LEFT);
+		border.setTitlePosition(TitledBorder.TOP);
+		panelCustomersForm.setBorder(border);
 		
-		JPanel panelCustomersFormBorder = new JPanel(new BorderLayout());
-		JPanel panelCustomersFormButtons = new JPanel(new FlowLayout());
-		
-		panelCustomersFormBorder.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-		panelCustomersFormBorder.add(panelCustomersForm, BorderLayout.CENTER);
-		panelCustomersFormBorder.add(panelCustomersFormButtons, BorderLayout.SOUTH);
 		
 		return panelCustomersForm;
 		
@@ -572,10 +596,17 @@ public class CustomerGUI {
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		
-		panelCustomersOrders.add(new JLabel("Customer orders:"), BorderLayout.NORTH);
-		panelCustomersOrders.setBorder(BorderFactory.createEmptyBorder(0,0,10,0));
+		//panelCustomersOrders.add(new JLabel("Customer orders:"), BorderLayout.NORTH);
+		//panelCustomersOrders.setBorder(BorderFactory.createEmptyBorder(0,0,10,0));
 		panelCustomersOrders.add(jsp, BorderLayout.CENTER);
 		panelCustomersOrders.add(customersOrdersButtons(), BorderLayout.SOUTH);
+		
+		
+		TitledBorder border = new TitledBorder("Customer orders:");
+		border.setTitleJustification(TitledBorder.LEFT);
+		border.setTitlePosition(TitledBorder.TOP);
+		
+		panelCustomersOrders.setBorder(border);
 		
 		
 		return panelCustomersOrders;

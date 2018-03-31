@@ -251,6 +251,7 @@ public class AddStockDialogGUI {
 		dialogAddStock.add(panelMain);
 		dialogAddStock.setSize(300, 180);
 		dialogAddStock.setModal(true); // Always on top
+		dialogAddStock.pack();
 		dialogAddStock.setLocationRelativeTo(frame); // Open dialog in middle of frame
 		dialogAddStock.setVisible(true);
 

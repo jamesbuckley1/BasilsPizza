@@ -11,5 +11,7 @@
 	<classpathentry kind="lib" path="lib/jfxrt.jar"/>
 	<classpathentry kind="lib" path="lib/json-simple-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/java-json.jar"/>
+	<classpathentry kind="lib" path="lib/thumbnailator-0.4.5.jar"/>
+	<classpathentry kind="lib" path="lib/javaxt-core.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

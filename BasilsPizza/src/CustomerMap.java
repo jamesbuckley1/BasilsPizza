@@ -2,7 +2,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
+import java.text.DecimalFormat;
 import java.util.Scanner;
 
 import javax.imageio.ImageIO;
@@ -11,7 +11,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import com.mysql.fabric.xmlrpc.base.Data;
+import net.coobird.thumbnailator.Thumbnails;
 
 
 
@@ -28,13 +28,12 @@ public class CustomerMap {
 	String distanceKm;
 	String distanceMiles;
 	String duration;
+	
 	Thread directionsThread;
 	Thread mapImageThread;
 
-	private boolean directionsDataDownloaded = false;
-
-
-
+	private boolean directionsDataDownloaded = false; //???
+	
 	public CustomerMap() {
 
 	}
@@ -128,20 +127,36 @@ public class CustomerMap {
 
 
 
-	//};
-
-	//directionsThread.start();
-
-	//return directionsDataDownloaded;
-
-
-
 
 	private String convertKmToMiles(String distanceKm) {
-		String processedDistanceKm = distanceKm.replace(" km", "");
-		Double miles = Double.parseDouble(processedDistanceKm) * 0.621;
-		processedDistanceKm = miles.toString() + " miles";
+		String processedDistanceKm = null;
+		try {
+			processedDistanceKm = distanceKm.replace(" km", "");
+			Double miles = Double.parseDouble(processedDistanceKm) * 0.621;
+
+
+			processedDistanceKm = formatDistanceStr(miles);
+		} catch (Exception e) {
+			System.out.println("Could not convert to miles.");
+		}
 		return processedDistanceKm;
+	}
+
+	private static String formatDistanceStr(Double distance) {
+		String pattern = "####.0";
+		DecimalFormat df = new DecimalFormat(pattern);
+		String formattedDistance = df.format(distance).toString();
+		return formattedDistance;
+	}
+
+	public boolean outsideDeliveryZone() {
+		if (Double.parseDouble(distanceMiles) > 10) {
+			return true;
+		} else {
+			return false;
+		}
+
+
 	}
 
 
@@ -160,7 +175,7 @@ public class CustomerMap {
 		 */
 		try {
 
-			String mapImgUrl = "https://maps.googleapis.com/maps/api/staticmap?size=300x300&path=enc:";
+			String mapImgUrl = "https://maps.googleapis.com/maps/api/staticmap?size=200x200&scale=2&path=enc:";
 			String formattedAddress = address.replace("+", " "); // Remove + character from address
 			String imageFileName = houseNumber + " " + formattedAddress + " " + city + ".jpg";
 			String key = "&key=AIzaSyBn2qYJcHoNCgNQZv1mcycnUo06sJDZPBs";
@@ -169,17 +184,31 @@ public class CustomerMap {
 			sb.append(mapImgUrl);
 			sb.append(polyline);
 			sb.append(key);
+			
+		
 
-			boolean fileExists = new File("Customer Maps/", imageFileName).exists();
+			boolean fileExists = new File("maps/", imageFileName).exists();
 			if (fileExists) {
 				System.out.println("Image file already exists.");
 			} else {
 				System.out.println("Downloading image...");
 				URL url = new URL(mapImgUrl + polyline + key);
 				BufferedImage img = ImageIO.read(url);
-				File file = new File("Customer Maps/" + imageFileName);
+				
+				/*
+				javaxt.io.Image image = new javaxt.io.Image(img);
+				image.setWidth(200);
+				image.setHeight(200);
+				image.setOutputQuality(1);
+				//image.getRenderedImage(); goes in ImageIO.write
+				*/
+				
+				File file = new File("maps/" + imageFileName);
 				ImageIO.write(img, "jpg", file);
-			}
+				
+
+
+			}	
 
 
 
@@ -188,7 +217,6 @@ public class CustomerMap {
 			System.out.println("STRINGBUILDER");
 			System.out.println(sb);
 
-			//latch.countDown();
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -200,7 +228,9 @@ public class CustomerMap {
 
 
 
-
+	public void resizeMapImage() {
+		//
+	}
 
 
 	public String getDistance() {
@@ -210,6 +240,7 @@ public class CustomerMap {
 	public String getDuration() {
 		return duration;
 	}
-
+	
+	
 
 }

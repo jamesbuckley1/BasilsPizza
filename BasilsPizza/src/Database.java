@@ -18,10 +18,10 @@ public class Database {
 	private final static String dropStockTableSql = "DROP TABLE stock;";
 
 	// CUSTOMERS SQL STRINGS
-	private final static String createCustomersTableSql = "CREATE TABLE IF NOT EXISTS customers (first_name TEXT NOT NULL, last_name TEXT NOT NULL, house_number TEXT NOT NULL, address TEXT NOT NULL, city TEXT NOT NULL, postcode TEXT NOT NULL, phone_number TEXT NOT NULL, PRIMARY KEY(first_name, last_name, postcode));";
+	private final static String createCustomersTableSql = "CREATE TABLE IF NOT EXISTS customers (first_name TEXT NOT NULL, last_name TEXT NOT NULL, house_number TEXT NOT NULL, address TEXT NOT NULL, city TEXT NOT NULL, postcode TEXT NOT NULL, phone_number TEXT NOT NULL, PRIMARY KEY(first_name, last_name, house_number, address, city));";
 	private final static String selectCustomersSql = "SELECT * FROM customers ORDER BY last_name ASC;";
 	private final static String insertCustomersSql = "INSERT INTO customers (first_name, last_name, house_number, address, city, postcode, phone_number) VALUES (?, ?, ?, ?, ?, ?, ?);";
-	private final static String deleteCustomersSql = "DELETE FROM customers WHERE (first_name = ? AND last_name = ? AND postcode = ?);";
+	private final static String deleteCustomersSql = "DELETE FROM customers WHERE (first_name = ? AND last_name = ? AND house_number = ? AND address = ? AND city = ?);";
 	private final static String dropCustomersTableSql = "DROP TABLE customers;";
 
 	private static void openDB() {
@@ -217,11 +217,19 @@ public class Database {
 		openDB();
 		PreparedStatement delete = conn.prepareStatement(deleteCustomersSql);
 		delete.setString(1, cellValues.get(0));
-		System.out.println("1. " + cellValues.get(0));
+		System.out.println(cellValues.get(0));
+		
 		delete.setString(2, cellValues.get(1));
-		System.out.println("2. " + cellValues.get(1));
-		delete.setString(3, cellValues.get(5));
-		System.out.println("3. " + cellValues.get(5));
+		System.out.println(cellValues.get(1));
+		
+		delete.setString(3, cellValues.get(2));
+		System.out.println(cellValues.get(2));
+		
+		delete.setString(4, cellValues.get(3));
+		System.out.println(cellValues.get(3));
+		
+		delete.setString(5, cellValues.get(4));
+		System.out.println(cellValues.get(4));
 		
 		
 		delete.executeUpdate();
