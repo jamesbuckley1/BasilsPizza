@@ -35,31 +35,23 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
 public class CustomerGUI {
-
+	private static JFrame frame;
+	private static final int SQLITE_CONSTRAINT_PRIMARYKEY = 19; // SQLite error code.
 	private static DefaultTableModel customersTableModel, customersOrdersTableModel;
 	private static JTable customersTable, customersOrdersTable;
-	private static GridBagConstraints gbc;
-
-	//SQLite error codes:
-	private static final int SQLITE_CONSTRAINT_PRIMARYKEY = 19;
-
-	private JFrame frame;
-
+	
 	private JPanel panelCustomersMain;
-
 	private JTextField textFieldCustomerFirstName, textFieldCustomerLastName,
 	textFieldCustomerHouseNumber, textFieldCustomerAddress,
 	textFieldCustomerCity, textFieldCustomerPostcode,
 	textFieldCustomerPhoneNumber, textFieldCustomersSearch;
-
-	private CustomerMap cm;
-
-
+	private GridBagConstraints gbc;
 
 	public CustomerGUI() {
 		initGUI();
 	}
 
+	// Set up main GUI components.
 	private void initGUI() {
 		// Check if running on event dispatch thread.
 		if (SwingUtilities.isEventDispatchThread()) { 
@@ -68,36 +60,25 @@ public class CustomerGUI {
 			System.err.println("CustomerGUI not running on EDT");
 		}
 
-
-
 		panelCustomersMain = new JPanel(new BorderLayout());
-		//frame = (JFrame)SwingUtilities.getRoot(panelCustomersMain); // ?
-
-		JPanel panelCustomersMainGrid = new JPanel(new GridLayout(1, 2));
-		JPanel panelCustomersFormOrdersGrid = new JPanel(new GridLayout(2, 1));
-
-
-
+		JPanel panelCustomersMainGrid = new JPanel(new GridLayout(1, 2)); // Splits window into 2 columns.
+		JPanel panelCustomersFormOrdersGrid = new JPanel(new GridLayout(2, 1)); // Panel for add new customer form and customer orders table.
 
 		gbc = new GridBagConstraints();
+		
 		panelCustomersMainGrid.add(customersTable());
-
-
-
-
-
-		//panelCustomersOrders.add(customersOrders(), BorderLayout.CENTER);
-		//panelCustomersOrders.add(new JLabel("TEST"), BorderLayout.SOUTH);
 
 		panelCustomersFormOrdersGrid.add(customersForm());
 		panelCustomersFormOrdersGrid.add(customersOrders()); 
 
 		panelCustomersMainGrid.add(panelCustomersFormOrdersGrid);
+		
 		panelCustomersMain.add(panelCustomersMainGrid);
-
 	}
 
+	// Set up customers table.
 	private JPanel customersTable() {
+		
 		JPanel panelCustomersTable = new JPanel(new BorderLayout());
 
 		customersTableModel = new DefaultTableModel(new String[] {
@@ -106,8 +87,6 @@ public class CustomerGUI {
 		}, 0);
 
 		customersTable = new JTable(customersTableModel ) {
-
-
 			public boolean isCellEditable(int row, int col) {
 				return false;
 			}
@@ -115,6 +94,7 @@ public class CustomerGUI {
 			public Component prepareRenderer(TableCellRenderer r, int row, int col) {
 				Component c = super.prepareRenderer(r, row, col);
 
+				// Rows alternate in colour for readability.
 				if (row % 2 == 0) {
 					c.setBackground(Color.WHITE);
 				} else {
@@ -133,13 +113,11 @@ public class CustomerGUI {
 		customersTable.setRowHeight(customersTable.getRowHeight() + 10);
 		customersTable.setAutoCreateRowSorter(true);
 		customersTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-
-
 		customersTable.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent event) {
 				if (event.getClickCount() == 2) {
-					//editCustomer(frame?)
+					// EDIT CUSTOMER - Do this is there's time.
 				}
 
 				try {
@@ -150,45 +128,38 @@ public class CustomerGUI {
 					//populateMap(houseNumber, address, city);
 				} catch (Exception e) {
 					/*
-        				JOptionPane.showMessageDialog(frame, "Please select an item to delete.",
+        				JOptionPane.showMessageDialog(frame, "Please select an item to edit.",
         						"Error", JOptionPane.ERROR_MESSAGE);
 					 */
 				}
 			}
 		});
 
-
-
 		populateCustomersTable();
-
-
-		// SET FOCUS TO FIRST ROW!!!
-
-		customersTable.setFillsViewportHeight(true);
-
 
 		JScrollPane jsp = new JScrollPane(customersTable,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		
+		customersTable.setFillsViewportHeight(true);
 
-
-		//panelCustomersTable.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 		panelCustomersTable.add(jsp, BorderLayout.CENTER);
 		panelCustomersTable.add(customersTableButtons(), BorderLayout.SOUTH);
 		panelCustomersTable.add(customersTableSearch(), BorderLayout.NORTH);
 
-
 		TitledBorder border = new TitledBorder("Search:");
 		border.setTitleJustification(TitledBorder.LEFT);
 		border.setTitlePosition(TitledBorder.TOP);
-
 		panelCustomersTable.setBorder(border);
-
 
 		return panelCustomersTable;
 	}
 
+	// Set up buttons for customers table.
 	private JPanel customersTableButtons() {
+		
+		JPanel panelCustomersTableButtons = new JPanel(new GridBagLayout());
+		
 		JButton customerInfoBtn = new JButton();
 		customerInfoBtn.setText("Info & Directions");
 		customerInfoBtn.addActionListener(new ActionListener() {
@@ -225,16 +196,14 @@ public class CustomerGUI {
 			}
 		});
 
-
-
-		JPanel panelCustomersTableButtons = new JPanel(new GridBagLayout());
-
+		// SPACING
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		gbc.weightx = 1.0;
 		gbc.weighty = 1.0;
 		panelCustomersTableButtons.add(new JLabel(), gbc);
 
+		// BUTTONS
 		gbc.gridx++;
 		gbc.weightx = 0;
 		gbc.weighty = 0;
@@ -247,13 +216,14 @@ public class CustomerGUI {
 		gbc.gridx++;
 		panelCustomersTableButtons.add(deleteCustomerBtn, gbc);
 
-
-
 		return panelCustomersTableButtons;
 	}
 
 	private JPanel customersTableSearch() {
-
+		
+		JPanel panelCustomersTableSearch = new JPanel(new GridBagLayout());
+		
+		// Clear Button - Is this needed?
 		JButton searchClearBtn = new JButton();
 		searchClearBtn.setText("Clear");
 		searchClearBtn.addActionListener(new ActionListener() {
@@ -262,16 +232,13 @@ public class CustomerGUI {
 				textFieldCustomersSearch.setText("");
 			}
 		});
-
-
-		JPanel panelCustomersTableSearch = new JPanel(new GridBagLayout());
-
-		textFieldCustomersSearch = new JTextField(20);
+		
 		TableRowSorter<TableModel> rowSorter = new TableRowSorter<>(customersTable.getModel());
 		customersTable.setRowSorter(rowSorter);
 
+		textFieldCustomersSearch = new JTextField(20);
 		textFieldCustomersSearch.getDocument().addDocumentListener(new DocumentListener() {
-
+			// Set up search filter function
 			@Override
 			public void insertUpdate(DocumentEvent e) {
 				String text = textFieldCustomersSearch.getText();
@@ -302,39 +269,33 @@ public class CustomerGUI {
 		});
 
 
-		//TRICK
+		// SPACING
 		gbc.gridx = 20;
 		gbc.gridy = 0;
 		gbc.weightx = 1.0;
 		gbc.weighty = 1.0;
 		panelCustomersTableSearch.add(new JLabel(), gbc);
 
+		// TEXT FIELD
 		gbc.gridx++;
-		gbc.gridy = 0;
 		gbc.weightx = 0;
 		gbc.weighty = 0;
 		gbc.anchor = GridBagConstraints.LINE_END;
-		//panelCustomersTableSearch.add(new JLabel("Filter: "));
-
-
-		gbc.gridx++;
 		panelCustomersTableSearch.add(textFieldCustomersSearch, gbc);
 
+		// BUTTON
 		gbc.gridx++;
 		panelCustomersTableSearch.add(searchClearBtn, gbc);
-
-		/*
-		TitledBorder border = new TitledBorder("Filter:");
-		border.setTitleJustification(TitledBorder.LEFT);
-		border.setTitlePosition(TitledBorder.TOP);
-
-		panelCustomersTableSearch.setBorder(border);
-		 */
 
 		return panelCustomersTableSearch;
 	}
 
+	// Set up customer form
 	private JPanel customersForm() {
+		
+		JPanel panelCustomersForm = new JPanel(new GridBagLayout());
+		
+		// Action listener to add a new customer. Used by "Add" button and also when user presses enter.
 		Action addCustomerAction = new AbstractAction() {
 			public void actionPerformed(ActionEvent e) {
 				String firstName = textFieldCustomerFirstName.getText();
@@ -345,16 +306,14 @@ public class CustomerGUI {
 				String postcode = textFieldCustomerPostcode.getText();
 				String phoneNumber = textFieldCustomerPhoneNumber.getText();
 
-
+				// Create the customer object using values from text fields.
 				Customer c = new Customer(firstName, lastName, houseNumber,
 						address, city, postcode, phoneNumber);
+				
+				// Create the customer map object using the customer object.
 				CustomerMap cm = new CustomerMap(c);
 
-
-
-
-				//c.setDistance(cm.getDistance)
-
+				// Customer form validation
 				try {
 					if (!c.validateFirstName()) {
 						showError("Invalid first name.");
@@ -371,13 +330,11 @@ public class CustomerGUI {
 					} else if (!c.validatePhoneNumber()) {
 						showError("Invalid phone number.");
 					} else {
-
-						
-
 						Thread t = new Thread() {
 							public void run() {
 								try {
 									c.addCustomerToDatabase();
+									// Do this on EDT.
 									SwingUtilities.invokeLater(new Runnable() {
 										public void run() {
 											populateCustomersTable();
@@ -387,9 +344,7 @@ public class CustomerGUI {
 									
 									cm.getDirectionsData();
 									cm.getStaticMapImage();
-
 									
-
 								} catch (SQLException e) {
 									if (e.getErrorCode() == SQLITE_CONSTRAINT_PRIMARYKEY) {
 										showError("Duplicate entry - Customer already exists.");
@@ -401,8 +356,6 @@ public class CustomerGUI {
 							}
 						};
 						t.start();
-
-
 					}
 				} catch (Exception e2) {
 					showError("Error.");
@@ -410,11 +363,10 @@ public class CustomerGUI {
 				}
 			}
 		};
-		JButton addCustomerBtn = new JButton();
-		addCustomerBtn.setText("Add"); //Is this line needed?
+		
+		JButton addCustomerBtn = new JButton("Add");
 		addCustomerBtn.addActionListener(addCustomerAction);
 
-		JLabel lblCustomerFormTitle = new JLabel("Add new customer: ");
 		JLabel lblCustomerFirstName = new JLabel("First name: ");
 		JLabel lblCustomerLastName = new JLabel("Last name: ");
 		JLabel lblCustomerHouseNumber = new JLabel("House number: ");
@@ -444,25 +396,16 @@ public class CustomerGUI {
 		textFieldCustomerPhoneNumber = new JTextField(15);
 		textFieldCustomerPhoneNumber.addActionListener(addCustomerAction);
 
-		JPanel panelCustomersForm = new JPanel(new GridBagLayout());
-
-		/*
-		gbc.gridx = 0;
-		gbc.gridy = 0;
-		gbc.insets = new Insets(15,0,0,0); //TOP, LEFT 
-		gbc.anchor = GridBagConstraints.LINE_END;
-		panelCustomersForm.add(lblCustomerFormTitle, gbc);
-		 */
-
+		// LABELS
 		gbc.gridx = 0;
 		gbc.gridy++;
-		gbc.insets = new Insets(30,0,0,0); //TOP, LEFT 
+		gbc.insets = new Insets(30,0,0,0);
 		gbc.anchor = GridBagConstraints.LINE_END;
 		panelCustomersForm.add(lblCustomerFirstName, gbc);
 
 		gbc.gridx = 0;
 		gbc.gridy++;
-		gbc.insets = new Insets(5,0,0,0); //TOP, LEFT 
+		gbc.insets = new Insets(5,0,0,0);
 		panelCustomersForm.add(lblCustomerLastName, gbc);
 
 		gbc.gridx = 0;
@@ -489,12 +432,12 @@ public class CustomerGUI {
 		gbc.gridx = 1;
 		gbc.gridy = 1;
 		gbc.anchor = GridBagConstraints.LINE_START;
-		gbc.insets = new Insets(30,0,0,0); //TOP, LEFT 
+		gbc.insets = new Insets(30,0,0,0); 
 		panelCustomersForm.add(textFieldCustomerFirstName, gbc);
 
 		gbc.gridx = 1;
 		gbc.gridy++;
-		gbc.insets = new Insets(5,0,0,0); //TOP, LEFT 
+		gbc.insets = new Insets(5,0,0,0);
 		panelCustomersForm.add(textFieldCustomerLastName, gbc);
 
 		gbc.gridx = 1;
@@ -517,6 +460,7 @@ public class CustomerGUI {
 		gbc.gridy++;
 		panelCustomersForm.add(textFieldCustomerPhoneNumber, gbc);
 
+		// SPACING
 		gbc.gridx = 0;
 		gbc.gridy = 20;
 		gbc.weightx = 1.0;
@@ -530,24 +474,18 @@ public class CustomerGUI {
 		gbc.anchor = GridBagConstraints.LINE_END;
 		panelCustomersForm.add(addCustomerBtn, gbc);
 
-		//TRICK
-		gbc.gridx = 0;
-		gbc.gridy = 20;
-		gbc.weightx = 1.0;
-		gbc.weighty = 1.0;
-		panelCustomersForm.add(new JLabel(), gbc);
-
 		TitledBorder border = new TitledBorder("Add a New Customer:");
 		border.setTitleJustification(TitledBorder.LEFT);
 		border.setTitlePosition(TitledBorder.TOP);
 		panelCustomersForm.setBorder(border);
 
-
 		return panelCustomersForm;
-
+		
 	}
 
+	// Set up customer orders table.
 	private JPanel customersOrders() {
+		
 		JPanel panelCustomersOrders = new JPanel(new BorderLayout());
 
 		customersOrdersTableModel = new DefaultTableModel(new String[] {
@@ -563,6 +501,7 @@ public class CustomerGUI {
 			public Component prepareRenderer(TableCellRenderer r, int row, int col) {
 				Component c = super.prepareRenderer(r, row, col);
 
+				// Alternate row colours for readability.
 				if (row % 2 == 0) {
 					c.setBackground(Color.WHITE);
 				} else {
@@ -582,6 +521,7 @@ public class CustomerGUI {
 		customersOrdersTable.setAutoCreateRowSorter(true);
 		customersOrdersTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
+		// THIS PROBABLY WON'T BE NEEDED.
 		customersOrdersTable.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent event) {
@@ -606,17 +546,14 @@ public class CustomerGUI {
 
 		populateCustomersOrdersTable();
 
-		customersOrdersTable.setFillsViewportHeight(true);
-
 		JScrollPane jsp = new JScrollPane(customersOrdersTable,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
-		//panelCustomersOrders.add(new JLabel("Customer orders:"), BorderLayout.NORTH);
-		//panelCustomersOrders.setBorder(BorderFactory.createEmptyBorder(0,0,10,0));
+		customersOrdersTable.setFillsViewportHeight(true);
+
 		panelCustomersOrders.add(jsp, BorderLayout.CENTER);
 		panelCustomersOrders.add(customersOrdersButtons(), BorderLayout.SOUTH);
-
 
 		TitledBorder border = new TitledBorder("Customer orders:");
 		border.setTitleJustification(TitledBorder.LEFT);
@@ -624,13 +561,14 @@ public class CustomerGUI {
 
 		panelCustomersOrders.setBorder(border);
 
-
 		return panelCustomersOrders;
-
 	}
 
 	private JPanel customersOrdersButtons() {
+		
+		JPanel panelCustomersOrdersButtons = new JPanel(new GridBagLayout());
 
+		// THIS MIGHT NOT BE NEEDED
 		JButton clearOrdersBtn = new JButton();
 		clearOrdersBtn.setText("Clear");
 		clearOrdersBtn.addActionListener(new ActionListener() {
@@ -640,19 +578,18 @@ public class CustomerGUI {
 			}
 		});
 
-		JPanel panelCustomersOrdersButtons = new JPanel(new GridBagLayout());
-
+		// SPACING
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		gbc.weightx = 1.0;
 		gbc.weighty = 1.0;
 		panelCustomersOrdersButtons.add(new JLabel(), gbc);
 
+		// BUTTON
 		gbc.gridx++;
 		gbc.weightx = 0;
 		gbc.weighty = 0;
 		panelCustomersOrdersButtons.add(clearOrdersBtn);
-
 
 		return panelCustomersOrdersButtons;
 	}
@@ -692,7 +629,8 @@ public class CustomerGUI {
 		 */
 	}
 
-	private void showError(String error) {
+	// Display error message.
+	private static void showError(String error) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				JOptionPane.showMessageDialog(frame, error,
@@ -702,6 +640,7 @@ public class CustomerGUI {
 
 	}
 
+	// Add items to customers table.
 	private static void populateCustomersTable() {
 		int rows = customersTableModel.getRowCount();
 		for (int i = rows - 1; i >= 0; i --) {
@@ -725,7 +664,6 @@ public class CustomerGUI {
 					postcode, phoneNumber
 			};
 
-
 			customersTableModel.addRow(data);
 			customersTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			customersTable.getSelectionModel().setSelectionInterval(0, 0);
@@ -733,44 +671,10 @@ public class CustomerGUI {
 			customersTable.requestFocusInWindow();
 		}
 	}
-	/*
-	private void populateMap(String houseNumber, String address, String city) {
-
-		CustomerMap cm = new CustomerMap(houseNumber, address, city);
-		panelCustomersMap.removeAll();
-
-
-		//panelCustomersMap.add(cm.getImage(), BorderLayout.CENTER);
-		panelCustomersMap.add(panelCustomersMapButtons, BorderLayout.SOUTH);
-
-		panelCustomersMap.validate();
-		panelCustomersMap.repaint();
-
-
-	}
-
-	private void expandMap(String url) {
-		JEditorPane jep = new JEditorPane();
-		jep.setEditable(false);
-
-		try {
-			jep.setPage(url);
-		} catch (Exception e) {
-			jep.setContentType("text/html");
-			jep.setText("<html>Could not load page.</html>");
-		}
-
-		JScrollPane jsp = new JScrollPane(jep);
-		JFrame frame = new JFrame("Google Maps");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.add(jsp);
-		frame.setPreferredSize(new Dimension(800,600));
-		frame.pack();
-		frame.setVisible(true);
-	}
-
-	 */
+	
+	// Get all values from customer form text fields.
 	private ArrayList<String> getCustomerTextFieldValues() {
+		
 		ArrayList<String> customerTextFieldsArray = new ArrayList<String>();
 
 		customerTextFieldsArray.add(textFieldCustomerFirstName.getText());
@@ -784,7 +688,9 @@ public class CustomerGUI {
 		return customerTextFieldsArray;
 	}
 
-	private ArrayList<String> getSelectedCellValues() { // Col: 0 = First name, 1 = Last name, 2 = House number, 3 = Address, 4 = City, 5 = Postcode, 6 = Phone number.
+	// get values from selected row in customers table.
+	private static ArrayList<String> getSelectedCellValues() { // Col: 0 = First name, 1 = Last name, 2 = House number, 3 = Address, 4 = City, 5 = Postcode, 6 = Phone number.
+		
 		ArrayList<String> selectedCellValuesArray = new ArrayList<String>();
 		int row = customersTable.getSelectedRow();
 		String firstName = customersTable.getModel().getValueAt(row, 0).toString();

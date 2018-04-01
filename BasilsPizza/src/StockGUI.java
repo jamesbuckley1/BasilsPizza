@@ -22,19 +22,19 @@ import javax.swing.table.TableCellRenderer;
 public class StockGUI {
 
 	private static JFrame frame;
+	
 	private JPanel panelStockMain;
 	private JTable stockTable;
 	private JPanel panelStockTable;
 	private DefaultTableModel stockTableModel;
 	
-	
-
 	public StockGUI() {
 		// Get frame of panelStockTable
 		frame = (JFrame)SwingUtilities.getRoot(panelStockTable);
 		initGUI();
 	}
 
+	// Set up main GUI components.
 	private void initGUI(){
 		
 		// Check if running on event dispatch thread.
@@ -45,8 +45,8 @@ public class StockGUI {
 		}
 		
 		panelStockMain = new JPanel();
-		JPanel panelStockButtons = new JPanel();
-		panelStockTable = new JPanel(new BorderLayout());
+		JPanel panelStockButtons = new JPanel(); // Panel for buttons.
+		panelStockTable = new JPanel(new BorderLayout()); // Panel for table.
 
 		panelStockMain.setLayout(new BorderLayout());
 
@@ -58,7 +58,6 @@ public class StockGUI {
 			public boolean isCellEditable(int row, int columns) {
 				return false;
 			}
-
 
 			// Makes every other row a different colour for readability
 			public Component prepareRenderer(TableCellRenderer r, int row, int columns) {
@@ -104,8 +103,6 @@ public class StockGUI {
 		addBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
-				
-				
 				AddStockDialogGUI a = new AddStockDialogGUI(frame);
 				populateStockTable();
 			}
@@ -116,15 +113,12 @@ public class StockGUI {
 		editBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
-				
 					try {
 					AddStockDialogGUI a = new AddStockDialogGUI(frame, getTextFieldValues());
 					} catch (Exception e) {
 						JOptionPane.showMessageDialog(frame, "Please select an item to edit.",
 								"Error", JOptionPane.ERROR_MESSAGE);
 					}
-				
-				
 				populateStockTable();
 			}
 		});
@@ -160,13 +154,11 @@ public class StockGUI {
 
 		// Add stock table panel to main panel
 		panelStockMain.add(panelStockTable, BorderLayout.CENTER);
-
 		
 	}
 
-	/**
-	 * Clears stockTableModel then retrieves fresh data
-	 */
+	// Clears stockTableModel then retrieves fresh data
+	 
 	private void populateStockTable() {
 		int rows = stockTableModel.getRowCount();
 		for (int i = rows - 1; i >= 0; i --) {
@@ -204,7 +196,6 @@ public class StockGUI {
 	}
 
 	public JPanel getStockPanel() {
-
 		return panelStockMain;
 	}
 

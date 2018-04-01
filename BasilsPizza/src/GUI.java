@@ -39,7 +39,7 @@ public class GUI {
     	        tabbedPane("Tables", tablesPanel());
     	        tabbedPane("Stock", new StockGUI().getStockPanel());
     	        tabbedPane("Customers", new CustomerGUI().getCustomerPanel());
-    	        tabbedPane("Staff", staffPanel());
+    	        tabbedPane("Staff", new StaffGUI().getStaffPanel());
     	        createAndShowGUI();
     			
     		
