@@ -145,7 +145,7 @@ public class CustomerInfoDialogGUI {
 		
 		JPanel panelMapBorder = new JPanel(new BorderLayout()); // Panel just for border around map
 		panelMapBorder.add(labelMap, BorderLayout.CENTER);
-		panelMapBorder.setBorder(BorderFactory.createEmptyBorder(23,23,23,23));
+		panelMapBorder.setBorder(BorderFactory.createEmptyBorder(29,29,29,25));
 		
 		panelMap.add(panelMapBorder, BorderLayout.CENTER);
 		panelMap.add(labelMapStatus, BorderLayout.SOUTH);

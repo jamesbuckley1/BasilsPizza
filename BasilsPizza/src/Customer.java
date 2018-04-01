@@ -71,7 +71,7 @@ public class Customer {
 	}
 	
 	public boolean validatePostcode() {
-		String pattern = "\\w{7,8}";
+		String pattern = "\\w{6,8}";
 		if (!postcode.matches(pattern)) {
 			return false;
 		}
