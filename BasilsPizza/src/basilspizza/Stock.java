@@ -1,3 +1,4 @@
+package basilspizza;
 import java.text.DecimalFormat;
 
 public class Stock {

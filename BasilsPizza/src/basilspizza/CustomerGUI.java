@@ -1,3 +1,4 @@
+package basilspizza;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -147,7 +148,7 @@ public class CustomerGUI {
 		panelCustomersTable.add(customersTableButtons(), BorderLayout.SOUTH);
 		panelCustomersTable.add(customersTableSearch(), BorderLayout.NORTH);
 
-		TitledBorder border = new TitledBorder("Search:");
+		TitledBorder border = new TitledBorder("Search Customers:");
 		border.setTitleJustification(TitledBorder.LEFT);
 		border.setTitlePosition(TitledBorder.TOP);
 		panelCustomersTable.setBorder(border);
@@ -223,7 +224,7 @@ public class CustomerGUI {
 		
 		JPanel panelCustomersTableSearch = new JPanel(new GridBagLayout());
 		
-		// Clear Button - Is this needed?
+		// Clear Button
 		JButton searchClearBtn = new JButton();
 		searchClearBtn.setText("Clear");
 		searchClearBtn.addActionListener(new ActionListener() {
