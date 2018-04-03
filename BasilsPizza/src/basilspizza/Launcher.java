@@ -9,7 +9,7 @@ public class Launcher {
 		
 		Database.initialise();
 		
-		//Database.dropStockTable();
+		//Database.dropStockTable);
 		//Database.dropCustomersTable();
 		//Database.insertCustomer("James", "Buckley", "88", "Longdown Lane South", "Epsom", "KT17 4JR", "07783021170");
 		

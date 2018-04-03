@@ -9,6 +9,7 @@ public class Database {
 
 	private static ArrayList<Stock> stockArray;
 	private static ArrayList<Customer> customersArray;
+	private static ArrayList<Staff> staffArray;
 	
 	// STOCK SQL STRINGS
 	private final static String createStockTableSql = "CREATE TABLE IF NOT EXISTS stock (item TEXT PRIMARY KEY NOT NULL, price DOUBLE NOT NULL, quantity INT NOT NULL);";
@@ -24,7 +25,14 @@ public class Database {
 	private final static String insertCustomersSql = "INSERT INTO customers (first_name, last_name, house_number, address, city, postcode, phone_number) VALUES (?, ?, ?, ?, ?, ?, ?);";
 	private final static String deleteCustomersSql = "DELETE FROM customers WHERE (first_name = ? AND last_name = ? AND house_number = ? AND address = ? AND city = ?);";
 	private final static String dropCustomersTableSql = "DROP TABLE customers;";
-
+	
+	// STAFF SQL STRINGS
+	private final static String createStaffTableSql = "CREATE TABLE IF NOT EXISTS staff (employee_number TEXT PRIMARY KEY NOT NULL, first_name TEXT NOT NULL, last_name TEXT NOT NULL, job_title TEXT NOT NULL);";
+	private final static String selectStaffSql = "SELECT * FROM staff ORDER BY last_name ASC;";
+	private final static String insertStaffSql = "INSERT INTO staff (employee_number, first_name, last_name, job_title) VALUES (?, ?, ?, ?);";
+	private final static String deleteStaffSql = "DELETE FROM staff WHERE (employee_number = ?);";
+	private final static String dropStaffTableSql = "DROP TABLE staff;";
+	
 	private static void openDB() {
 		try {
 			Class.forName("org.sqlite.JDBC");
@@ -54,6 +62,9 @@ public class Database {
 
 			stmt = conn.prepareStatement(createCustomersTableSql);
 			stmt.executeUpdate();
+			
+			stmt = conn.prepareStatement(createStaffTableSql);
+			stmt.executeUpdate();
 
 			stmt.close();
 			closeDB();
@@ -65,6 +76,8 @@ public class Database {
 		//selectCustomers();
 		System.out.println("SQLite database initialisation complete.");
 	}
+	
+	/////////// STOCK ///////////
 
 	public static void selectStock() {
 		try {
@@ -242,14 +255,105 @@ public class Database {
 	}
 
 
-
-
-
 	public static ArrayList<Customer> getCustomersArray() {
 		return customersArray;
 	}
+	
+	//////////// STAFF /////////////
+	
+	public static void selectStaff() {
+		try {
+			staffArray = new ArrayList<Staff>();
+			openDB();
 
-	// DEBUG
+			PreparedStatement selectStaff = conn.prepareStatement(selectStaffSql);
+			ResultSet rs = selectStaff.executeQuery();
+
+			while (rs.next()) {
+				String employeeNumber = rs.getString("employee_number");
+				String firstName = rs.getString("first_name");
+				String lastName = rs.getString("last_name");
+				String jobTitle = rs.getString("job_title");
+
+				Staff s = new Staff(employeeNumber, firstName, lastName, jobTitle);
+				staffArray.add(s);
+			}
+
+			rs.close();
+			selectStaff.close();
+			closeDB();
+
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		}
+		System.out.println("SELECT stock successful.");
+	}
+	
+	public static void insertStaff(String employeeNumber, String firstName, String lastName, String jobTitle) throws SQLException {
+		openDB();
+		//System.out.println("Inserting staff: " + item + " , " + price + " , " + quantity);
+
+		PreparedStatement insert = conn.prepareStatement(insertStaffSql);
+
+		insert.setString(1, employeeNumber);
+		insert.setString(2, firstName);
+		insert.setString(3, lastName);
+		insert.setString(4, jobTitle);
+
+		insert.executeUpdate();
+		insert.close();
+
+		closeDB();
+
+		System.out.println("INSERT stock successful.");
+	}
+	
+	public static void updateStaff() {
+		try {
+			openDB();
+
+			//PreparedStatement update = conn.prepareStatement(updateStaffSql);
+
+			//update.setString(1, employeeNumber);
+			//update.setDouble(2, newPrice);
+			//update.setInt(3, newQuantity);
+			//update.setString(4, currentItem);
+			//update.executeUpdate();
+
+			//update.close();
+			conn.commit();
+			conn.close();
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			System.exit(0);
+		}
+		//System.out.println("UPDATED " + currentItem + " successfully.");
+	}
+	
+	public static void deleteStaff(String employeeNumber) {
+		try {
+			openDB();
+
+			PreparedStatement delete = conn.prepareStatement(deleteStaffSql);
+			delete.setString(1, employeeNumber);
+			delete.executeUpdate();
+			delete.close();
+
+			closeDB();
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			System.exit(0);
+		}
+		System.out.println("Delete successful.");
+	}
+
+	public static ArrayList<Staff> getStaffArray() {
+		return staffArray;
+	}
+	
+	/////////////////////// DEBUG
 	public static void dropStockTable() { 
 		try {
 			openDB();
@@ -280,6 +384,22 @@ public class Database {
 			System.exit(0);
 		}
 		System.out.println("CUSTOMERS table dropped successfully");
+	}
+	
+	public static void dropStaffTable() {
+		try {
+			openDB();
+
+			PreparedStatement dropCustomersTable = conn.prepareStatement(dropStaffTableSql);
+			dropCustomersTable.executeUpdate();
+			dropCustomersTable.close();
+
+			closeDB();
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			System.exit(0);
+		}
+		System.out.println("STAFF table dropped successfully");
 	}
 
 }

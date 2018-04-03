@@ -11,6 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -19,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
@@ -32,8 +34,9 @@ public class StaffGUI {
 	private JFrame frame;
 	private JPanel panelStaffMain;
 	private DefaultTableModel staffClockedInTableModel, allStaffTableModel;
-	private JTable staffClockedInTable, allStaffTable;
-	
+	private JTable staffClockedInTable;
+	private static JTable allStaffTable;
+
 	private JTextField textFieldStaffSearch;
 
 	public StaffGUI() {
@@ -42,45 +45,45 @@ public class StaffGUI {
 
 	private void initGUI() {
 		//frame = 
-		
+
 		panelStaffMain = new JPanel(new BorderLayout());
-		
+
 		JPanel panelMainGrid = new JPanel(new GridLayout(2, 1));
 		JPanel panelTopRow = new JPanel(new BorderLayout());
 		JPanel panelBottomRow = new JPanel(new BorderLayout());
-		
+
 		panelTopRow.add(staffClockedInTable(), BorderLayout.CENTER);
 		panelBottomRow.add(allStaffTable());
-		
+
 		panelMainGrid.add(panelTopRow);
 		panelMainGrid.add(panelBottomRow);
-		
+
 		panelStaffMain.add(panelMainGrid);
 
 		/*
 		JPanel panelMainGrid = new JPanel(new GridLayout(1, 2));
 		JPanel panelLeftGrid = new JPanel(new GridLayout(2, 1));
 		JPanel panelRightGrid = new JPanel(new GridLayout(2, 1));
-		
+
 		panelLeftGrid.add(staffClockedInTable());
 		panelLeftGrid.add(allStaffTable());
-		
+
 		panelRightGrid.add(staffClockInOutForm());
 		panelRightGrid.add(staffManagementForm());
-		
+
 		panelMainGrid.add(panelLeftGrid);
 		panelMainGrid.add(panelRightGrid);
 
 
 		panelStaffMain.add(panelMainGrid);
-		*/
-		
+		 */
+
 
 	}
 
 	private JPanel staffClockedInTable() {
 		JPanel panelStaffClockedInTable = new JPanel(new GridBagLayout());
-		
+
 
 		staffClockedInTableModel = new DefaultTableModel(new String[] {
 				"EMPLOYEE NO", "FIRST NAME", "LAST NAME", "JOB TITLE",
@@ -113,7 +116,7 @@ public class StaffGUI {
 		staffClockedInTable.setFont(new Font("", 0, 14));
 		//staffClockedInTable.setRowHeight(staffClockedInTable.getRowHeight() + 10);
 		staffClockedInTable.setAutoCreateRowSorter(true);
-		staffClockedInTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		//staffClockedInTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		staffClockedInTable.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent event) {
@@ -141,21 +144,21 @@ public class StaffGUI {
 		JScrollPane jsp = new JScrollPane(staffClockedInTable,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		
+
 		JPanel panelJsp = new JPanel(new BorderLayout());
-		
+
 		TitledBorder border = new TitledBorder("Search Currently Clocked-In Staff:");
 		border.setTitleJustification(TitledBorder.LEFT);
 		border.setTitlePosition(TitledBorder.TOP);
 		panelJsp.setBorder(border);
-		
+
 		panelJsp.add(jsp, BorderLayout.CENTER);
 		panelJsp.add(staffClockedInTableSearch(), BorderLayout.NORTH);
 
 		staffClockedInTable.setFillsViewportHeight(true);
-		
+
 		GridBagConstraints gbc = new GridBagConstraints();
-		
+
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		gbc.fill = GridBagConstraints.BOTH;
@@ -164,11 +167,11 @@ public class StaffGUI {
 		//gbc.gridwidth = 1;
 		gbc.gridheight = 1;
 		panelStaffClockedInTable.add(panelJsp, gbc);
-	
-		
+
+
 		//JPanel formPanel = new JPanel(new BorderLayout());
 		//formPanel.add(staffClockInOutForm(), BorderLayout.CENTER);
-		
+
 		gbc.gridx = 1;
 		gbc.gridy = 0;
 		gbc.weightx = 0.1;
@@ -178,22 +181,22 @@ public class StaffGUI {
 		//gbc.gridheight = 0;
 		//gbc.anchor = GridBagConstraints.LINE_START;
 		panelStaffClockedInTable.add(staffClockInOutForm(), gbc);
-		
+
 		gbc.gridx = 1;
 		gbc.gridy = 1;
 		gbc.weightx = 0;
 		gbc.weighty = 0;
 		//gbc.anchor = GridBagConstraints.LINE_START;
 		//panelStaffClockedInTable.add(new JLabel("test1"), gbc);
-		
-		
-		
-		
-		
-		//panelStaffClockedInTable.add(staffClockedInTableButtons(), BorderLayout.SOUTH);
-		
 
-		
+
+
+
+
+		//panelStaffClockedInTable.add(staffClockedInTableButtons(), BorderLayout.SOUTH);
+
+
+
 
 		return panelStaffClockedInTable;
 	}
@@ -205,7 +208,7 @@ public class StaffGUI {
 	}
 
 	private JPanel staffClockedInTableSearch() {
-		
+
 		JPanel panelStaffClockedInTableSearch = new JPanel(new GridBagLayout());
 
 		GridBagConstraints gbc = new GridBagConstraints();
@@ -337,7 +340,7 @@ public class StaffGUI {
 			}
 		});
 
-		populateStaffClockedOutTable();
+		populateAllStaffTable();
 
 		JScrollPane jsp = new JScrollPane(allStaffTable,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
@@ -346,7 +349,6 @@ public class StaffGUI {
 		allStaffTable.setFillsViewportHeight(true);
 
 		panelAllStaffTable.add(jsp, BorderLayout.CENTER);
-		panelAllStaffTable.add(allStaffTableButtons(), BorderLayout.SOUTH);
 		panelAllStaffTable.add(allStaffTableSearch(), BorderLayout.NORTH);
 
 		TitledBorder border = new TitledBorder("Search All Staff:");
@@ -357,19 +359,42 @@ public class StaffGUI {
 		return panelAllStaffTable;
 	}
 
-	private JPanel allStaffTableButtons() {
-		JPanel allStaffTableButtons = new JPanel(new GridBagLayout());
-
-		return allStaffTableButtons;
-	}
-
 	private JPanel allStaffTableSearch() {
 		JPanel allStaffTableSearch = new JPanel(new GridBagLayout());
 
 		GridBagConstraints gbc = new GridBagConstraints();
 
-		JButton searchClearBtn = new JButton();
-		searchClearBtn.setText("Clear");
+		JButton addStaffBtn = new JButton("Add");
+		addStaffBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String addStaffFlag = "ADD";
+				new ManagerPasswordDialog(frame, addStaffFlag);
+				//new AddStaffDialogGUI(frame);
+				populateAllStaffTable();
+			}
+		});
+
+		JButton editStaffBtn = new JButton("Edit");
+		editStaffBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+			}
+		});
+
+		JButton deleteStaffBtn = new JButton("Delete");
+		deleteStaffBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				new ManagerPasswordDialog(frame, getSelectedCellValues());
+				populateAllStaffTable();
+			}
+		});
+
+
+
+		JButton searchClearBtn = new JButton("Clear");
 		searchClearBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
@@ -420,6 +445,24 @@ public class StaffGUI {
 		gbc.weighty = 1.0;
 		allStaffTableSearch.add(new JLabel(), gbc);
 
+
+
+
+
+
+
+		gbc.gridx++;
+		gbc.weightx = 0;
+		gbc.weighty = 0;
+		gbc.anchor = GridBagConstraints.LINE_END;
+		allStaffTableSearch.add(addStaffBtn, gbc);
+
+		gbc.gridx++;
+		allStaffTableSearch.add(editStaffBtn, gbc);
+
+		gbc.gridx++;
+		allStaffTableSearch.add(deleteStaffBtn, gbc);
+
 		// TEXT FIELD
 		gbc.gridx++;
 		gbc.weightx = 0;
@@ -434,28 +477,52 @@ public class StaffGUI {
 		return allStaffTableSearch;
 	}
 
-	private void populateStaffClockedOutTable() {
+	private void populateAllStaffTable() {
+		int rows = allStaffTableModel.getRowCount();
+		for (int i = rows - 1; i >= 0; i --) {
+			allStaffTableModel.removeRow(i);
+		}
 
+		Database.selectStaff();
+
+		for (int i = 0; i < Database.getStaffArray().size(); i++) {
+
+		
+			
+			String employeeNumber = Database.getStaffArray().get(i).getEmployeeNumber();
+			String firstName = Database.getStaffArray().get(i).getFirstName();
+			String lastName = Database.getStaffArray().get(i).getLastName();
+			String jobTitle = Database.getStaffArray().get(i).getJobTitle();
+
+
+			Object[] data = {employeeNumber, firstName, lastName, jobTitle};
+
+			allStaffTableModel.addRow(data);
+			allStaffTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			allStaffTable.getSelectionModel().setSelectionInterval(0, 0);
+			allStaffTable.setColumnSelectionInterval(0, 0);
+			allStaffTable.requestFocusInWindow();
+		}
 	}
 
 	private JPanel staffClockInOutForm() {
 		JPanel panelStaffClockInOutFormMain = new JPanel(new BorderLayout());
 		JPanel panelStaffClockInOutForm = new JPanel(new GridBagLayout());
-		
+
 		GridBagConstraints gbc = new GridBagConstraints();
-		
+
 		JTextField textFieldEmployeeNumber = new JTextField(10);
 		textFieldEmployeeNumber.setPreferredSize(new Dimension(100, 40));
-		
+
 		//Font currentFont = textFieldEmployeeNumber.getFon;
 		Font font = new Font("Arial", Font.PLAIN, 16);
 		textFieldEmployeeNumber.setFont(font);
 		//textFieldEmployeeNumber.setText("12345");
 		//textFieldEmployeeNumber.setMinimumSize(textFieldEmployeeNumber.getPreferredSize());
-		
+
 		JButton clockInBtn = new JButton("Clock In");
 		clockInBtn.setPreferredSize(new Dimension(100, 40));
-		
+
 		JButton clockOutBtn = new JButton("Clock Out");
 		clockOutBtn.setPreferredSize(new Dimension(100, 40));
 
@@ -465,10 +532,10 @@ public class StaffGUI {
 		gbc.weighty = 0;
 		//gbc.anchor = GridBagConstraints.LINE_END;
 		panelStaffClockInOutForm.add(new JLabel("Employee Number: "), gbc);
-		
+
 		gbc.gridy = 1;
 		panelStaffClockInOutForm.add(new JLabel(" "), gbc);
-		
+
 		gbc.gridx = 0;
 		gbc.gridy = 2;
 		gbc.weightx = 0;
@@ -482,71 +549,87 @@ public class StaffGUI {
 		//gbc.anchor = GridBagConstraints.LINE_START;
 		//gbc.fill = GridBagConstraints.HORIZONTAL;
 		panelStaffClockInOutForm.add(textFieldEmployeeNumber, gbc);
-	
+
 		gbc.gridy = 1;
 		panelStaffClockInOutForm.add(new JLabel(" "), gbc);
-		
+
 		gbc.gridx = 1;
 		gbc.gridy = 2;
 		gbc.weightx = 0;
 		gbc.weighty = 0;
 		panelStaffClockInOutForm.add(clockOutBtn, gbc);
-		
-		
-		
-		
+
+
+
+
 		/*
 		gbc.gridx = 0;
 		gbc.gridy = 20;
 		gbc.weightx = 1.0;
 		gbc.weighty = 1.0;
 		panelStaffClockInOutForm.add(new JLabel(), gbc);
-		*/
-		
-		
-		
+		 */
+
+
+
 		gbc.gridx = 1;
 		gbc.gridy = 0;
 		gbc.weightx = 0;
 		gbc.weighty = 0;
 		//gbc.anchor = GridBagConstraints.LINE_START;
 		//panelStaffClockInOutForm.add(new JLabel("Employee number: "), gbc);
-		
+
 		/*
 		gbc.gridx++;
 		//gbc.weightx = 1.0;
 		gbc.fill = GridBagConstraints.BOTH;
 		//gbc.anchor = GridBagConstraints.LINE_START;
 		panelStaffClockInOutForm.add(textFieldEmployeeNumber, gbc);
-		
+
 		gbc.gridx++;
-		
-		*/
+
+		 */
 		//panelStaffClockInOutForm.add(new JLabel("tets"), gbc);
-		
+
 		TitledBorder border = new TitledBorder("Staff Clock-In/Out:");
 		border.setTitleJustification(TitledBorder.LEFT);
 		border.setTitlePosition(TitledBorder.TOP);
 		panelStaffClockInOutForm.setBorder(border);
 
 		panelStaffClockInOutFormMain.add(panelStaffClockInOutForm, BorderLayout.CENTER);
-		
+
 		return panelStaffClockInOutFormMain;
 	}
-	
+
 	private JPanel staffManagementForm() {
 		JPanel panelStaffManagementFormMain = new JPanel(new BorderLayout());
 		JPanel panelStaffManagementForm = new JPanel(new GridBagLayout());
-		
+
 		GridBagConstraints gbc = new GridBagConstraints();
-		
+
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		panelStaffManagementForm.add(new JLabel("Management"), gbc);
-		
+
 		panelStaffManagementFormMain.add(panelStaffManagementForm, BorderLayout.CENTER);
-		
+
 		return panelStaffManagementFormMain;
+	}
+	
+	private static ArrayList<String> getSelectedCellValues() {
+		ArrayList<String> selectedCellValuesArray = new ArrayList<String>();
+		int row = allStaffTable.getSelectedRow();
+		String employeeNumber = allStaffTable.getModel().getValueAt(row, 0).toString();
+		String firstName = allStaffTable.getModel().getValueAt(row, 1).toString();
+		String lastName = allStaffTable.getModel().getValueAt(row, 2).toString();
+		String jobTitle = allStaffTable.getModel().getValueAt(row, 3).toString();
+	
+		selectedCellValuesArray.add(employeeNumber);
+		selectedCellValuesArray.add(firstName);
+		selectedCellValuesArray.add(lastName);
+		selectedCellValuesArray.add(jobTitle);
+		
+		return selectedCellValuesArray;
 	}
 
 	public JPanel getStaffPanel() {
