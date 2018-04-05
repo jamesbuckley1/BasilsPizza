@@ -10,29 +10,40 @@ public class Database {
 	private static ArrayList<Stock> stockArray;
 	private static ArrayList<Customer> customersArray;
 	private static ArrayList<Staff> staffArray;
-	
+	private static ArrayList<Staff> staffClockedInArray;
+
 	// STOCK SQL STRINGS
-	private final static String createStockTableSql = "CREATE TABLE IF NOT EXISTS stock (item TEXT PRIMARY KEY NOT NULL, price DOUBLE NOT NULL, quantity INT NOT NULL);";
+	private final static String createStockTableSql = "CREATE TABLE IF NOT EXISTS stock (stock_id INTEGER PRIMARY KEY NOT NULL, item TEXT NOT NULL, price DOUBLE NOT NULL, quantity INT NOT NULL);";
 	private final static String selectStockSql = "SELECT * FROM stock ORDER BY item ASC;";
 	private final static String insertStockSql = "INSERT INTO stock (item, price, quantity) VALUES (?, ?, ?);";
-	private final static String updateStockSql = "UPDATE stock SET item = ?, price = ?, quantity = ? WHERE item = ?";
-	private final static String deleteStockSql = "DELETE FROM stock WHERE item = ?";
+	private final static String updateStockSql = "UPDATE stock SET item = ?, price = ?, quantity = ? WHERE item = ?;";
+	private final static String deleteStockSql = "DELETE FROM stock WHERE item = ?;";
 	private final static String dropStockTableSql = "DROP TABLE stock;";
 
 	// CUSTOMERS SQL STRINGS
-	private final static String createCustomersTableSql = "CREATE TABLE IF NOT EXISTS customers (first_name TEXT NOT NULL, last_name TEXT NOT NULL, house_number TEXT NOT NULL, address TEXT NOT NULL, city TEXT NOT NULL, postcode TEXT NOT NULL, phone_number TEXT NOT NULL, PRIMARY KEY(first_name, last_name, house_number, address, city));";
+	private final static String createCustomersTableSql = "CREATE TABLE IF NOT EXISTS customers (customer_id INTEGER NOT NULL, first_name TEXT NOT NULL, last_name TEXT NOT NULL, house_number TEXT NOT NULL, address TEXT NOT NULL, city TEXT NOT NULL, postcode TEXT NOT NULL, phone_number TEXT NOT NULL, PRIMARY KEY(customer_id, first_name, last_name, house_number, address, city));";
 	private final static String selectCustomersSql = "SELECT * FROM customers ORDER BY last_name ASC;";
 	private final static String insertCustomersSql = "INSERT INTO customers (first_name, last_name, house_number, address, city, postcode, phone_number) VALUES (?, ?, ?, ?, ?, ?, ?);";
 	private final static String deleteCustomersSql = "DELETE FROM customers WHERE (first_name = ? AND last_name = ? AND house_number = ? AND address = ? AND city = ?);";
 	private final static String dropCustomersTableSql = "DROP TABLE customers;";
-	
+
 	// STAFF SQL STRINGS
-	private final static String createStaffTableSql = "CREATE TABLE IF NOT EXISTS staff (employee_number TEXT PRIMARY KEY NOT NULL, first_name TEXT NOT NULL, last_name TEXT NOT NULL, job_title TEXT NOT NULL);";
+	private final static String createStaffTableSql = "CREATE TABLE IF NOT EXISTS staff (staff_id INTEGER PRIMARY KEY NOT NULL, first_name TEXT NOT NULL, last_name TEXT NOT NULL, job_title TEXT NOT NULL, last_clock_in DATETIME, last_clock_out DATETIME);";
 	private final static String selectStaffSql = "SELECT * FROM staff ORDER BY last_name ASC;";
-	private final static String insertStaffSql = "INSERT INTO staff (employee_number, first_name, last_name, job_title) VALUES (?, ?, ?, ?);";
-	private final static String deleteStaffSql = "DELETE FROM staff WHERE (employee_number = ?);";
+	private final static String insertStaffSql = "INSERT INTO staff (staff_id, first_name, last_name, job_title) VALUES (?, ?, ?, ?);";
+	private final static String deleteStaffSql = "DELETE FROM staff WHERE (staff_id = ?);";
 	private final static String dropStaffTableSql = "DROP TABLE staff;";
+
+	// STAFF CLOCK IN
+	private final static String createStaffClockedInSql = "CREATE TABLE IF NOT EXISTS staff_clocked_in (staff_id INTEGER PRIMARY KEY NOT NULL REFERENCES staff(staff_id), clock_in_time DATETIME NOT NULL);";
+	private final static String selectStaffClockedInSql = "SELECT staff.staff_id, first_name, last_name, job_title, staff_clocked_in.clock_in_time FROM staff INNER JOIN staff_clocked_in ON staff.staff_id = staff_clocked_in.staff_id;";
+	private final static String insertClockedInStaffSql = "INSERT INTO staff_clocked_in (staff_id, clock_in_time) VALUES (?, ?);";
+	private final static String updateStaffLastClockInSql = "UPDATE staff SET last_clock_in = ? WHERE staff_id = ?;";
+	private final static String clockOutStaffSql = "DELETE FROM staff_clocked_in WHERE (staff_id = ?);";
+	private final static String updateStaffLastClockOutSql = "UPDATE staff SET last_clock_out = ? WHERE staff_id = ?;";
 	
+	//private final static String foreignKeysEnabledSql = "PRAGMA foreign_keys;";
+
 	private static void openDB() {
 		try {
 			Class.forName("org.sqlite.JDBC");
@@ -62,9 +73,15 @@ public class Database {
 
 			stmt = conn.prepareStatement(createCustomersTableSql);
 			stmt.executeUpdate();
-			
+
 			stmt = conn.prepareStatement(createStaffTableSql);
 			stmt.executeUpdate();
+
+
+			stmt = conn.prepareStatement(createStaffClockedInSql);
+			stmt.executeUpdate();
+
+
 
 			stmt.close();
 			closeDB();
@@ -76,7 +93,7 @@ public class Database {
 		//selectCustomers();
 		System.out.println("SQLite database initialisation complete.");
 	}
-	
+
 	/////////// STOCK ///////////
 
 	public static void selectStock() {
@@ -204,7 +221,7 @@ public class Database {
 		}
 		System.out.println("SELECT customers successful.");
 	}
-	
+
 	public static void insertCustomer(String firstName, String lastName, String houseNumber, String address, String city, String postcode, String phoneNumber) throws Exception {
 		openDB();
 		//System.out.println("Inserting customer: " + item + " , " + price + " , " + quantity);
@@ -226,31 +243,31 @@ public class Database {
 
 		System.out.println("INSERT customer successful.");
 	}
-	
+
 	public static void deleteCustomer(ArrayList<String> cellValues) throws SQLException {
 		openDB();
 		PreparedStatement delete = conn.prepareStatement(deleteCustomersSql);
 		delete.setString(1, cellValues.get(0));
 		System.out.println(cellValues.get(0));
-		
+
 		delete.setString(2, cellValues.get(1));
 		System.out.println(cellValues.get(1));
-		
+
 		delete.setString(3, cellValues.get(2));
 		System.out.println(cellValues.get(2));
-		
+
 		delete.setString(4, cellValues.get(3));
 		System.out.println(cellValues.get(3));
-		
+
 		delete.setString(5, cellValues.get(4));
 		System.out.println(cellValues.get(4));
-		
-		
+
+
 		delete.executeUpdate();
 		delete.close();
-		
+
 		closeDB();
-		
+
 		System.out.println("DELETE customer successful");
 	}
 
@@ -258,9 +275,9 @@ public class Database {
 	public static ArrayList<Customer> getCustomersArray() {
 		return customersArray;
 	}
-	
+
 	//////////// STAFF /////////////
-	
+
 	public static void selectStaff() {
 		try {
 			staffArray = new ArrayList<Staff>();
@@ -270,12 +287,14 @@ public class Database {
 			ResultSet rs = selectStaff.executeQuery();
 
 			while (rs.next()) {
-				String employeeNumber = rs.getString("employee_number");
+				String staffId = rs.getString("staff_id");
 				String firstName = rs.getString("first_name");
 				String lastName = rs.getString("last_name");
 				String jobTitle = rs.getString("job_title");
+				String lastClockIn = rs.getString("last_clock_in");
+				String lastClockOut = rs.getString("last_clock_out");
 
-				Staff s = new Staff(employeeNumber, firstName, lastName, jobTitle);
+				Staff s = new Staff(staffId, firstName, lastName, jobTitle, lastClockIn, lastClockOut);
 				staffArray.add(s);
 			}
 
@@ -288,16 +307,47 @@ public class Database {
 			e.printStackTrace();
 			System.exit(0);
 		}
-		System.out.println("SELECT stock successful.");
+		System.out.println("SELECT successful.");
 	}
-	
-	public static void insertStaff(String employeeNumber, String firstName, String lastName, String jobTitle) throws SQLException {
+
+	public static void selectClockedInStaff() {
+		try {
+			staffClockedInArray = new ArrayList<Staff>();
+			openDB();
+
+			PreparedStatement selectStaffClockedIn = conn.prepareStatement(selectStaffClockedInSql);
+			ResultSet rs = selectStaffClockedIn.executeQuery();
+
+			while (rs.next()) {
+				String staffId = rs.getString("staff_id");
+				String firstName = rs.getString("first_name");
+				String lastName = rs.getString("last_name");
+				String jobTitle = rs.getString("job_title");
+				String clockInTime = rs.getString("clock_in_time");
+
+				Staff s = new Staff(staffId, firstName, lastName, jobTitle, clockInTime);
+				staffClockedInArray.add(s);
+			}
+
+			rs.close();
+			selectStaffClockedIn.close();
+			closeDB();
+
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		}
+		System.out.println("SELECT STAFF CLOCKED IN successful.");
+	}
+
+	public static void insertStaff(String staffId, String firstName, String lastName, String jobTitle) throws SQLException {
 		openDB();
 		//System.out.println("Inserting staff: " + item + " , " + price + " , " + quantity);
 
 		PreparedStatement insert = conn.prepareStatement(insertStaffSql);
 
-		insert.setString(1, employeeNumber);
+		insert.setString(1, staffId);
 		insert.setString(2, firstName);
 		insert.setString(3, lastName);
 		insert.setString(4, jobTitle);
@@ -307,16 +357,16 @@ public class Database {
 
 		closeDB();
 
-		System.out.println("INSERT stock successful.");
+		System.out.println("INSERT staff successful.");
 	}
-	
+
 	public static void updateStaff() {
 		try {
 			openDB();
 
 			//PreparedStatement update = conn.prepareStatement(updateStaffSql);
 
-			//update.setString(1, employeeNumber);
+			//update.setString(1, staffNumber);
 			//update.setDouble(2, newPrice);
 			//update.setInt(3, newQuantity);
 			//update.setString(4, currentItem);
@@ -329,15 +379,33 @@ public class Database {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-		//System.out.println("UPDATED " + currentItem + " successfully.");
+		System.out.println("UPDATED staff successfully");
 	}
-	
-	public static void deleteStaff(String employeeNumber) {
+
+	public static void updateStaffLastClockIn(String staffId, String dateTime) throws Exception {
+		openDB();
+		//System.out.println("Inserting staff: " + item + " , " + price + " , " + quantity);
+
+		PreparedStatement update = conn.prepareStatement(updateStaffLastClockInSql);
+
+		update.setString(1, dateTime);
+		update.setString(2, staffId);
+
+
+		update.executeUpdate();
+		update.close();
+
+		closeDB();
+
+		System.out.println("UPDATE staff last clock in successful.");
+	}
+
+	public static void deleteStaff(String staffId) {
 		try {
 			openDB();
 
 			PreparedStatement delete = conn.prepareStatement(deleteStaffSql);
-			delete.setString(1, employeeNumber);
+			delete.setString(1, staffId);
 			delete.executeUpdate();
 			delete.close();
 
@@ -346,13 +414,68 @@ public class Database {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-		System.out.println("Delete successful.");
+		System.out.println("DELETE staff successful.");
 	}
 
+	public static void clockInStaff(String staffId, String dateTime) {
+		try {
+			openDB();
+
+			PreparedStatement clockIn = conn.prepareStatement(insertClockedInStaffSql);
+			clockIn.setString(1, staffId);
+			clockIn.setString(2, dateTime);
+			clockIn.executeUpdate();
+			clockIn.close();
+
+			closeDB();
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			System.exit(0);
+		}
+		System.out.println("Clock in staff successful.");
+	}
+
+	public static void clockOutStaff(String staffId) {
+		try {
+			openDB();
+
+			PreparedStatement delete = conn.prepareStatement(clockOutStaffSql);
+			delete.setString(1, staffId);
+			delete.executeUpdate();
+			delete.close();
+
+			closeDB();
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			System.exit(0);
+		}
+		System.out.println("Clock out staff successful.");
+	}
+	
+	public static void updateStaffClockOutTime(String staffId, String dateTime) {
+		try {
+			openDB();
+
+			PreparedStatement update = conn.prepareStatement(updateStaffLastClockOutSql);
+			update.setString(1, dateTime);
+			update.setString(2, staffId);
+			update.executeUpdate();
+			update.close();
+
+			closeDB();
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			System.exit(0);
+		}
+		System.out.println("Update staff clock out time successful.");
+	}
 	public static ArrayList<Staff> getStaffArray() {
 		return staffArray;
 	}
-	
+
+	public static ArrayList<Staff> getStaffClockedInArray() {
+		return staffClockedInArray;
+	}
 	/////////////////////// DEBUG
 	public static void dropStockTable() { 
 		try {
@@ -385,7 +508,7 @@ public class Database {
 		}
 		System.out.println("CUSTOMERS table dropped successfully");
 	}
-	
+
 	public static void dropStaffTable() {
 		try {
 			openDB();

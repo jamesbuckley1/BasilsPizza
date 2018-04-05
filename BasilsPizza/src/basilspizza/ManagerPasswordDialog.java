@@ -7,6 +7,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -31,13 +33,11 @@ public class ManagerPasswordDialog {
 	private boolean editFlag = false;
 	private boolean deleteFlag = false;
 
-	public ManagerPasswordDialog(JFrame frame, String flagStr) {
-		if (flagStr.equals("ADD")) { // Tells the class we are adding staff
-			addFlag = true;
-		} 
-		initDialog();
+	public ManagerPasswordDialog(JFrame frame) {
+		this.frame = frame;
+		//initDialog();
 	}
-	
+
 
 	public ManagerPasswordDialog(JFrame frame, ArrayList<String> selectedCellValues) {
 		this.frame = frame;
@@ -45,7 +45,7 @@ public class ManagerPasswordDialog {
 		firstName = selectedCellValues.get(1);
 		lastName = selectedCellValues.get(2);
 		jobTitle = selectedCellValues.get(3);
-		
+
 		initDialog();
 	}
 
@@ -57,8 +57,32 @@ public class ManagerPasswordDialog {
 
 		GridBagConstraints gbc = new GridBagConstraints();
 
+		// Action Listener for OK button and ENTER keyboard input.
+		Action enterPasswordAction = new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (getTextFieldPasswordValue().equals(managerPassword)) {
+					System.out.println("PASSWORD CORRECT");
+					if (addFlag) {
+						new AddStaffDialogGUI(frame);
+						dialogManagerPassword.dispose();
+					} else {
+						Database.deleteStaff(employeeNumber);
+						dialogManagerPassword.dispose();
+					}
+
+				} else {
+					JOptionPane.showMessageDialog(frame, "Incorrect password.",
+							"Access Denied", JOptionPane.ERROR_MESSAGE);
+				}
+
+			}
+
+		};
+
 		JLabel labelPassword = new JLabel("Password: ");
 		textFieldPassword = new JTextField(15);
+		textFieldPassword.addActionListener(enterPasswordAction);
 
 		JButton cancelBtn = new JButton("Cancel");
 		cancelBtn.addActionListener(new ActionListener() {
@@ -67,28 +91,12 @@ public class ManagerPasswordDialog {
 				dialogManagerPassword.dispose();
 			}
 		});
-		
+
+
+
+
 		JButton okBtn = new JButton("OK");
-		okBtn.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (getTextFieldPasswordValue().equals(managerPassword)) {
-					if (addFlag) {
-						new AddStaffDialogGUI(frame);
-						dialogManagerPassword.dispose();
-					} else {
-						Database.deleteStaff(employeeNumber);
-						dialogManagerPassword.dispose();
-					}
-					
-				} else {
-					JOptionPane.showMessageDialog(frame, "Incorrect password.",
-							"Access Denied", JOptionPane.ERROR_MESSAGE);
-				}
-				
-				
-			}
-		});
+		okBtn.addActionListener(enterPasswordAction);
 
 
 
@@ -133,7 +141,7 @@ public class ManagerPasswordDialog {
 		panelButtons.add(okBtn, gbcBtn);
 
 		panelForm.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-		
+
 		TitledBorder border = new TitledBorder("Manager Access Only:");
 		border.setTitleJustification(TitledBorder.LEFT);
 		border.setTitlePosition(TitledBorder.TOP);
@@ -148,9 +156,15 @@ public class ManagerPasswordDialog {
 		dialogManagerPassword.setLocationRelativeTo(frame);
 		dialogManagerPassword.setVisible(true);
 	}
-	
+
 	private String getTextFieldPasswordValue() {
 		return textFieldPassword.getText();
+	}
+
+	public void addStaff() {
+		addFlag = true;
+		initDialog();
+
 	}
 
 }
