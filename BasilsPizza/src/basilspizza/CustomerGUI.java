@@ -74,7 +74,7 @@ public class CustomerGUI {
 
 		panelCustomersMainGrid.add(panelCustomersFormOrdersGrid);
 		
-		panelCustomersMain.add(panelCustomersMainGrid);
+		panelCustomersMain.add(panelCustomersMainGrid, BorderLayout.CENTER);
 	}
 
 	// Set up customers table.
