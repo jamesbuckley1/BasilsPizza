@@ -11,6 +11,7 @@ public class Database {
 	private static ArrayList<Customer> customersArray;
 	private static ArrayList<Staff> staffArray;
 	private static ArrayList<Staff> staffClockedInArray;
+	private static ArrayList<Table> tablesArray;
 
 	// STOCK SQL STRINGS
 	private final static String createStockTableSql = "CREATE TABLE IF NOT EXISTS stock (stock_id INTEGER PRIMARY KEY NOT NULL, item TEXT NOT NULL, price DOUBLE NOT NULL, quantity INT NOT NULL);";
@@ -34,13 +35,26 @@ public class Database {
 	private final static String deleteStaffSql = "DELETE FROM staff WHERE (staff_id = ?);";
 	private final static String dropStaffTableSql = "DROP TABLE staff;";
 
-	// STAFF CLOCK IN
+	// STAFF CLOCK IN SQL STRINGS
 	private final static String createStaffClockedInSql = "CREATE TABLE IF NOT EXISTS staff_clocked_in (staff_id INTEGER PRIMARY KEY NOT NULL REFERENCES staff(staff_id), clock_in_time DATETIME NOT NULL);";
 	private final static String selectStaffClockedInSql = "SELECT staff.staff_id, first_name, last_name, job_title, staff_clocked_in.clock_in_time FROM staff INNER JOIN staff_clocked_in ON staff.staff_id = staff_clocked_in.staff_id;";
 	private final static String insertClockedInStaffSql = "INSERT INTO staff_clocked_in (staff_id, clock_in_time) VALUES (?, ?);";
 	private final static String updateStaffLastClockInSql = "UPDATE staff SET last_clock_in = ? WHERE staff_id = ?;";
 	private final static String clockOutStaffSql = "DELETE FROM staff_clocked_in WHERE (staff_id = ?);";
 	private final static String updateStaffLastClockOutSql = "UPDATE staff SET last_clock_out = ? WHERE staff_id = ?;";
+	
+	// TABLES SQL STRINGS
+	private final static String createTablesTableSql = "CREATE TABLE IF NOT EXISTS tables (table_id TEXT PRIMARY KEY NOT NULL, assigned_staff TEXT, special_requirements TEXT, order_id INTEGER REFERENCES orders(order_id));"; 
+	private final static String selectTablesSql = "SELECT * FROM tables;";
+	private final static String insertTableSql = "INSERT INTO tables (table_id) VALUES (?);";
+	private final static String deleteTableSql = "DELETE FROM tables WHERE (table_id = ?);";
+	private final static String updateTableInfoSql = "UPDATE tables SET assigned_staff = ?, special_requirements = ? WHERE table_id = ?;";
+	private final static String selectTableSpecialRequirementsSql = "SELECT special_requirements FROM tables WHERE table_id = ?;";
+	private final static String selectTableAssignedStaffSql = "SELECT assigned_staff FROM tables WHERE table_id = ?;";
+	
+	// ORDERS SQL STRINGS
+	private final static String createOrdersTableSql = "CREATE TABLE IF NOT EXISTS orders (order_id INTEGER PRIMARY KEY NOT NULL, price TEXT NOT NULL);";
+	
 	
 	//private final static String foreignKeysEnabledSql = "PRAGMA foreign_keys;";
 
@@ -80,7 +94,12 @@ public class Database {
 
 			stmt = conn.prepareStatement(createStaffClockedInSql);
 			stmt.executeUpdate();
+			
+			stmt = conn.prepareStatement(createTablesTableSql);
+			stmt.executeUpdate();
 
+			stmt = conn.prepareStatement(createOrdersTableSql);
+			stmt.executeUpdate();
 
 
 			stmt.close();
@@ -476,6 +495,166 @@ public class Database {
 	public static ArrayList<Staff> getStaffClockedInArray() {
 		return staffClockedInArray;
 	}
+	
+	//////////// TABLES
+	
+	public static void selectTables() {
+		try {
+			tablesArray = new ArrayList<Table>();
+			openDB();
+
+			PreparedStatement selectTables = conn.prepareStatement(selectTablesSql);
+			ResultSet rs = selectTables.executeQuery();
+
+			while (rs.next()) {
+				String tableId = rs.getString("table_id");
+				String assignedStaff = rs.getString("assigned_staff");
+				String specialRequirements = rs.getString("special_requirements");
+				String orderId = rs.getString("order_id");
+
+				Table t = new Table(tableId, assignedStaff, specialRequirements, orderId);
+				tablesArray.add(t);
+			}
+
+			rs.close();
+			selectTables.close();
+			closeDB();
+
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		}
+		System.out.println("SELECT tables successful.");
+	}
+	
+	public static void insertTable(String tableId) {
+		try {
+		openDB();
+		//System.out.println("Inserting staff: " + item + " , " + price + " , " + quantity);
+
+		PreparedStatement insert = conn.prepareStatement(insertTableSql);
+
+		insert.setString(1, tableId);
+		
+
+		insert.executeUpdate();
+		insert.close();
+
+		closeDB();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		System.out.println("INSERT table successful.");
+	}
+	
+	public static void deleteTable(String tableId) {
+		try {
+			openDB();
+			//System.out.println("Inserting staff: " + item + " , " + price + " , " + quantity);
+
+			PreparedStatement delete = conn.prepareStatement(deleteTableSql);
+
+			delete.setString(1, tableId);
+			
+
+			delete.executeUpdate();
+			delete.close();
+
+			closeDB();
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			System.out.println("INSERT staff successful.");
+	}
+	
+	public static void updateTableInfo(String assignedStaff, String specialRequirements, String tableId) {
+		try {
+			openDB();
+
+			PreparedStatement update = conn.prepareStatement(updateTableInfoSql);
+
+			
+			update.setString(1, assignedStaff);
+			update.setString(2, specialRequirements);
+			update.setString(3, tableId);
+
+			update.executeUpdate();
+			update.close();
+
+			closeDB();
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			System.out.println("UPDATE table information successful.");
+	}
+	
+	public static String selectTableSpecialRequirements(String tableId) {
+		String specialRequirements = null;
+		try {
+			openDB();
+
+			PreparedStatement select = conn.prepareStatement(selectTableSpecialRequirementsSql);
+			
+			
+			select.setString(1, tableId);
+			ResultSet rs = select.executeQuery();
+			
+			while(rs.next()) {
+				specialRequirements = rs.getString("special_requirements");
+			}
+
+			
+			select.close();
+			rs.close();
+			closeDB();
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			//System.out.println("UPDATE table information successful.");
+		
+		return specialRequirements;
+				
+	}
+	
+	public static String selectTableAssignedStaff(String tableId) {
+		String assignedStaff = null;
+		try {
+			openDB();
+
+			PreparedStatement select = conn.prepareStatement(selectTableAssignedStaffSql);
+			
+			
+			select.setString(1, tableId);
+			ResultSet rs = select.executeQuery();
+			
+			while(rs.next()) {
+				assignedStaff = rs.getString("assigned_staff");
+			}
+
+			
+			select.close();
+			rs.close();
+			closeDB();
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			//System.out.println("UPDATE table information successful.");
+		
+		return assignedStaff;
+	}
+	
+	public static ArrayList<Table> getTablesArray() {
+		return tablesArray;
+	}
+	
+	////////////// ORDERS
+	
 	/////////////////////// DEBUG
 	public static void dropStockTable() { 
 		try {

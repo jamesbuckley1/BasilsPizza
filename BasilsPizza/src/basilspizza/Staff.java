@@ -58,6 +58,7 @@ public class Staff {
 		dateTime = new Date();
 		currentDateTime = dateFormat.format(dateTime);
 		Database.clockInStaff(staffId, currentDateTime);
+		TablesGUI.populateComboboxStaff();
 	}
 	
 	public void updateLastClockIn() {
@@ -71,6 +72,7 @@ public class Staff {
 	public void clockOut() {
 		try {
 		Database.clockOutStaff(staffId);
+		TablesGUI.populateComboboxStaff();
 		}
 		catch (Exception e) {
 			e.printStackTrace();
