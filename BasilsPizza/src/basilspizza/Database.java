@@ -22,11 +22,11 @@ public class Database {
 	private final static String dropStockTableSql = "DROP TABLE stock;";
 
 	// CUSTOMERS SQL STRINGS
-	private final static String createCustomersTableSql = "CREATE TABLE IF NOT EXISTS customers (customer_id INTEGER NOT NULL, first_name TEXT NOT NULL, last_name TEXT NOT NULL, house_number TEXT NOT NULL, address TEXT NOT NULL, city TEXT NOT NULL, postcode TEXT NOT NULL, phone_number TEXT NOT NULL, PRIMARY KEY(customer_id, first_name, last_name, house_number, address, city));";
-	private final static String selectCustomersSql = "SELECT * FROM customers ORDER BY last_name ASC;";
-	private final static String insertCustomersSql = "INSERT INTO customers (first_name, last_name, house_number, address, city, postcode, phone_number) VALUES (?, ?, ?, ?, ?, ?, ?);";
-	private final static String deleteCustomersSql = "DELETE FROM customers WHERE (first_name = ? AND last_name = ? AND house_number = ? AND address = ? AND city = ?);";
-	private final static String dropCustomersTableSql = "DROP TABLE customers;";
+	private final static String createCustomersTableSql = "CREATE TABLE IF NOT EXISTS customer (customer_id INTEGER PRIMARY KEY NOT NULL, first_name TEXT NOT NULL, last_name TEXT NOT NULL, house_number TEXT NOT NULL, address TEXT NOT NULL, city TEXT NOT NULL, postcode TEXT NOT NULL, phone_number TEXT NOT NULL);";
+	private final static String selectCustomersSql = "SELECT * FROM customer ORDER BY last_name ASC;";
+	private final static String insertCustomersSql = "INSERT INTO customer (first_name, last_name, house_number, address, city, postcode, phone_number) VALUES (?, ?, ?, ?, ?, ?, ?);";
+	private final static String deleteCustomersSql = "DELETE FROM customer WHERE (first_name = ? AND last_name = ? AND house_number = ? AND address = ? AND city = ?);";
+	private final static String dropCustomersTableSql = "DROP TABLE customer;";
 
 	// STAFF SQL STRINGS
 	private final static String createStaffTableSql = "CREATE TABLE IF NOT EXISTS staff (staff_id INTEGER PRIMARY KEY NOT NULL, first_name TEXT NOT NULL, last_name TEXT NOT NULL, job_title TEXT NOT NULL, last_clock_in DATETIME, last_clock_out DATETIME);";
@@ -43,7 +43,7 @@ public class Database {
 	private final static String clockOutStaffSql = "DELETE FROM staff_clocked_in WHERE (staff_id = ?);";
 	private final static String updateStaffLastClockOutSql = "UPDATE staff SET last_clock_out = ? WHERE staff_id = ?;";
 	
-	// TABLES SQL STRINGS
+	// TABLES SQL STRINGS (Had to name the table "tables" as it did not like "table").
 	private final static String createTablesTableSql = "CREATE TABLE IF NOT EXISTS tables (table_id TEXT PRIMARY KEY NOT NULL, assigned_staff TEXT, special_requirements TEXT, order_id INTEGER REFERENCES orders(order_id));"; 
 	private final static String selectTablesSql = "SELECT * FROM tables;";
 	private final static String insertTableSql = "INSERT INTO tables (table_id) VALUES (?);";

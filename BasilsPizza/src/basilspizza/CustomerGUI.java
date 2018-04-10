@@ -292,7 +292,7 @@ public class CustomerGUI {
 	}
 
 	// Set up customer form
-	private JPanel customersForm() {
+	public JPanel customersForm() {
 		
 		JPanel panelCustomersForm = new JPanel(new GridBagLayout());
 		
