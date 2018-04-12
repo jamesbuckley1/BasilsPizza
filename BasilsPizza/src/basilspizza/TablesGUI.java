@@ -91,12 +91,10 @@ public class TablesGUI {
 		
 		populateTables();
 		
+		
 		JScrollPane jsp = new JScrollPane(tableList);
 		
-		
-		// Test add item to list
-		tableListModel.add(0, "TEST ITEM");
-		
+	
 		
 		
 		panelTablesSelectEmptyBorder.add(jsp, BorderLayout.CENTER);
@@ -123,6 +121,9 @@ public class TablesGUI {
 			public void actionPerformed(ActionEvent e) {
 				new AddTableDialogGUI(frame);
 				populateTables();
+				//NewOrderGUI.populateTables();
+				
+				
 			}
 		});
 		
@@ -482,7 +483,7 @@ public class TablesGUI {
 		return panelTableOrdersTableButtons;
 	}
 	
-	public void populateTables() {
+	public static void populateTables() {
 		
 		tableListModel.removeAllElements();
 
@@ -495,19 +496,13 @@ public class TablesGUI {
 			String specialRequirements = Database.getTablesArray().get(i).getSpecialRequirements();
 			String orderId = Database.getTablesArray().get(i).getOrderId();
 		
-			Object[] data = {tableId, assignedStaff, specialRequirements, orderId};
+			//Object[] data = {tableId, assignedStaff, specialRequirements, orderId};
 
 			tableListModel.addElement(tableId);
-			//tableList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			//tableList.getSelectionModel().setSelectionInterval(0, 0);
 			
-			/*
-			allStaffTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			allStaffTable.getSelectionModel().setSelectionInterval(0, 0);
-			allStaffTable.setColumnSelectionInterval(0, 0);
-			allStaffTable.requestFocusInWindow();
-			*/
+			
 		}
+		
 	}
 	
 	public static void populateComboboxStaff() { // Needs to be public as this method is called from StaffGUI when other staff clock in.

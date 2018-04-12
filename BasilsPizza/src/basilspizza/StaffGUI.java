@@ -596,7 +596,6 @@ public class StaffGUI {
 			public void actionPerformed(ActionEvent e) {
 				Staff s = new Staff(textFieldStaffId.getText());
 				s.clockIn();
-				s.updateLastClockIn();
 				populateStaffClockedInTable();
 				populateAllStaffTable();
 			}

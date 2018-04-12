@@ -12,6 +12,7 @@ public class Database {
 	private static ArrayList<Staff> staffArray;
 	private static ArrayList<Staff> staffClockedInArray;
 	private static ArrayList<Table> tablesArray;
+	private static ArrayList<MenuItem> menuItemArray;
 
 	// STOCK SQL STRINGS
 	private final static String createStockTableSql = "CREATE TABLE IF NOT EXISTS stock (stock_id INTEGER PRIMARY KEY NOT NULL, item TEXT NOT NULL, price DOUBLE NOT NULL, quantity INT NOT NULL);";
@@ -22,29 +23,31 @@ public class Database {
 	private final static String dropStockTableSql = "DROP TABLE stock;";
 
 	// CUSTOMERS SQL STRINGS
-	private final static String createCustomersTableSql = "CREATE TABLE IF NOT EXISTS customer (customer_id INTEGER PRIMARY KEY NOT NULL, first_name TEXT NOT NULL, last_name TEXT NOT NULL, house_number TEXT NOT NULL, address TEXT NOT NULL, city TEXT NOT NULL, postcode TEXT NOT NULL, phone_number TEXT NOT NULL);";
+	private final static String createCustomersTableSql = "CREATE TABLE IF NOT EXISTS customer (customer_id INTEGER PRIMARY KEY AUTOINCREMENT, first_name TEXT NOT NULL, last_name TEXT NOT NULL, house_number TEXT NOT NULL, address TEXT NOT NULL, city TEXT NOT NULL, postcode TEXT NOT NULL, phone_number TEXT NOT NULL);";
 	private final static String selectCustomersSql = "SELECT * FROM customer ORDER BY last_name ASC;";
 	private final static String insertCustomersSql = "INSERT INTO customer (first_name, last_name, house_number, address, city, postcode, phone_number) VALUES (?, ?, ?, ?, ?, ?, ?);";
 	private final static String deleteCustomersSql = "DELETE FROM customer WHERE (first_name = ? AND last_name = ? AND house_number = ? AND address = ? AND city = ?);";
 	private final static String dropCustomersTableSql = "DROP TABLE customer;";
 
 	// STAFF SQL STRINGS
-	private final static String createStaffTableSql = "CREATE TABLE IF NOT EXISTS staff (staff_id INTEGER PRIMARY KEY NOT NULL, first_name TEXT NOT NULL, last_name TEXT NOT NULL, job_title TEXT NOT NULL, last_clock_in DATETIME, last_clock_out DATETIME);";
-	private final static String selectStaffSql = "SELECT * FROM staff ORDER BY last_name ASC;";
-	private final static String insertStaffSql = "INSERT INTO staff (staff_id, first_name, last_name, job_title) VALUES (?, ?, ?, ?);";
+	private final static String createStaffTableSql = "CREATE TABLE IF NOT EXISTS staff (staff_id INTEGER PRIMARY KEY AUTOINCREMENT, first_name TEXT NOT NULL, last_name TEXT NOT NULL, job_title TEXT NOT NULL, last_clock_in DATETIME, last_clock_out DATETIME);";
+	private final static String selectStaffSql = "SELECT staff_id, first_name, last_name, job_title, last_clock_in, last_clock_out FROM staff ORDER BY last_name ASC;";
+	private final static String insertStaffSql = "INSERT INTO staff (first_name, last_name, job_title) VALUES (?, ?, ?);";
 	private final static String deleteStaffSql = "DELETE FROM staff WHERE (staff_id = ?);";
 	private final static String dropStaffTableSql = "DROP TABLE staff;";
 
 	// STAFF CLOCK IN SQL STRINGS
-	private final static String createStaffClockedInSql = "CREATE TABLE IF NOT EXISTS staff_clocked_in (staff_id INTEGER PRIMARY KEY NOT NULL REFERENCES staff(staff_id), clock_in_time DATETIME NOT NULL);";
-	private final static String selectStaffClockedInSql = "SELECT staff.staff_id, first_name, last_name, job_title, staff_clocked_in.clock_in_time FROM staff INNER JOIN staff_clocked_in ON staff.staff_id = staff_clocked_in.staff_id;";
-	private final static String insertClockedInStaffSql = "INSERT INTO staff_clocked_in (staff_id, clock_in_time) VALUES (?, ?);";
+	private final static String createStaffClockInSql = "CREATE TABLE IF NOT EXISTS staff_clocked_in (staff_clocked_in_id INTEGER PRIMARY KEY AUTOINCREMENT, staff_id INTEGER NOT NULL REFERENCES staff(staff_id), clock_in_time DATETIME);";
+	private final static String selectStaffClockInSql = "SELECT staff.staff_id, first_name, last_name, job_title, staff_clocked_in.clock_in_time FROM staff INNER JOIN staff_clocked_in ON staff.staff_id = staff_clocked_in.staff_id;";
+	private final static String clockInStaffSql = "INSERT INTO staff_clocked_in (staff_id, clock_in_time) VALUES (?, ?);";
 	private final static String updateStaffLastClockInSql = "UPDATE staff SET last_clock_in = ? WHERE staff_id = ?;";
+	
+	// STAFF CLOCK OUT SQL STRINGS
 	private final static String clockOutStaffSql = "DELETE FROM staff_clocked_in WHERE (staff_id = ?);";
 	private final static String updateStaffLastClockOutSql = "UPDATE staff SET last_clock_out = ? WHERE staff_id = ?;";
 	
 	// TABLES SQL STRINGS (Had to name the table "tables" as it did not like "table").
-	private final static String createTablesTableSql = "CREATE TABLE IF NOT EXISTS tables (table_id TEXT PRIMARY KEY NOT NULL, assigned_staff TEXT, special_requirements TEXT, order_id INTEGER REFERENCES orders(order_id));"; 
+	private final static String createTablesTableSql = "CREATE TABLE IF NOT EXISTS tables (table_id TEXT PRIMARY KEY, assigned_staff TEXT, special_requirements TEXT, order_id INTEGER REFERENCES orders(order_id));"; 
 	private final static String selectTablesSql = "SELECT * FROM tables;";
 	private final static String insertTableSql = "INSERT INTO tables (table_id) VALUES (?);";
 	private final static String deleteTableSql = "DELETE FROM tables WHERE (table_id = ?);";
@@ -53,7 +56,14 @@ public class Database {
 	private final static String selectTableAssignedStaffSql = "SELECT assigned_staff FROM tables WHERE table_id = ?;";
 	
 	// ORDERS SQL STRINGS
-	private final static String createOrdersTableSql = "CREATE TABLE IF NOT EXISTS orders (order_id INTEGER PRIMARY KEY NOT NULL, price TEXT NOT NULL);";
+	private final static String createOrdersTableSql = "CREATE TABLE IF NOT EXISTS orders (order_id INTEGER PRIMARY KEY AUTOINCREMENT, customer_id INTEGER NOT NULL REFERENCES customer(customer_id));";
+	
+	
+	// MENU ITEM SQL STRINGS
+	
+	private final static String createMenuItemTableSql = "CREATE TABLE IF NOT EXISTS menu_item (menu_item_id INTEGER PRIMARY KEY AUTOINCREMENT, item_name TEXT NOT NULL, item_type TEXT NOT NULL, item_price DOUBLE NOT NULL);";
+	private final static String selectMenuItemSql = "SELECT * FROM menu_item;";
+	private final static String insertMenuItemSql = "INSERT INTO menu_item (item_name, item_type, item_price) VALUES (?, ?, ?);";
 	
 	
 	//private final static String foreignKeysEnabledSql = "PRAGMA foreign_keys;";
@@ -91,14 +101,16 @@ public class Database {
 			stmt = conn.prepareStatement(createStaffTableSql);
 			stmt.executeUpdate();
 
-
-			stmt = conn.prepareStatement(createStaffClockedInSql);
+			stmt = conn.prepareStatement(createStaffClockInSql);
 			stmt.executeUpdate();
 			
 			stmt = conn.prepareStatement(createTablesTableSql);
 			stmt.executeUpdate();
 
 			stmt = conn.prepareStatement(createOrdersTableSql);
+			stmt.executeUpdate();
+			
+			stmt = conn.prepareStatement(createMenuItemTableSql);
 			stmt.executeUpdate();
 
 
@@ -312,6 +324,7 @@ public class Database {
 				String jobTitle = rs.getString("job_title");
 				String lastClockIn = rs.getString("last_clock_in");
 				String lastClockOut = rs.getString("last_clock_out");
+				
 
 				Staff s = new Staff(staffId, firstName, lastName, jobTitle, lastClockIn, lastClockOut);
 				staffArray.add(s);
@@ -329,47 +342,18 @@ public class Database {
 		System.out.println("SELECT successful.");
 	}
 
-	public static void selectClockedInStaff() {
-		try {
-			staffClockedInArray = new ArrayList<Staff>();
-			openDB();
+	
 
-			PreparedStatement selectStaffClockedIn = conn.prepareStatement(selectStaffClockedInSql);
-			ResultSet rs = selectStaffClockedIn.executeQuery();
-
-			while (rs.next()) {
-				String staffId = rs.getString("staff_id");
-				String firstName = rs.getString("first_name");
-				String lastName = rs.getString("last_name");
-				String jobTitle = rs.getString("job_title");
-				String clockInTime = rs.getString("clock_in_time");
-
-				Staff s = new Staff(staffId, firstName, lastName, jobTitle, clockInTime);
-				staffClockedInArray.add(s);
-			}
-
-			rs.close();
-			selectStaffClockedIn.close();
-			closeDB();
-
-		} catch (Exception e) {
-			System.err.println(e.getClass().getName() + ": " + e.getMessage());
-			e.printStackTrace();
-			System.exit(0);
-		}
-		System.out.println("SELECT STAFF CLOCKED IN successful.");
-	}
-
-	public static void insertStaff(String staffId, String firstName, String lastName, String jobTitle) throws SQLException {
+	public static void insertStaff(String firstName, String lastName, String jobTitle) throws SQLException {
 		openDB();
 		//System.out.println("Inserting staff: " + item + " , " + price + " , " + quantity);
 
 		PreparedStatement insert = conn.prepareStatement(insertStaffSql);
 
-		insert.setString(1, staffId);
-		insert.setString(2, firstName);
-		insert.setString(3, lastName);
-		insert.setString(4, jobTitle);
+		//insert.setString(1, staffId);
+		insert.setString(1, firstName);
+		insert.setString(2, lastName);
+		insert.setString(3, jobTitle);
 
 		insert.executeUpdate();
 		insert.close();
@@ -401,23 +385,6 @@ public class Database {
 		System.out.println("UPDATED staff successfully");
 	}
 
-	public static void updateStaffLastClockIn(String staffId, String dateTime) throws Exception {
-		openDB();
-		//System.out.println("Inserting staff: " + item + " , " + price + " , " + quantity);
-
-		PreparedStatement update = conn.prepareStatement(updateStaffLastClockInSql);
-
-		update.setString(1, dateTime);
-		update.setString(2, staffId);
-
-
-		update.executeUpdate();
-		update.close();
-
-		closeDB();
-
-		System.out.println("UPDATE staff last clock in successful.");
-	}
 
 	public static void deleteStaff(String staffId) {
 		try {
@@ -436,11 +403,46 @@ public class Database {
 		System.out.println("DELETE staff successful.");
 	}
 
+	/////// STAFF CLOCK IN ///////
+	
+	public static void selectClockedInStaff() {
+		try {
+			staffClockedInArray = new ArrayList<Staff>();
+			openDB();
+
+			PreparedStatement selectStaffClockedIn = conn.prepareStatement(selectStaffClockInSql);
+			ResultSet rs = selectStaffClockedIn.executeQuery();
+
+			while (rs.next()) {
+				String staffId = rs.getString("staff_id");
+				String firstName = rs.getString("first_name");
+				String lastName = rs.getString("last_name");
+				String jobTitle = rs.getString("job_title");
+
+				String clockInTime = rs.getString("clock_in_time");
+
+				Staff s = new Staff(staffId, firstName, lastName, jobTitle, clockInTime);
+				staffClockedInArray.add(s);
+			}
+
+			rs.close();
+			selectStaffClockedIn.close();
+			closeDB();
+
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		}
+		System.out.println("SELECT STAFF CLOCKED IN successful.");
+	}
+	
+	
 	public static void clockInStaff(String staffId, String dateTime) {
 		try {
 			openDB();
 
-			PreparedStatement clockIn = conn.prepareStatement(insertClockedInStaffSql);
+			PreparedStatement clockIn = conn.prepareStatement(clockInStaffSql);
 			clockIn.setString(1, staffId);
 			clockIn.setString(2, dateTime);
 			clockIn.executeUpdate();
@@ -451,8 +453,27 @@ public class Database {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-		System.out.println("Clock in staff successful.");
+		System.out.println("Staff clock in successful.");
 	}
+	
+	public static void updateLastClockIn(String staffId, String dateTime) {
+		try {
+			openDB();
+
+			PreparedStatement update = conn.prepareStatement(updateStaffLastClockInSql);
+			update.setString(1, dateTime);
+			update.setString(2, staffId);
+			update.executeUpdate();
+			update.close();
+
+			closeDB();
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			System.exit(0);
+		}
+	}
+	
+	
 
 	public static void clockOutStaff(String staffId) {
 		try {
@@ -495,6 +516,9 @@ public class Database {
 	public static ArrayList<Staff> getStaffClockedInArray() {
 		return staffClockedInArray;
 	}
+	
+	////// TABLES
+	
 	
 	//////////// TABLES
 	
@@ -649,9 +673,72 @@ public class Database {
 		return assignedStaff;
 	}
 	
+	
 	public static ArrayList<Table> getTablesArray() {
 		return tablesArray;
 	}
+	
+	///////// MENU ITEMS //////////
+	
+	public static void selectMenuItems() {
+		try {
+			menuItemArray = new ArrayList<MenuItem>();
+			openDB();
+
+			PreparedStatement selectMenuItem = conn.prepareStatement(selectMenuItemSql);
+			ResultSet rs = selectMenuItem.executeQuery();
+
+			while (rs.next()) {
+				String itemName = rs.getString("item_name");
+				String itemType = rs.getString("item_type");
+				Double itemPrice = rs.getDouble("item_price");
+
+				MenuItem m = new MenuItem(itemName, itemType, itemPrice);
+				menuItemArray.add(m);
+			}
+
+			rs.close();
+			selectMenuItem.close();
+			closeDB();
+
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		}
+		System.out.println("SELECT menu successful.");
+	}
+	
+	public static void insertMenuItem(String menuItemName, String menuItemType, double menuItemPrice) {
+		try {
+			openDB();
+			//System.out.println("Inserting staff: " + item + " , " + price + " , " + quantity);
+
+			PreparedStatement insert = conn.prepareStatement(insertMenuItemSql);
+
+			insert.setString(1, menuItemName);
+			insert.setString(2, menuItemType);
+			insert.setDouble(3, menuItemPrice);
+			
+
+			insert.executeUpdate();
+			insert.close();
+
+			closeDB();
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			System.out.println("INSERT table successful.");
+	}
+	
+	public static ArrayList<MenuItem> getMenuItemArray() {
+		return menuItemArray;
+	}
+	
+	
+	///////// DEBUG
+	
 	
 	////////////// ORDERS
 	

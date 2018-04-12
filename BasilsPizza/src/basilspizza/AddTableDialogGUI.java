@@ -79,6 +79,7 @@ public class AddTableDialogGUI {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				Database.insertTable(textFieldTableName.getText());
+				
 				dialogAddTable.dispose();
 			}
 		});

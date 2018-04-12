@@ -1,27 +1,11 @@
 package basilspizza;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Insets;
-import java.awt.event.*;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.awt.event.ActionEvent;
 
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 public class GUI {
 
@@ -31,21 +15,40 @@ public class GUI {
     public GUI() {
     		
     				frame = new JFrame();
+    				
     	    		tabbedPane = new JTabbedPane();
     	    		
-    	    		newOrderPanel();
-    	    		ordersPanel();
+    	    		/*
+    	    		tabbedPane.addChangeListener(new ChangeListener() {
+						@Override
+						public void stateChanged(ChangeEvent e) {
+							System.out.println("TAB CHANGED");
+							
+							if (tabbedPane.getSelectedIndex() == 0) {
+								System.out.println("NEW ORDER TAB SELECTED");
+								NewOrderGUI n = new NewOrderGUI();
+								n.populateTables();
+							}
+						}
+    	    		});
+    	    		
+    	    		*/
+    	    		
+    	    		//newOrderPanel();
+    	    		//ordersPanel();
     	        tabbedPane("New Order", new NewOrderGUI().getOrdersPanel());
     	        tabbedPane("Orders", new NewOrderGUI().getOrdersPanel());
     	        tabbedPane("Tables", new TablesGUI().getTablesPanel());
     	        tabbedPane("Stock", new StockGUI().getStockPanel());
     	        tabbedPane("Customers", new CustomerGUI().getCustomerPanel());
     	        tabbedPane("Staff", new StaffGUI().getStaffPanel());
+    	        //tabbedPane("Menu", new MenuGUI().getMenuPanel());
     	        createAndShowGUI();
     			
     		
     }
     
+    /*
     private JPanel newOrderPanel() {
     		JPanel panelNewOrder = new JPanel(new BorderLayout());
 		JLabel lbl1 = new JLabel("New Orders.");
@@ -83,7 +86,7 @@ public class GUI {
     }
     
     
-    
+    */
     
     
     
