@@ -32,6 +32,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
@@ -94,6 +95,11 @@ public class CustomerGUI {
 
 			public Component prepareRenderer(TableCellRenderer r, int row, int col) {
 				Component c = super.prepareRenderer(r, row, col);
+				
+				// Next 3 lines adapted from https://stackoverflow.com/questions/17858132/automatically-adjust-jtable-column-to-fit-content/25570812
+				int rendererWidth = c.getPreferredSize().width;
+				TableColumn tableColumn = getColumnModel().getColumn(col);
+				tableColumn.setPreferredWidth(Math.max(rendererWidth + getIntercellSpacing().width, tableColumn.getPreferredWidth())); // Sets width of columns to fill content.
 
 				// Rows alternate in colour for readability.
 				if (row % 2 == 0) {

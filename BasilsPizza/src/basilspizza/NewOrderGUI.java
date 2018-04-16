@@ -13,9 +13,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.TimerTask;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -24,9 +26,11 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.Timer;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 
 public class NewOrderGUI {
 
@@ -43,12 +47,36 @@ public class NewOrderGUI {
 	
 	private DefaultTableModel orderTableModel;
 	private JTable orderTable;
+	
+	
+	private JTextField textFieldOrderType;
+	private JTextField textFieldTableName;
+	private JTextField textFieldCustomerName;
+	private JTextField textFieldCustomerHouseNumber;
+	private JTextField textFieldCustomerAddress;
+	private JTextField textFieldCustomerCity;
+	private JTextField textFieldCustomerPostcode;
+	private JTextField textFieldCustomerPhoneNumber;
+	private JTextField textFieldTotalPrice;
+	
+	private String orderType;
+	private String tableName;
+	private double totalPrice;
+	
+	private JComboBox<Integer> comboboxQuantity;
+	
+	
+	
+	
+	
 
 	public NewOrderGUI() {
 		initGUI();
 	}
 
 	public void initGUI() {
+		
+		
 		panelNewOrdersMain = new JPanel(new BorderLayout());
 		JPanel panelNewOrdersMainGrid = new JPanel(new GridLayout(1, 2));
 		JPanel panelNewOrdersLeftSideGrid = new JPanel(new GridLayout(2, 1)); // Panel for select customer, select menu items, order summary table.
@@ -66,14 +94,26 @@ public class NewOrderGUI {
 		panelNewOrdersMainGrid.add(panelNewOrdersRightSideGrid);
 
 		panelNewOrdersMain.add(panelNewOrdersMainGrid, BorderLayout.CENTER);
+		
+		Timer timer = new Timer();
+		TimerTask myTask = new TimerTask() {
 
+			@Override
+			public void run() {
+				
+			}
+			
+		};
+		timer.sch
 	}
 
+	
+	
 	public JPanel selectOrderType() {
 		JPanel panelSelectOrderTypeMain = new JPanel(new BorderLayout());
 
 		JTabbedPane tabbedPane = new JTabbedPane();
-		tabbedPane.add("Seated", seatedOrderPane());
+		tabbedPane.add("Table", tablesOrderPane());
 		tabbedPane.add("Collection", collectionOrderPane());
 		tabbedPane.add("Delivery", deliveryOrderPane());
 		
@@ -89,14 +129,12 @@ public class NewOrderGUI {
 	}
 
 
-	public JPanel seatedOrderPane() {
+	public JPanel tablesOrderPane() {
 
 
 		JPanel panelSeatedOrderMain = new JPanel(new BorderLayout());
 		JPanel panelSeatedOrder = new JPanel(new GridBagLayout());
 
-
-		JButton buttonAddToOrder = new JButton("Add to Order");
 
 		
 		
@@ -115,8 +153,8 @@ public class NewOrderGUI {
 
 
 		panelSeatedOrderMain.add(jsp, BorderLayout.CENTER);
-		panelSeatedOrderMain.add(seatedOrderPaneNorthControls(), BorderLayout.NORTH);
-		panelSeatedOrderMain.add(seatedOrderPaneSouthControls(), BorderLayout.SOUTH);
+		panelSeatedOrderMain.add(tablesOrderPaneNorthControls(), BorderLayout.NORTH);
+		panelSeatedOrderMain.add(tablesOrderPaneSouthControls(), BorderLayout.SOUTH);
 
 		TitledBorder border = new TitledBorder("Tables:");
 		border.setTitleJustification(TitledBorder.LEFT);
@@ -127,7 +165,7 @@ public class NewOrderGUI {
 		return panelSeatedOrderMain;
 	}
 
-	public JPanel seatedOrderPaneNorthControls() {
+	public JPanel tablesOrderPaneNorthControls() {
 		JPanel panelSeatedOrderNorthControls = new JPanel(new GridBagLayout());
 
 		JTextField textFieldTableSearch = new JTextField(20);
@@ -164,7 +202,7 @@ public class NewOrderGUI {
 		return panelSeatedOrderNorthControls;
 	}
 
-	public JPanel seatedOrderPaneSouthControls() {
+	public JPanel tablesOrderPaneSouthControls() {
 		JPanel panelSeatedOrderSouthControls = new JPanel(new GridBagLayout());
 
 		JButton buttonRefresh = new JButton("Refresh");
@@ -178,6 +216,17 @@ public class NewOrderGUI {
 		
 		
 		JButton buttonAddToOrder = new JButton("Add to Order");
+		buttonAddToOrder.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				orderType = "TABLE";
+				tableName = getSelectedTableName();
+				
+				setOrderDetailsOrderType(orderType);
+				setOrderDetailsTableName(tableName);
+				grayCustomerInfoTextFields();
+			}
+		});
 
 		GridBagConstraints gbc = new GridBagConstraints();
 
@@ -227,14 +276,6 @@ public class NewOrderGUI {
 		
 	}
 	
-	public static void dunno() {
-		
-		//String test = "test";
-		//tablesListModel.addElement(test);
-		
-		//tablesListModel.removeAllElements();
-		
-	}
 
 	public JPanel collectionOrderPane() {
 		JPanel panelCollectionOrdersMain = new JPanel(new BorderLayout());
@@ -391,25 +432,29 @@ public class NewOrderGUI {
 
 	public JPanel pizzaMenu() {
 		JPanel panelPizzaMenu = new JPanel(new BorderLayout());
-		JPanel panelPizzaMenuButtons = new JPanel(new GridBagLayout());
+		
 
-		JButton buttonAddToOrder = new JButton("Add to Order");
-
+		
 
 
 		//JTable pizzaMenuTable = new JTable();
 		//DefaultTableModel pizzaMenuTableModel = new DefaultTableModel();
 		pizzaMenuTableModel = new DefaultTableModel(new String[] {
-				"Menu Item", "Price"
+				"Menu Item", "Price", "Quantity"
 		}, 0);
 
-		JTable pizzaMenuTable = new JTable(pizzaMenuTableModel ) {
+		pizzaMenuTable = new JTable(pizzaMenuTableModel ) {
 			public boolean isCellEditable(int row, int col) {
 				return false;
 			}
 
 			public Component prepareRenderer(TableCellRenderer r, int row, int col) {
 				Component c = super.prepareRenderer(r, row, col);
+				
+				// Next 3 lines adapted from https://stackoverflow.com/questions/17858132/automatically-adjust-jtable-column-to-fit-content/25570812
+				int rendererWidth = c.getPreferredSize().width;
+				TableColumn tableColumn = getColumnModel().getColumn(col);
+				tableColumn.setPreferredWidth(Math.max(rendererWidth + getIntercellSpacing().width, tableColumn.getPreferredWidth()));
 
 				// Rows alternate in colour for readability.
 				if (row % 2 == 0) {
@@ -430,6 +475,28 @@ public class NewOrderGUI {
 		pizzaMenuTable.setRowHeight(pizzaMenuTable.getRowHeight() + 10);
 		pizzaMenuTable.setAutoCreateRowSorter(true);
 		pizzaMenuTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		
+		pizzaMenuTable.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent event) {
+				if (event.getClickCount() == 2) {
+					// EDIT CUSTOMER - Do this is there's time.
+				}
+
+				try {
+					int row = pizzaMenuTable.getSelectedRow();
+					String houseNumber = pizzaMenuTable.getModel().getValueAt(row, 2).toString();
+					String address = pizzaMenuTable.getModel().getValueAt(row, 3).toString();
+					String city = pizzaMenuTable.getModel().getValueAt(row, 4).toString();
+					//populateMap(houseNumber, address, city);
+				} catch (Exception e) {
+					/*
+        				JOptionPane.showMessageDialog(frame, "Please select an item to edit.",
+        						"Error", JOptionPane.ERROR_MESSAGE);
+					 */
+				}
+			}
+		});
 
 
 		populatePizzaMenuTable();
@@ -443,6 +510,48 @@ public class NewOrderGUI {
 		pizzaMenuTable.setFillsViewportHeight(true);
 
 
+		
+
+		/*
+		TitledBorder border = new TitledBorder("Menu:");
+		border.setTitleJustification(TitledBorder.LEFT);
+		border.setTitlePosition(TitledBorder.TOP);
+		panelPizzaMenu.setBorder(border);
+		*/
+		
+		
+		
+		panelPizzaMenu.add(jsp, BorderLayout.CENTER);
+
+
+
+		panelPizzaMenu.add(pizzaMenuSouthControls(), BorderLayout.SOUTH);
+
+
+		return panelPizzaMenu;
+	}
+	
+	public JPanel pizzaMenuSouthControls() {
+		JPanel panelPizzaMenuButtons = new JPanel(new GridBagLayout());
+		
+		JButton buttonAddToOrder = new JButton("Add to Order");
+		buttonAddToOrder.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Object[] data = {getSelectedPizzaMenuItem(), getSelectedPizzaMenuItemPrice(), getQuantity()
+				};
+				orderTableModel.addRow(data);
+				
+				totalPrice += Double.parseDouble(getSelectedPizzaMenuItemPrice()) * Integer.parseInt(getQuantity());
+				setTotalPrice(totalPrice);
+			}
+		});
+		
+		comboboxQuantity = new JComboBox<Integer>();
+		for (int i = 0; i <= 50; i ++) {
+			comboboxQuantity.addItem(i);;
+		}
+		
 		GridBagConstraints gbc = new GridBagConstraints();
 
 		gbc.gridx = 20;
@@ -454,24 +563,19 @@ public class NewOrderGUI {
 		gbc.gridx++;
 		gbc.weightx = 0;
 		gbc.weighty = 0;
-		panelPizzaMenuButtons.add(buttonAddToOrder, gbc);
-
-		/*
-		TitledBorder border = new TitledBorder("Menu:");
-		border.setTitleJustification(TitledBorder.LEFT);
-		border.setTitlePosition(TitledBorder.TOP);
-		panelPizzaMenu.setBorder(border);
-		*/
+		panelPizzaMenuButtons.add(new JLabel("Quantity: "), gbc);
 		
-		panelPizzaMenu.add(jsp, BorderLayout.CENTER);
-
-
-
-		panelPizzaMenu.add(panelPizzaMenuButtons, BorderLayout.SOUTH);
-
-
-		return panelPizzaMenu;
+		gbc.gridx++;
+		panelPizzaMenuButtons.add(comboboxQuantity, gbc);
+		
+		gbc.gridx++;
+		panelPizzaMenuButtons.add(buttonAddToOrder, gbc);
+		
+		return panelPizzaMenuButtons;
 	}
+	
+	
+	
 
 	public void populatePizzaMenuTable() {
 		int rows = pizzaMenuTableModel.getRowCount();
@@ -499,7 +603,7 @@ public class NewOrderGUI {
 		}
 	}
 
-
+	
 
 	public JPanel sidesMenu() {
 		JPanel panelSidesMenu = new JPanel();
@@ -601,15 +705,39 @@ public class NewOrderGUI {
 		JPanel panelOrderSummaryMain = new JPanel(new BorderLayout());
 		JPanel panelOrderSummary = new JPanel(new GridBagLayout());
 		
-		JTextField textFieldOrderType = new JTextField(20);
-		JTextField textFieldTableName = new JTextField(20);
-		JTextField textFieldCustomerName = new JTextField(20);
-		JTextField textFieldCustomerHouseNumber = new JTextField(20);
-		JTextField textFieldCustomerAddress = new JTextField(20);
-		JTextField textFieldCustomerCity = new JTextField(20);
-		JTextField textFieldCustomerPostcode = new JTextField(20);
-		JTextField textFieldCustomerPhoneNumber = new JTextField(20);
-		JTextField textFieldTotalPrice = new JTextField(20);
+		textFieldOrderType = new JTextField(20);
+		textFieldOrderType.setEditable(false);
+		
+		textFieldTableName = new JTextField(20);
+		textFieldTableName.setEditable(false);
+		
+		textFieldCustomerName = new JTextField(20);
+		textFieldCustomerName.setEditable(false);
+		
+		textFieldCustomerHouseNumber = new JTextField(20);
+		textFieldCustomerHouseNumber.setEditable(false);
+		
+		textFieldCustomerAddress = new JTextField(20);
+		textFieldCustomerAddress.setEditable(false);
+		
+		textFieldCustomerCity = new JTextField(20);
+		textFieldCustomerCity.setEditable(false);
+		
+		textFieldCustomerPostcode = new JTextField(20);
+		textFieldCustomerPostcode.setEditable(false);
+		
+		textFieldCustomerPhoneNumber = new JTextField(20);
+		textFieldCustomerPhoneNumber.setEditable(false);
+		
+		textFieldTotalPrice = new JTextField(20);
+		textFieldTotalPrice.setEditable(false);
+		
+		
+		
+		
+		
+		
+		
 		
 		GridBagConstraints gbc = new GridBagConstraints();
 		
@@ -721,8 +849,61 @@ public class NewOrderGUI {
 		return panelOrderSummarySouth;
 		
 	}
-
-
+	
+	public String getSelectedTableName() {
+		System.out.println("SELECTED TABLE NAME " + tablesList.getSelectedValue().toString());
+		return tablesList.getSelectedValue().toString();
+	}
+	
+	public String getSelectedPizzaMenuItem() {
+		
+		
+		
+		String pizzaMenuItemName;
+		
+		int column = 0;
+		int row = pizzaMenuTable.getSelectedRow();
+		pizzaMenuItemName = pizzaMenuTable.getModel().getValueAt(row, 0).toString();
+		
+		System.out.println("SELECTED ROW sff" + pizzaMenuItemName);
+		
+		return pizzaMenuItemName;
+	}
+	
+	public String getSelectedPizzaMenuItemPrice() {
+		String pizzaMenuItemPrice;
+		
+		int column = 1;
+		int row = pizzaMenuTable.getSelectedRow();
+		pizzaMenuItemPrice = pizzaMenuTableModel.getValueAt(row, column).toString();
+		
+		return pizzaMenuItemPrice;
+	}
+	
+	public String getQuantity() {
+		return comboboxQuantity.getSelectedItem().toString();
+	}
+	
+	public void setOrderDetailsOrderType(String orderType) {
+		textFieldOrderType.setText(orderType);
+	}
+	
+	public void setOrderDetailsTableName(String tableName	) {
+		textFieldTableName.setText(tableName);
+	}
+	
+	public void grayCustomerInfoTextFields() { // Used when order type is TABLE
+		textFieldCustomerName.setBackground(Color.LIGHT_GRAY);
+		textFieldCustomerHouseNumber.setBackground(Color.LIGHT_GRAY);
+		textFieldCustomerAddress.setBackground(Color.LIGHT_GRAY);
+		textFieldCustomerCity.setBackground(Color.LIGHT_GRAY);
+		textFieldCustomerPostcode.setBackground(Color.LIGHT_GRAY);
+		textFieldCustomerPhoneNumber.setBackground(Color.LIGHT_GRAY);
+	}
+	
+	public void setTotalPrice(Double totalPrice) {
+		textFieldTotalPrice.setText(totalPrice.toString());
+	}
 
 	public JPanel getOrdersPanel() {
 		return panelNewOrdersMain;
