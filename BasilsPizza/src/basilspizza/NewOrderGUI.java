@@ -95,7 +95,8 @@ public class NewOrderGUI {
 
 		panelNewOrdersMain.add(panelNewOrdersMainGrid, BorderLayout.CENTER);
 		
-		Timer timer = new Timer();
+		/*
+		//Timer timer = new Timer();
 		TimerTask myTask = new TimerTask() {
 
 			@Override
@@ -104,7 +105,9 @@ public class NewOrderGUI {
 			}
 			
 		};
-		timer.sch
+		//timer.sch
+		 
+		 */
 	}
 
 	
