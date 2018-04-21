@@ -70,7 +70,7 @@ public class AddStaffDialogGUI {
 				
 				Staff s = new Staff(employeeNumber, firstName, lastName, jobTitle);
 				
-				System.out.println("ADDING STAFF TO DATEBASE");
+				System.out.println("ADDING STAFF TO DATABASE");
 				try {
 					s.addNewStaffToDatabase();
 				} catch (SQLException e1) {

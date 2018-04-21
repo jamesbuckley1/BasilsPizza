@@ -41,8 +41,9 @@ public class GUI {
     	        tabbedPane("Tables", new TablesGUI().getTablesPanel());
     	        tabbedPane("Stock", new StockGUI().getStockPanel());
     	        tabbedPane("Customers", new CustomerGUI().getCustomerPanel());
+    	        tabbedPane("Menu", new MenuGUI().getMenuPanel());
     	        tabbedPane("Staff", new StaffGUI().getStaffPanel());
-    	        tabbedPane("Admin", new MenuGUI().getMenuPanel());
+    	        
     	        //tabbedPane("Menu", new MenuGUI().getMenuPanel());
     	        createAndShowGUI();
     			

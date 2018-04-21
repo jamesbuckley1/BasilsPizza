@@ -62,7 +62,7 @@ public class Database {
 	// MENU ITEM SQL STRINGS
 	
 	private final static String createMenuItemTableSql = "CREATE TABLE IF NOT EXISTS menu_item (menu_item_id INTEGER PRIMARY KEY AUTOINCREMENT, item_name TEXT NOT NULL, item_type TEXT NOT NULL, item_price DOUBLE NOT NULL);";
-	private final static String selectMenuItemSql = "SELECT * FROM menu_item;";
+	private final static String selectMenuItemsSql = "SELECT * FROM menu_item WHERE item_type = ?";
 	private final static String insertMenuItemSql = "INSERT INTO menu_item (item_name, item_type, item_price) VALUES (?, ?, ?);";
 	
 	
@@ -680,12 +680,46 @@ public class Database {
 	
 	///////// MENU ITEMS //////////
 	
+	/*
 	public static void selectMenuItems() {
 		try {
 			menuItemArray = new ArrayList<MenuItem>();
 			openDB();
 
 			PreparedStatement selectMenuItem = conn.prepareStatement(selectMenuItemSql);
+			ResultSet rs = selectMenuItem.executeQuery();
+
+			while (rs.next()) {
+				String itemName = rs.getString("item_name");
+				String itemType = rs.getString("item_type");
+				Double itemPrice = rs.getDouble("item_price");
+
+				MenuItem m = new MenuItem(itemName, itemType, itemPrice);
+				menuItemArray.add(m);
+			}
+
+			rs.close();
+			selectMenuItem.close();
+			closeDB();
+
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		}
+		System.out.println("SELECT menu successful.");
+	}
+	*/
+	
+	public static void selectMenuItems(String menuItemType) {
+		try {
+			menuItemArray = new ArrayList<MenuItem>();
+			openDB();
+
+			PreparedStatement selectMenuItem = conn.prepareStatement(selectMenuItemsSql);
+			
+			selectMenuItem.setString(1, menuItemType);
+			
 			ResultSet rs = selectMenuItem.executeQuery();
 
 			while (rs.next()) {
