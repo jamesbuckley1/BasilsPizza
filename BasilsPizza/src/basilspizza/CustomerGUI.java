@@ -119,7 +119,7 @@ public class CustomerGUI {
 		customersTable.setFont(new Font("", 0, 14));
 		customersTable.setRowHeight(customersTable.getRowHeight() + 10);
 		customersTable.setAutoCreateRowSorter(true);
-		customersTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		customersTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		customersTable.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent event) {
@@ -305,6 +305,7 @@ public class CustomerGUI {
 		// Action listener to add a new customer. Used by "Add" button and also when user presses enter.
 		Action addCustomerAction = new AbstractAction() {
 			public void actionPerformed(ActionEvent e) {
+				
 				String firstName = textFieldCustomerFirstName.getText();
 				String lastName = textFieldCustomerLastName.getText();
 				String houseNumber = textFieldCustomerHouseNumber.getText();
@@ -526,7 +527,7 @@ public class CustomerGUI {
 		customersOrdersTable.setFont(new Font("", 0, 14));
 		customersOrdersTable.setRowHeight(customersOrdersTable.getRowHeight() + 10);
 		customersOrdersTable.setAutoCreateRowSorter(true);
-		customersOrdersTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		customersOrdersTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 
 		// THIS PROBABLY WON'T BE NEEDED.
 		customersOrdersTable.addMouseListener(new MouseAdapter() {
@@ -658,13 +659,13 @@ public class CustomerGUI {
 
 		for (int i = 0; i < Database.getCustomersArray().size(); i++) {
 
-			String firstName = Database.getCustomersArray().get(i).getFirstName();
-			String lastName = Database.getCustomersArray().get(i).getLastName(); 
-			String houseNumber = Database.getCustomersArray().get(i).getHouseNumber();
-			String address = Database.getCustomersArray().get(i).getAddress();
-			String city = Database.getCustomersArray().get(i).getCity();
-			String postcode = Database.getCustomersArray().get(i).getPostcode();
-			String phoneNumber = Database.getCustomersArray().get(i).getPhoneNumber();
+			String firstName = Database.getCustomersArray().get(i).getCustomerFirstName();
+			String lastName = Database.getCustomersArray().get(i).getCustomerLastName(); 
+			String houseNumber = Database.getCustomersArray().get(i).getCustomerHouseNumber();
+			String address = Database.getCustomersArray().get(i).getCustomerAddress();
+			String city = Database.getCustomersArray().get(i).getCustomerCity();
+			String postcode = Database.getCustomersArray().get(i).getCustomerPostcode();
+			String phoneNumber = Database.getCustomersArray().get(i).getCustomerPhoneNumber();
 
 
 			Object[] data = {firstName, lastName, houseNumber, address, city,

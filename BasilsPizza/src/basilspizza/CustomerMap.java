@@ -40,9 +40,9 @@ public class CustomerMap {
 	}
 	// Add customer constructor
 	public CustomerMap(Customer c) {
-		this.houseNumber = c.getHouseNumber();
-		this.address = c.getAddress().replace(" ", "+");
-		this.city = c.getCity().replace(" ", "+");
+		this.houseNumber = c.getCustomerHouseNumber();
+		this.address = c.getCustomerAddress().replace(" ", "+");
+		this.city = c.getCustomerCity().replace(" ", "+");
 
 	}
 	// Constructor for customer info dialog 

@@ -27,7 +27,7 @@ import javax.swing.table.TableColumn;
 public class MenuGUI {
 
 	JPanel panelMenuMain;
-	private JTable menuTable;
+	private JTable pizzaMenuTable, sidesMenuTable, drinksMenuTable, dessertsMenuTable;
 	private DefaultTableModel pizzaMenuTableModel, sidesMenuTableModel, drinksMenuTableModel, dessertsMenuTableModel;
 	
 	private JComboBox comboboxMenuItemType;
@@ -35,7 +35,6 @@ public class MenuGUI {
 
 	public MenuGUI() {
 
-		initMenuTable();
 
 		panelMenuMain = new JPanel(new BorderLayout());
 		
@@ -46,66 +45,6 @@ public class MenuGUI {
 
 	}
 
-	public void initMenuTable() {
-		
-		menuTable = new JTable(sidesMenuTableModel) {
-			public boolean isCellEditable(int row, int col) {
-				return false;
-			}
-
-			public Component prepareRenderer(TableCellRenderer r, int row, int col) {
-				Component c = super.prepareRenderer(r, row, col);
-
-				// Next 3 lines adapted from https://stackoverflow.com/questions/17858132/automatically-adjust-jtable-column-to-fit-content/25570812
-				int rendererWidth = c.getPreferredSize().width;
-				TableColumn tableColumn = getColumnModel().getColumn(col);
-				tableColumn.setPreferredWidth(Math.max(rendererWidth + getIntercellSpacing().width, tableColumn.getPreferredWidth()));
-
-				// Rows alternate in colour for readability.
-				if (row % 2 == 0) {
-					c.setBackground(Color.WHITE);
-				} else {
-					c.setBackground(new Color(234, 234, 234));
-				}
-
-				if (isRowSelected(row)) {
-					c.setBackground(new Color(24, 134, 254));
-				}
-
-				return c;
-			}
-		};
-		
-		menuTable.setFont(new Font("", 0, 14));
-		menuTable.setRowHeight(menuTable.getRowHeight() + 10);
-		menuTable.setAutoCreateRowSorter(true);
-		menuTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-
-		menuTable.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent event) {
-				if (event.getClickCount() == 2) {
-					// EDIT CUSTOMER - Do this is there's time.
-				}
-
-				try {
-					int row = menuTable.getSelectedRow();
-					String houseNumber = menuTable.getModel().getValueAt(row, 2).toString();
-					String address = menuTable.getModel().getValueAt(row, 3).toString();
-					String city = menuTable.getModel().getValueAt(row, 4).toString();
-					//populateMap(houseNumber, address, city);
-				} catch (Exception e) {
-					/*
-        				JOptionPane.showMessageDialog(frame, "Please select an item to edit.",
-        						"Error", JOptionPane.ERROR_MESSAGE);
-					 */
-				}
-			}
-		});
-		
-		
-
-	}
 
 	public JPanel selectMenu() {
 		JPanel panelSelectMenu = new JPanel(new BorderLayout());
@@ -134,10 +73,10 @@ public class MenuGUI {
 		JPanel panelPizzaMenu = new JPanel(new BorderLayout());
 
 		pizzaMenuTableModel = new DefaultTableModel(new String[] {
-				"Menu Item", "Price"
+				"Menu Item ID", "Menu Item", "Price"
 		}, 0);
 
-		JTable pizzaMenuTable = new JTable(pizzaMenuTableModel) { // Needs it's own JTable otherwise it doesn't work.
+		pizzaMenuTable = new JTable(pizzaMenuTableModel) { // Needs it's own JTable otherwise it doesn't work.
 			public boolean isCellEditable(int row, int col) {
 				return false;
 			}
@@ -168,7 +107,7 @@ public class MenuGUI {
 		pizzaMenuTable.setFont(new Font("", 0, 14));
 		pizzaMenuTable.setRowHeight(pizzaMenuTable.getRowHeight() + 10);
 		pizzaMenuTable.setAutoCreateRowSorter(true);
-		pizzaMenuTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		pizzaMenuTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 
 		pizzaMenuTable.addMouseListener(new MouseAdapter() {
 			@Override
@@ -225,12 +164,13 @@ public class MenuGUI {
 
 		for (int i = 0; i < Database.getMenuItemArray().size(); i++) {
 
+			int itemId = Database.getMenuItemArray().get(i).getMenuItemId();
 			String itemName = Database.getMenuItemArray().get(i).getItemName();
 			double itemPrice = Database.getMenuItemArray().get(i).getItemPrice();
 
 
 
-			Object[] data = {itemName, itemPrice
+			Object[] data = {itemId, itemName, itemPrice
 			};
 
 			pizzaMenuTableModel.addRow(data);
@@ -238,6 +178,8 @@ public class MenuGUI {
 			//menuTable.getSelectionModel().setSelectionInterval(0, 0);
 			//menuTable.setColumnSelectionInterval(0, 0);
 			//menuTable.requestFocusInWindow();
+			
+			pizzaMenuTable.setModel(pizzaMenuTableModel);
 		}
 	}
 
@@ -249,8 +191,63 @@ public class MenuGUI {
 		JPanel panelSidesMenu = new JPanel(new BorderLayout());
 
 		sidesMenuTableModel = new DefaultTableModel(new String[] {
-				"Menu Item", "Price"
+				"Menu Item ID", "Menu Item", "Price"
 		}, 0);
+		
+		sidesMenuTable = new JTable(sidesMenuTableModel) { // Needs it's own JTable otherwise it doesn't work.
+			public boolean isCellEditable(int row, int col) {
+				return false;
+			}
+
+			public Component prepareRenderer(TableCellRenderer r, int row, int col) {
+				Component c = super.prepareRenderer(r, row, col);
+
+				// Next 3 lines adapted from https://stackoverflow.com/questions/17858132/automatically-adjust-jtable-column-to-fit-content/25570812
+				int rendererWidth = c.getPreferredSize().width;
+				TableColumn tableColumn = getColumnModel().getColumn(col);
+				tableColumn.setPreferredWidth(Math.max(rendererWidth + getIntercellSpacing().width, tableColumn.getPreferredWidth()));
+
+				// Rows alternate in colour for readability.
+				if (row % 2 == 0) {
+					c.setBackground(Color.WHITE);
+				} else {
+					c.setBackground(new Color(234, 234, 234));
+				}
+
+				if (isRowSelected(row)) {
+					c.setBackground(new Color(24, 134, 254));
+				}
+
+				return c;
+			}
+		};
+
+		sidesMenuTable.setFont(new Font("", 0, 14));
+		sidesMenuTable.setRowHeight(sidesMenuTable.getRowHeight() + 10);
+		sidesMenuTable.setAutoCreateRowSorter(true);
+		sidesMenuTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+
+		sidesMenuTable.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent event) {
+				if (event.getClickCount() == 2) {
+					// EDIT CUSTOMER - Do this is there's time.
+				}
+
+				try {
+					int row = sidesMenuTable.getSelectedRow();
+					String houseNumber = sidesMenuTable.getModel().getValueAt(row, 2).toString();
+					String address = sidesMenuTable.getModel().getValueAt(row, 3).toString();
+					String city = sidesMenuTable.getModel().getValueAt(row, 4).toString();
+					//populateMap(houseNumber, address, city);
+				} catch (Exception e) {
+					/*
+        				JOptionPane.showMessageDialog(frame, "Please select an item to edit.",
+        						"Error", JOptionPane.ERROR_MESSAGE);
+					 */
+				}
+			}
+		});
 
 
 
@@ -260,10 +257,10 @@ public class MenuGUI {
 
 		
 		
-		menuTable.setModel(sidesMenuTableModel);
+		sidesMenuTable.setModel(sidesMenuTableModel);
 
 
-		JScrollPane jsp = new JScrollPane(menuTable,
+		JScrollPane jsp = new JScrollPane(sidesMenuTable,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
@@ -288,12 +285,13 @@ public class MenuGUI {
 
 		for (int i = 0; i < Database.getMenuItemArray().size(); i++) {
 
+			int itemId = Database.getMenuItemArray().get(i).getMenuItemId();
 			String itemName = Database.getMenuItemArray().get(i).getItemName();
 			double itemPrice = Database.getMenuItemArray().get(i).getItemPrice();
 
 
 
-			Object[] data = {itemName, itemPrice
+			Object[] data = {itemId, itemName, itemPrice
 			};
 
 			sidesMenuTableModel.addRow(data);
@@ -308,7 +306,7 @@ public class MenuGUI {
 		JPanel panelDrinksMenu = new JPanel(new BorderLayout());
 
 		drinksMenuTableModel = new DefaultTableModel(new String[] {
-				"Menu Item", "Price"
+				"Menu Item ID", "Menu Item", "Price"
 		}, 0);
 
 		JTable drinksMenuTable = new JTable(drinksMenuTableModel) { // Needs it's own JTable otherwise it doesn't work.
@@ -342,7 +340,7 @@ public class MenuGUI {
 		drinksMenuTable.setFont(new Font("", 0, 14));
 		drinksMenuTable.setRowHeight(drinksMenuTable.getRowHeight() + 10);
 		drinksMenuTable.setAutoCreateRowSorter(true);
-		drinksMenuTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		drinksMenuTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 
 		drinksMenuTable.addMouseListener(new MouseAdapter() {
 			@Override
@@ -399,12 +397,13 @@ public class MenuGUI {
 
 		for (int i = 0; i < Database.getMenuItemArray().size(); i++) {
 
+			int itemId = Database.getMenuItemArray().get(i).getMenuItemId();
 			String itemName = Database.getMenuItemArray().get(i).getItemName();
 			double itemPrice = Database.getMenuItemArray().get(i).getItemPrice();
 
 
 
-			Object[] data = {itemName, itemPrice
+			Object[] data = {itemId, itemName, itemPrice
 			};
 
 			drinksMenuTableModel.addRow(data);
@@ -420,7 +419,7 @@ public class MenuGUI {
 		JPanel panelDessertsMenu = new JPanel(new BorderLayout());
 
 		dessertsMenuTableModel = new DefaultTableModel(new String[] {
-				"Menu Item", "Price"
+				"Menu Item ID", "Menu Item", "Price"
 		}, 0);
 
 		JTable dessertsMenuTable = new JTable(dessertsMenuTableModel) { // Needs it's own JTable otherwise it doesn't work.
@@ -454,7 +453,7 @@ public class MenuGUI {
 		dessertsMenuTable.setFont(new Font("", 0, 14));
 		dessertsMenuTable.setRowHeight(dessertsMenuTable.getRowHeight() + 10);
 		dessertsMenuTable.setAutoCreateRowSorter(true);
-		dessertsMenuTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		dessertsMenuTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 
 		dessertsMenuTable.addMouseListener(new MouseAdapter() {
 			@Override
@@ -511,12 +510,13 @@ public class MenuGUI {
 
 		for (int i = 0; i < Database.getMenuItemArray().size(); i++) {
 
+			int itemId = Database.getMenuItemArray().get(i).getMenuItemId();
 			String itemName = Database.getMenuItemArray().get(i).getItemName();
 			double itemPrice = Database.getMenuItemArray().get(i).getItemPrice();
 
 
 
-			Object[] data = {itemName, itemPrice
+			Object[] data = {itemId, itemName, itemPrice
 			};
 
 			dessertsMenuTableModel.addRow(data);
@@ -535,6 +535,11 @@ public class MenuGUI {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				new AddMenuItemDialogGUI();
+				populatePizzaMenuTable();
+				populateSidesMenuTable();
+				populateDrinksMenuTable();
+				populateDessertsMenuTable();
+				
 			}
 		});
 		
@@ -570,10 +575,10 @@ public class MenuGUI {
 		String pizzaMenuItemName;
 
 		int column = 0;
-		int row = menuTable.getSelectedRow();
-		pizzaMenuItemName = menuTable.getModel().getValueAt(row, 0).toString();
+		int row = pizzaMenuTable.getSelectedRow();
+		pizzaMenuItemName = pizzaMenuTable.getModel().getValueAt(row, 0).toString();
 
-		System.out.println("SELECTED ROW sff" + pizzaMenuItemName);
+		System.out.println("SELECTED ROW " + pizzaMenuItemName);
 
 		return pizzaMenuItemName;
 	}

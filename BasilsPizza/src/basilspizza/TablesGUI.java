@@ -413,7 +413,7 @@ public class TablesGUI {
 		tableOrdersTable.setFont(new Font("", 0, 14));
 		tableOrdersTable.setRowHeight(tableOrdersTable.getRowHeight() + 10);
 		tableOrdersTable.setAutoCreateRowSorter(true);
-		tableOrdersTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		tableOrdersTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		tableOrdersTable.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent event) {

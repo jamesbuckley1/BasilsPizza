@@ -230,6 +230,7 @@ public class StaffGUI {
 			}
 		});
 
+		// Following search code adapted from https://stackoverflow.com/questions/22066387/how-to-search-an-element-in-a-jtable-java
 		TableRowSorter<TableModel> rowSorter = new TableRowSorter<>(staffClockedInTable.getModel());
 		staffClockedInTable.setRowSorter(rowSorter);
 

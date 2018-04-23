@@ -9,6 +9,7 @@ import org.json.simple.parser.JSONParser;
 
 public class Customer {
 	
+	private int customerId;
 	private String firstName;
 	private String lastName;
 	private String houseNumber;
@@ -17,7 +18,20 @@ public class Customer {
 	private String postcode;
 	private String phoneNumber;
 	
+	// Add new customer constructor
 	public Customer(String firstName, String lastName, String houseNumber, String address, String city, String postcode, String phoneNumber) {
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.houseNumber = houseNumber;
+		this.address = address;
+		this.city = city;
+		this.postcode = postcode;
+		this.phoneNumber = phoneNumber;
+	}
+	
+	// Select from database constructor
+	public Customer(int customerId, String firstName, String lastName, String houseNumber, String address, String city, String postcode, String phoneNumber) {
+		this.customerId = customerId;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.houseNumber = houseNumber;
@@ -91,60 +105,63 @@ public class Customer {
 		Database.insertCustomer(firstName, lastName, houseNumber, address, city, postcode, phoneNumber);
 	}
 	
+	public int getCustomerId() {
+		return customerId;
+	}
 	
-	public String getFirstName() {
+	public String getCustomerFirstName() {
 		return firstName;
 	}
 
-	public void setFirstName(String firstName) {
+	public void setCustomerFirstName(String firstName) {
 		this.firstName = firstName;
 	}
 
-	public String getLastName() {
+	public String getCustomerLastName() {
 		return lastName;
 	}
 
-	public void setLastName(String lastName) {
+	public void setCustomerLastName(String lastName) {
 		this.lastName = lastName;
 	}
 
-	public String getHouseNumber() {
+	public String getCustomerHouseNumber() {
 		return houseNumber;
 	}
 
-	public void setHouseNumber(String houseNumber) {
+	public void setCustomerHouseNumber(String houseNumber) {
 		this.houseNumber = houseNumber;
 	}
 
-	public String getAddress() {
+	public String getCustomerAddress() {
 		return address;
 	}
 
-	public void setAddress(String address) {
+	public void setCustomerAddress(String address) {
 		this.address = address;
 	}
 
-	public String getCity() {
+	public String getCustomerCity() {
 		return city;
 	}
 
-	public void setCity(String city) {
+	public void setCustomerCity(String city) {
 		this.city = city;
 	}
 
-	public String getPostcode() {
+	public String getCustomerPostcode() {
 		return postcode;
 	}
 
-	public void setPostcode(String postcode) {
+	public void setCustomerPostcode(String postcode) {
 		this.postcode = postcode;
 	}
 
-	public String getPhoneNumber() {
+	public String getCustomerPhoneNumber() {
 		return phoneNumber;
 	}
 
-	public void setPhoneNumber(String phoneNumber) {
+	public void setCustomerPhoneNumber(String phoneNumber) {
 		this.phoneNumber = phoneNumber;
 	}
 	
