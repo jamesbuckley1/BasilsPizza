@@ -4,7 +4,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class Order {
+public class TableOrder {
 	
 	private int orderId; // Used only when selecting from database.
 	private String dateTime; // Used only when selecting from database.
@@ -12,35 +12,38 @@ public class Order {
 	private int menuItemId;
 	private int quantity;
 	private String menuItemName;
-	double menuItemPrice;
+	private double menuItemPrice;
 	
-	// Add new order constructor
-	public Order(String tableName) {
+	// Add new table order constructor
+	public TableOrder(String tableName) {
 		this.tableName = tableName;
 	}
 	
-	// Add new order item constructor.
-	public Order(String tableName, int menuItemId, int quantity) {
+	// Add new table order item constructor.
+	public TableOrder(String tableName, int menuItemId, int quantity) {
 		this.tableName = tableName;
 		this.menuItemId = menuItemId;
 		this.quantity = quantity;
 		
 	}
 	
-	// Select order from database constructor.
-	public Order(int orderId, String tableName, String dateTime) {
+	// Select table order from database constructor.
+	public TableOrder(int orderId, String tableName, String dateTime) {
 		this.orderId = orderId;
 		this.tableName = tableName;
 		this.dateTime = dateTime;
 	}
 	
-	// Select order item from database constructor.
-	public Order(int orderId, int menuItemId, String menuItemName, double menuItemPrice) {
+	// Select table order item from database constructor.
+	public TableOrder(int orderId, int menuItemId, String menuItemName, int quantity, double menuItemPrice) {
 		this.orderId = orderId;
 		this.menuItemId = menuItemId;
 		this.menuItemName = menuItemName;
+		this.quantity = quantity;
 		this.menuItemPrice = menuItemPrice;
 	}
+	
+	
 	
 	public String getCurrentDateTime() {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -70,6 +73,10 @@ public class Order {
 	
 	public String getMenuItemName() {
 		return menuItemName;
+	}
+	
+	public int getQuantity() {
+		return quantity;
 	}
 	
 	public double getMenuItemPrice() {

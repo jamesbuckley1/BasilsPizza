@@ -17,6 +17,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,6 +34,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
+import javax.swing.Timer;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -40,6 +43,9 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 
 public class NewOrderGUI {
 
@@ -86,7 +92,11 @@ public class NewOrderGUI {
 	boolean boolTextFieldDrinksMenuSearchPlaceholderText = false;
 	boolean boolTextFieldDessertsMenuSearchPlaceholderText = false;
 
-	HashMap orderHM;
+	HashMap orderMenuItemQuantityHashMap;
+	Multimap<Integer, Integer> orderMenuItemQuantityMultimap;
+	
+	private int selectedTablesListRow, selectedDeliveryCustomersTableRow, selectedPizzaMenuTableRow,
+				selectedSidesMenuTableRow, selectedDrinksMenuTableRow, selectedDessertsMenuTableRow;
 
 
 
@@ -132,24 +142,36 @@ public class NewOrderGUI {
 
 		resetOrder();
 
-		/*
-		//Timer timer = new Timer();
-		TimerTask myTask = new TimerTask() {
-
-			@Override
-			public void run() {
-
-			}
-
-		};
-		//timer.sch
-
-		 */
+		
+		startRefreshTablesTimer();
 
 
 	}
 
-
+	// Automatically refreshes tables every 5 seconds
+	public void startRefreshTablesTimer() {
+				Timer timer = new Timer(1000, new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						System.out.println("Populating tables");
+						populateTables();
+						setTablesListSelectedRow(); // Run this method so user does not lose selected item.
+						populateDeliveryCustomers();
+						setDeliveryCustomersTableSelectedRow();
+						populatePizzaMenuTable();
+						setPizzaMenuTableSelectedRow();
+						populateSidesMenuTable();
+						setSidesMenuTableSelectedRow();
+						populateDrinksMenuTable();
+						setDrinksMenuTableSelectedRow();
+						populateDessertsMenuTable();
+						setDessertsMenuTableSelectedRow();
+						
+					}
+				});
+				
+				timer.start();
+	}
 
 	public JPanel selectOrderType() {
 		JPanel panelSelectOrderTypeMain = new JPanel(new BorderLayout());
@@ -184,7 +206,8 @@ public class NewOrderGUI {
 		tablesList = new JList(tablesListModel);
 		MouseListener mouseListener = new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
-				//setSpecialRequirements(getSelectedTable());
+				selectedTablesListRow = tablesList.getSelectedIndex();
+				System.out.println("selectedTablesListRow " + selectedTablesListRow);
 			}
 		};
 		tablesList.addMouseListener(mouseListener);
@@ -247,14 +270,7 @@ public class NewOrderGUI {
 	public JPanel tablesOrderPaneSouthControls() {
 		JPanel panelSeatedOrderSouthControls = new JPanel(new GridBagLayout());
 
-		JButton buttonRefresh = new JButton("Refresh");
-		buttonRefresh.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				System.out.println("TABLE REFRESH");
-				populateTables();
-			}
-		});
+		
 
 
 		JButton buttonAddToOrder = new JButton("Add to Order");
@@ -278,12 +294,11 @@ public class NewOrderGUI {
 		gbc.weighty = 1.0;
 		panelSeatedOrderSouthControls.add(new JLabel(), gbc);
 
+		
+
 		gbc.gridx++;
 		gbc.weightx = 0;
 		gbc.weighty = 0;
-		panelSeatedOrderSouthControls.add(buttonRefresh, gbc);
-
-		gbc.gridx++;
 		panelSeatedOrderSouthControls.add(buttonAddToOrder, gbc);
 
 
@@ -433,11 +448,8 @@ public class NewOrderGUI {
 				}
 
 				try {
-					int row = deliveryCustomersTable.getSelectedRow();
-					String houseNumber = deliveryCustomersTable.getModel().getValueAt(row, 2).toString();
-					String address = deliveryCustomersTable.getModel().getValueAt(row, 3).toString();
-					String city = deliveryCustomersTable.getModel().getValueAt(row, 4).toString();
-					//populateMap(houseNumber, address, city);
+					selectedDeliveryCustomersTableRow = deliveryCustomersTable.getSelectedRow();
+					
 				} catch (Exception e) {
 					/*
         				JOptionPane.showMessageDialog(frame, "Please select an item to edit.",
@@ -714,11 +726,8 @@ public class NewOrderGUI {
 				}
 
 				try {
-					int row = pizzaMenuTable.getSelectedRow();
-					String houseNumber = pizzaMenuTable.getModel().getValueAt(row, 2).toString();
-					String address = pizzaMenuTable.getModel().getValueAt(row, 3).toString();
-					String city = pizzaMenuTable.getModel().getValueAt(row, 4).toString();
-					//populateMap(houseNumber, address, city);
+					selectedPizzaMenuTableRow = pizzaMenuTable.getSelectedRow();
+					
 				} catch (Exception e) {
 					/*
         				JOptionPane.showMessageDialog(frame, "Please select an item to edit.",
@@ -832,13 +841,7 @@ public class NewOrderGUI {
 	public JPanel pizzaMenuSouthControls() {
 		JPanel panelPizzaMenuButtons = new JPanel(new GridBagLayout());
 
-		JButton buttonRefresh = new JButton("Refresh");
-		buttonRefresh.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				System.out.println("REFRESH PRESS");
-				populatePizzaMenuTable();
-			}
-		});
+		
 
 		comboboxPizzaMenuQuantity = new JComboBox<Integer>();
 		for (int i = 1; i <= 50; i ++) {
@@ -862,9 +865,10 @@ public class NewOrderGUI {
 				totalPrice += Double.parseDouble(getSelectedMenuItemPrice(pizzaMenuTable)) * Integer.parseInt(getQuantity(comboboxPizzaMenuQuantity));
 				setTotalPrice(totalPrice);
 				
-				orderHM.put(getSelectedMenuItemID(pizzaMenuTable), getQuantity(comboboxPizzaMenuQuantity));
+				//orderMenuItemQuantityHashMap.put(getSelectedMenuItemID(pizzaMenuTable), getQuantity(comboboxPizzaMenuQuantity));
+				//System.out.println("ADDING TO ORDER" + getSelectedMenuItemID(pizzaMenuTable) + " " + getQuantity(comboboxPizzaMenuQuantity));
 				
-				
+				orderMenuItemQuantityMultimap.put(Integer.parseInt(getSelectedMenuItemID(pizzaMenuTable)), Integer.parseInt(getQuantity(comboboxPizzaMenuQuantity)));
 			}
 			
 		});
@@ -874,11 +878,7 @@ public class NewOrderGUI {
 
 		GridBagConstraints gbc = new GridBagConstraints();
 
-		gbc.gridx = 0;
-		gbc.gridy = 0;
-		gbc.weightx = 0;
-		gbc.weighty = 0;
-		panelPizzaMenuButtons.add(buttonRefresh, gbc);
+		
 
 		gbc.gridx = 20;
 		gbc.gridy = 0;
@@ -954,11 +954,8 @@ public class NewOrderGUI {
 				}
 
 				try {
-					int row = sidesMenuTable.getSelectedRow();
-					String houseNumber = sidesMenuTable.getModel().getValueAt(row, 2).toString();
-					String address = sidesMenuTable.getModel().getValueAt(row, 3).toString();
-					String city = sidesMenuTable.getModel().getValueAt(row, 4).toString();
-					//populateMap(houseNumber, address, city);
+					selectedSidesMenuTableRow = sidesMenuTable.getSelectedRow();
+					
 				} catch (Exception e) {
 					/*
         				JOptionPane.showMessageDialog(frame, "Please select an item to edit.",
@@ -1083,7 +1080,7 @@ public class NewOrderGUI {
 				totalPrice += Double.parseDouble(getSelectedMenuItemPrice(sidesMenuTable)) * Integer.parseInt(getQuantity(comboboxSidesMenuQuantity));
 				setTotalPrice(totalPrice);
 				
-				orderHM.put(getSelectedMenuItemID(sidesMenuTable), getQuantity(comboboxSidesMenuQuantity));
+				orderMenuItemQuantityHashMap.put(getSelectedMenuItemID(sidesMenuTable), getQuantity(comboboxSidesMenuQuantity));
 			}
 		});
 
@@ -1112,6 +1109,12 @@ public class NewOrderGUI {
 		panelSidesMenuButtons.add(buttonAddToOrder, gbc);
 
 		return panelSidesMenuButtons;
+	}
+	
+	public void populateSidesMenuTable() {
+		MenuGUI m = new MenuGUI();
+		sidesMenuTableModel = m.getSidesMenuTableModel();
+		sidesMenuTable.setModel(sidesMenuTableModel);
 	}
 
 	public JPanel drinksMenuTable() {
@@ -1161,6 +1164,7 @@ public class NewOrderGUI {
 					// EDIT CUSTOMER - Do this is there's time.
 				}
 
+				selectedDrinksMenuTableRow = drinksMenuTable.getSelectedRow();
 
 			}
 		});
@@ -1282,7 +1286,7 @@ public class NewOrderGUI {
 				totalPrice += Double.parseDouble(getSelectedMenuItemPrice(drinksMenuTable)) * Integer.parseInt(getQuantity(comboboxDrinksMenuQuantity));
 				setTotalPrice(totalPrice);
 				
-				orderHM.put(getSelectedMenuItemID(drinksMenuTable), getQuantity(comboboxDrinksMenuQuantity));
+				orderMenuItemQuantityHashMap.put(getSelectedMenuItemID(drinksMenuTable), getQuantity(comboboxDrinksMenuQuantity));
 			}
 		});
 
@@ -1311,6 +1315,12 @@ public class NewOrderGUI {
 		panelDrinksMenuButtons.add(buttonAddToOrder, gbc);
 
 		return panelDrinksMenuButtons;
+	}
+	
+	public void populateDrinksMenuTable() {
+		MenuGUI m = new MenuGUI();
+		drinksMenuTableModel = m.getDrinksMenuTableModel();
+		drinksMenuTable.setModel(drinksMenuTableModel);
 	}
 
 	public JPanel dessertsMenuTable() {
@@ -1360,7 +1370,7 @@ public class NewOrderGUI {
 					// EDIT CUSTOMER - Do this is there's time.
 				}
 
-
+				selectedDessertsMenuTableRow = dessertsMenuTable.getSelectedRow();
 			}
 		});
 
@@ -1477,7 +1487,7 @@ public class NewOrderGUI {
 				totalPrice += Double.parseDouble(getSelectedMenuItemPrice(dessertsMenuTable)) * Integer.parseInt(getQuantity(comboboxDessertsMenuQuantity));
 				setTotalPrice(totalPrice);
 				
-				orderHM.put(getSelectedMenuItemID(dessertsMenuTable), getQuantity(comboboxDessertsMenuQuantity));
+				orderMenuItemQuantityHashMap.put(getSelectedMenuItemID(dessertsMenuTable), getQuantity(comboboxDessertsMenuQuantity));
 			}
 		});
 
@@ -1506,6 +1516,12 @@ public class NewOrderGUI {
 		panelDessertsMenuButtons.add(buttonAddToOrder, gbc);
 
 		return panelDessertsMenuButtons;
+	}
+	
+	public void populateDessertsMenuTable() {
+		MenuGUI m = new MenuGUI();
+		dessertsMenuTableModel = m.getDessertsMenuTableModel();
+		dessertsMenuTable.setModel(dessertsMenuTableModel);
 	}
 
 	/*
@@ -1796,26 +1812,46 @@ public class NewOrderGUI {
 				
 				if (getOrderDetailsOrderType().equals("TABLE")) {
 					
-					Order newOrder = new Order(getOrderDetailsTableName());
+					TableOrder newOrder = new TableOrder(getOrderDetailsTableName());
 					Database.insertTableOrder(newOrder.getTableName(), newOrder.getCurrentDateTime());
 					
-					Set hmSet = orderHM.entrySet();
+					
+					for (Map.Entry<Integer, Integer> me : orderMenuItemQuantityMultimap.entries()) {
+						TableOrder newOrderItem = new TableOrder(getOrderDetailsTableName(), Integer.parseInt(me.getKey().toString()), Integer.parseInt(me.getValue().toString()));
+						newOrderItem.databaseInsertTableOrderItem();
+					}
+					
+					
+					/*
+					Set set = orderMenuItemQuantityMultimap.entrySet();
 					Iterator i = hmSet.iterator();
 					while(i.hasNext()) {
 						
 						Map.Entry me = (Map.Entry)i.next();
 					
-						Order newOrderItem = new Order(getOrderDetailsTableName(), Integer.parseInt(me.getKey().toString()), Integer.parseInt(me.getValue().toString()));
+						TableOrder newOrderItem = new TableOrder(getOrderDetailsTableName(), Integer.parseInt(me.getKey().toString()), Integer.parseInt(me.getValue().toString()));
 						newOrderItem.databaseInsertTableOrderItem();
-					}
-					
-					/*
-					for (int i = 0; i < menuItemsArray.size(); i ++) {
-						//Database.insertTableOrderItem(getOrderDetailsTableName(), Integer.parseInt(menuItemsArray.get(i)), getQuantity());
 					}
 					*/
 					
+				
+					
+				} else if (getOrderDetailsOrderType().equals("COLLECTION")) {
+					
+					CollectionOrder newOrder = new CollectionOrder(getOrderDetailsCustomerName());
+					Database.insertCollectionOrder(newOrder.getCustomerName(), newOrder.getCurrentDateTime());
+					
+					Set hmSet = orderMenuItemQuantityHashMap.entrySet();
+					Iterator i = hmSet.iterator();
+					while(i.hasNext()) {
+						Map.Entry me = (Map.Entry)i.next();
+						CollectionOrder newOrderItem = new CollectionOrder(getOrderDetailsCustomerName(), Integer.parseInt(me.getKey().toString()), Integer.parseInt(me.getValue().toString()));
+						newOrderItem.databaseInsertCollectionOrderItem();
+					}
 				}
+				
+				
+				
 				//Order o = new Order(getOrderType(), getTableName(), getCustomerName(),
 				//						getCustomerHouseNumber(), getCustomerAddress(),
 				//						getCustomerCity(), getCustomerPostcode(),
@@ -1969,6 +2005,10 @@ public class NewOrderGUI {
 	public String getOrderDetailsTableName() {
 		return textFieldTableName.getText();
 	}
+	
+	public String getOrderDetailsCustomerName() {
+		return textFieldCustomerName.getText();
+	}
 
 	public void setOrderDetailsCustomerName(String customerName) {
 		textFieldCustomerName.setText(customerName);
@@ -2031,9 +2071,34 @@ public class NewOrderGUI {
 	public void setTotalPrice(Double totalPrice) {
 		textFieldTotalPrice.setText(totalPrice.toString());
 	}
+	
+	private void setTablesListSelectedRow() {
+		tablesList.setSelectedIndex(selectedTablesListRow);
+	}
+	
+	private void setDeliveryCustomersTableSelectedRow() {
+		deliveryCustomersTable.getSelectionModel().setSelectionInterval(selectedDeliveryCustomersTableRow, selectedDeliveryCustomersTableRow);
+	}
+	
+	private void setPizzaMenuTableSelectedRow() {
+		pizzaMenuTable.getSelectionModel().setSelectionInterval(selectedPizzaMenuTableRow, selectedPizzaMenuTableRow);
+	}
+	
+	private void setSidesMenuTableSelectedRow() {
+		sidesMenuTable.getSelectionModel().setSelectionInterval(selectedSidesMenuTableRow, selectedSidesMenuTableRow);
+	}
+	
+	private void setDrinksMenuTableSelectedRow() {
+		drinksMenuTable.getSelectionModel().setSelectionInterval(selectedDrinksMenuTableRow, selectedDrinksMenuTableRow);
+	}
+	
+	private void setDessertsMenuTableSelectedRow() {
+		dessertsMenuTable.getSelectionModel().setSelectionInterval(selectedDessertsMenuTableRow, selectedDessertsMenuTableRow);
+	}
 
 	public void resetOrder() {
-		orderHM = new HashMap();
+		orderMenuItemQuantityHashMap = new HashMap();
+		orderMenuItemQuantityMultimap = ArrayListMultimap.create();
 		resetTableNameBackground();
 		resetCustomerInfoTextFieldsBackground();
 
