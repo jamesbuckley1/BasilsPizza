@@ -121,7 +121,7 @@ public class TablesGUI {
 			public void actionPerformed(ActionEvent e) {
 				new AddTableDialogGUI(frame);
 				populateTables();
-				//NewOrderGUI.populateTables();
+				NewOrderGUI.populateTables();
 				
 				
 			}

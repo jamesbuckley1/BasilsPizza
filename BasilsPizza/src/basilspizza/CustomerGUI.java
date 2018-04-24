@@ -347,6 +347,7 @@ public class CustomerGUI {
 										public void run() {
 											populateCustomersTable();
 											clearCustomerForm();
+											NewOrderGUI.populateDeliveryCustomers();
 										}
 									});
 									
@@ -369,6 +370,8 @@ public class CustomerGUI {
 					showError("Error.");
 					e2.printStackTrace();
 				}
+				
+				
 			}
 		};
 		

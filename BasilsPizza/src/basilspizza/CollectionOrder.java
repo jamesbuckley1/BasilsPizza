@@ -36,10 +36,11 @@ public class CollectionOrder {
 	}
 	
 	// Select collection order item from database constructor.
-	public CollectionOrder(int orderId, int menuItemId, String menuItemName, double menuItemPrice) {
+	public CollectionOrder(int orderId, int menuItemId, String menuItemName, int quantity, double menuItemPrice) {
 		this.orderId = orderId;
 		this.menuItemId = menuItemId;
 		this.menuItemName = menuItemName;
+		this.quantity = quantity;
 		this.menuItemPrice = menuItemPrice;
 	}
 	
@@ -79,9 +80,13 @@ public class CollectionOrder {
 		return menuItemPrice;
 	}
 	
+	public int getQuantity() {
+		return quantity;
+	}
+	
 	
 	public void databaseInsertCollectionOrderItem() {
-		Database.insertTableOrderItem(customerName, menuItemId, quantity);
+		Database.insertCollectionOrderItem(menuItemId, quantity);
 	}
 
 }

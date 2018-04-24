@@ -17,6 +17,8 @@ public class Database {
 	private static ArrayList<TableOrder> tableOrderItemsArray;
 	private static ArrayList<CollectionOrder> collectionOrdersArray;
 	private static ArrayList<CollectionOrder> collectionOrderItemsArray;
+	private static ArrayList<DeliveryOrder> deliveryOrdersArray;
+	private static ArrayList<DeliveryOrder> deliveryOrderItemsArray;
 
 	// STOCK SQL STRINGS
 	private final static String createStockTableSql = "CREATE TABLE IF NOT EXISTS stock (stock_id INTEGER PRIMARY KEY NOT NULL, item TEXT NOT NULL, price DOUBLE NOT NULL, quantity INT NOT NULL);";
@@ -75,12 +77,24 @@ public class Database {
 	private final static String createCollectionOrdersTableSql = "CREATE TABLE IF NOT EXISTS collection_order (collection_order_id INTEGER PRIMARY KEY AUTOINCREMENT, customer_name TEXT NOT NULL, order_time DATETIME NOT NULL);";
 	private final static String insertCollectionOrderSql = "INSERT INTO collection_order(customer_name, order_time) VALUES (?, ?);";
 	private final static String selectLastCollectionOrderIdSql = "SELECT seq FROM sqlite_sequence WHERE name = \"collection_order\";"; // Gets last inserted autoincremented ID
-	private final static String selectCollectionOrdersSql = "SELECT * FROM collection_order";
+	private final static String selectCollectionOrdersSql = "SELECT * FROM collection_order;";
 
 	// COLLECTION ORDER ITEM SQL STRINGS
 	private final static String createCollectionOrderItemTableSql = "CREATE TABLE IF NOT EXISTS collection_order_item (collection_order_item_id INTEGER PRIMARY KEY AUTOINCREMENT, collection_order_id INTEGER NOT NULL REFERENCES collection_order(collection_order_id), menu_item_id INTEGER NOT NULL REFERENCES menu_item(menu_item_id), quantity INTEGER NOT NULL);";
 	private final static String insertCollectionOrderItemSql = "INSERT INTO collection_order_item(collection_order_id, menu_item_id, quantity) VALUES (?, ?, ?);";
-	private final static String selectCollectionOrderItemsSql = "SELECT collection_order_item.collection_order_item_id, collection_order_item.collection_order_id, collection_order_item.menu_item_id, menu_item.item_name, menu_item.item_price FROM collection_order_item INNER JOIN menu_item ON collection_order_item.menu_item_id = menu_item.menu_item_id WHERE collection_order_item.collection_order_id = ?;";
+	private final static String selectCollectionOrderItemsSql = "SELECT collection_order_item.collection_order_item_id, collection_order_item.collection_order_id, collection_order_item.menu_item_id, menu_item.item_name, collection_order_item.quantity, menu_item.item_price FROM collection_order_item INNER JOIN menu_item ON collection_order_item.menu_item_id = menu_item.menu_item_id WHERE collection_order_item.collection_order_id = ?;";
+
+	// DELIVERY ORDERS SQL STRINGS
+	private final static String createDeliveryOrdersTableSql = "CREATE TABLE IF NOT EXISTS delivery_order (delivery_order_id INTEGER PRIMARY KEY AUTOINCREMENT, customer_name TEXT NOT NULL, order_time DATETIME NOT NULL);";
+	private final static String insertDeliveryOrderSql = "INSERT INTO delivery_order(customer_name, order_time) VALUES (?, ?);";
+	private final static String selectLastDeliveryOrderIdSql = "SELECT seq FROM sqlite_sequence WHERE name = \"delivery_order\";"; // Gets last inserted autoincremented ID
+	private final static String selectDeliveryOrdersSql = "SELECT * FROM delivery_order;";
+
+	// DELIVERY ORDER ITEM SQL STRINGS
+	private final static String createDeliveryOrderItemTableSql = "CREATE TABLE IF NOT EXISTS delivery_order_item (delivery_order_item_id INTEGER PRIMARY KEY AUTOINCREMENT, delivery_order_id INTEGER NOT NULL REFERENCES delivery_order(delivery_order_id), menu_item_id INTEGER NOT NULL REFERENCES menu_item(menu_item_id), quantity INTEGER NOT NULL);";
+	private final static String insertDeliveryOrderItemSql = "INSERT INTO delivery_order_item(delivery_order_id, menu_item_id, quantity) VALUES (?, ?, ?);";
+	private final static String selectDeliveryOrderItemsSql = "SELECT delivery_order_item.delivery_order_item_id, delivery_order_item.delivery_order_id, delivery_order_item.menu_item_id, menu_item.item_name, delivery_order_item.quantity, menu_item.item_price FROM delivery_order_item INNER JOIN menu_item ON delivery_order_item.menu_item_id = menu_item.menu_item_id WHERE delivery_order_item.delivery_order_id = ?;";
+
 
 	// MENU ITEM SQL STRINGS
 
@@ -136,11 +150,17 @@ public class Database {
 
 			stmt = conn.prepareStatement(createTableOrderItemTableSql);
 			stmt.executeUpdate();
-			
+
 			stmt = conn.prepareStatement(createCollectionOrdersTableSql);
 			stmt.executeUpdate();
 
 			stmt = conn.prepareStatement(createCollectionOrderItemTableSql);
+			stmt.executeUpdate();
+
+			stmt = conn.prepareStatement(createDeliveryOrdersTableSql);
+			stmt.executeUpdate();
+
+			stmt = conn.prepareStatement(createDeliveryOrderItemTableSql);
 			stmt.executeUpdate();
 
 			stmt = conn.prepareStatement(createMenuItemTableSql);
@@ -904,12 +924,12 @@ public class Database {
 		}
 		System.out.println("SELECT collection orders successful.");
 	}
-	
+
 	public static ArrayList<CollectionOrder> getCollectionOrdersArray() {
 		return collectionOrdersArray;
 	}
-	
-	
+
+
 
 	///////// COLLECTION ORDER ITEM //////////
 
@@ -925,14 +945,16 @@ public class Database {
 			ResultSet rs = selectCollectionOrderItems.executeQuery();
 
 			while (rs.next()) {
-				int tableOrderId = rs.getInt("table_order_id");
+				int collectionOrderId = rs.getInt("collection_order_id");
 				int menuItemId = rs.getInt("menu_item_id");
 				String menuItemName = rs.getString("item_name");
 				int quantity = rs.getInt("quantity");
 				double menuItemPrice = rs.getDouble("item_price");
 
-				TableOrder o = new TableOrder(tableOrderId, menuItemId, menuItemName, quantity, menuItemPrice);
-				tableOrderItemsArray.add(o);
+				System.out.println("DATABASE!!! " + collectionOrderId + " " + menuItemId );
+
+				CollectionOrder c = new CollectionOrder(collectionOrderId, menuItemId, menuItemName, quantity, menuItemPrice);
+				collectionOrderItemsArray.add(c);
 			}
 
 			rs.close();
@@ -950,8 +972,8 @@ public class Database {
 	public static ArrayList<CollectionOrder> getCollectionOrderItemsArray() {
 		return collectionOrderItemsArray;
 	}
-	
-	
+
+
 
 	public static void insertCollectionOrderItem(int menuItemId, int quantity) {
 		try {
@@ -992,6 +1014,147 @@ public class Database {
 		}
 		System.out.println("INSERT collection order item successful.");
 	}
+
+	///////// DELIVERY ORDER /////////
+
+	public static void insertDeliveryOrder(String customerName, String dateTime) {
+		try {
+			openDB();
+
+			PreparedStatement insert = conn.prepareStatement(insertDeliveryOrderSql);
+
+			insert.setString(1, customerName);
+			insert.setString(2,  dateTime);
+
+			insert.executeUpdate();
+			insert.close();
+
+			closeDB();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		System.out.println("INSERT delivery order successful.");
+	}
+
+	public static void selectDeliveryOrders() {
+		try {
+			deliveryOrdersArray = new ArrayList<DeliveryOrder>();
+			openDB();
+
+			PreparedStatement selectDeliveryOrders = conn.prepareStatement(selectDeliveryOrdersSql);
+			ResultSet rs = selectDeliveryOrders.executeQuery();
+
+			while (rs.next()) {
+				int deliveryOrderId = rs.getInt("delivery_order_id");
+				String customerName = rs.getString("customer_name");
+				String dateTime = rs.getString("order_time");
+
+				DeliveryOrder d = new DeliveryOrder(deliveryOrderId, customerName, dateTime);
+				deliveryOrdersArray.add(d);
+			}
+
+			rs.close();
+			selectDeliveryOrders.close();
+			closeDB();
+
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		}
+		System.out.println("SELECT delivery orders successful.");
+	}
+
+	public static ArrayList<DeliveryOrder> getDeliveryOrdersArray() {
+		return deliveryOrdersArray;
+	}
+
+
+
+	///////// DELIVERY ORDER ITEM //////////
+
+	public static void selectDeliveryOrderItem(int orderId) {
+		try {
+			deliveryOrderItemsArray = new ArrayList<DeliveryOrder>();
+			openDB();
+
+			PreparedStatement selectDeliveryOrderItems = conn.prepareStatement(selectDeliveryOrderItemsSql);
+
+			selectDeliveryOrderItems.setInt(1, orderId);
+
+			ResultSet rs = selectDeliveryOrderItems.executeQuery();
+
+			while (rs.next()) {
+				int deliveryOrderId = rs.getInt("delivery_order_id");
+				int menuItemId = rs.getInt("menu_item_id");
+				String menuItemName = rs.getString("item_name");
+				int quantity = rs.getInt("quantity");
+				double menuItemPrice = rs.getDouble("item_price");
+
+
+				DeliveryOrder d = new DeliveryOrder(deliveryOrderId, menuItemId, menuItemName, quantity, menuItemPrice);
+				deliveryOrderItemsArray.add(d);
+			}
+
+			rs.close();
+			selectDeliveryOrderItems.close();
+			closeDB();
+
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		}
+		System.out.println("SELECT delivery order items successful.");
+	}
+
+	public static ArrayList<DeliveryOrder> getDeliveryOrderItemsArray() {
+		return deliveryOrderItemsArray;
+	}
+
+
+
+	public static void insertDeliveryOrderItem(int menuItemId, int quantity) {
+		try {
+			openDB();
+
+			PreparedStatement selectLastId = conn.prepareStatement(selectLastDeliveryOrderIdSql);
+
+			ResultSet rs = selectLastId.executeQuery();
+
+			int lastOrderId = 0;
+
+			while(rs.next()) {
+
+				lastOrderId = rs.getInt("seq");
+				System.out.println("LAST ORDER ID " + lastOrderId);
+			}
+
+
+			selectLastId.close();
+			rs.close();
+
+
+
+			PreparedStatement insert = conn.prepareStatement(insertDeliveryOrderItemSql);
+
+			insert.setInt(1, lastOrderId);
+			insert.setInt(2, menuItemId);
+			insert.setInt(3, quantity);
+
+
+			insert.executeUpdate();
+			insert.close();
+
+			closeDB();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		System.out.println("INSERT delivery order item successful.");
+	}
+
 
 	///////// MENU ITEMS //////////
 
