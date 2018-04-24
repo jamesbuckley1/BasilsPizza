@@ -34,6 +34,8 @@ public class Database {
 	private final static String insertCustomersSql = "INSERT INTO customer (first_name, last_name, house_number, address, city, postcode, phone_number) VALUES (?, ?, ?, ?, ?, ?, ?);";
 	private final static String deleteCustomersSql = "DELETE FROM customer WHERE (first_name = ? AND last_name = ? AND house_number = ? AND address = ? AND city = ?);";
 	private final static String dropCustomersTableSql = "DROP TABLE customer;";
+	
+	
 
 	// STAFF SQL STRINGS
 	private final static String createStaffTableSql = "CREATE TABLE IF NOT EXISTS staff (staff_id INTEGER PRIMARY KEY AUTOINCREMENT, first_name TEXT NOT NULL, last_name TEXT NOT NULL, job_title TEXT NOT NULL, last_clock_in DATETIME, last_clock_out DATETIME);";
@@ -66,7 +68,6 @@ public class Database {
 	private final static String insertTableOrderSql = "INSERT INTO table_order(table_id, order_time) VALUES (?, ?);";
 	private final static String selectLastTableOrderIdSql = "SELECT seq FROM sqlite_sequence WHERE name = \"table_order\";"; // Gets last inserted autoincremented ID
 	private final static String selectTableOrdersSql = "SELECT * FROM table_order;";
-
 
 	// TABLE ORDER ITEM SQL STRINGS
 	private final static String createTableOrderItemTableSql = "CREATE TABLE IF NOT EXISTS table_order_item (table_order_item_id INTEGER PRIMARY KEY AUTOINCREMENT, table_order_id INTEGER NOT NULL REFERENCES table_order(table_order_id), menu_item_id INTEGER NOT NULL REFERENCES menu_item(menu_item_id), quantity INTEGER NOT NULL);";
