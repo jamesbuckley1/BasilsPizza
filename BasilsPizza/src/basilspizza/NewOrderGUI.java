@@ -368,7 +368,12 @@ public class NewOrderGUI {
 		gbc.gridy++;
 		panelCollectionOrders.add(textFieldCustomerCollectionPhoneNumberInput, gbc);
 
-
+		TitledBorder border = new TitledBorder("Collection Order:");
+		border.setTitleJustification(TitledBorder.LEFT);
+		border.setTitlePosition(TitledBorder.TOP);
+		panelCollectionOrdersMain.setBorder(border);
+		
+		
 		panelCollectionOrdersMain.add(panelCollectionOrders, BorderLayout.CENTER);
 		panelCollectionOrdersMain.add(collectionOrderPaneSouthControls(), BorderLayout.SOUTH);
 		return panelCollectionOrdersMain;
@@ -458,7 +463,7 @@ public class NewOrderGUI {
 
 		//deliveryCustomersTable.setFont(new Font("", 0, 14));
 		//deliveryCustomersTable.setRowHeight(deliveryCustomersTable.getRowHeight() + 10);
-		deliveryCustomersTable.setAutoCreateRowSorter(true);
+		deliveryCustomersTable.getTableHeader().setEnabled(false);
 		deliveryCustomersTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		deliveryCustomersTable.addMouseListener(new MouseAdapter() {
 			@Override
@@ -744,7 +749,7 @@ public class NewOrderGUI {
 
 		pizzaMenuTable.setFont(new Font("", 0, 14));
 		pizzaMenuTable.setRowHeight(pizzaMenuTable.getRowHeight() + 10);
-		pizzaMenuTable.setAutoCreateRowSorter(true);
+		pizzaMenuTable.getTableHeader().setEnabled(false);
 		pizzaMenuTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		pizzaMenuTable.addMouseListener(new MouseAdapter() {
 			@Override
@@ -972,7 +977,7 @@ public class NewOrderGUI {
 
 		sidesMenuTable.setFont(new Font("", 0, 14));
 		sidesMenuTable.setRowHeight(sidesMenuTable.getRowHeight() + 10);
-		sidesMenuTable.setAutoCreateRowSorter(true);
+		sidesMenuTable.getTableHeader().setEnabled(false);
 		sidesMenuTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		sidesMenuTable.addMouseListener(new MouseAdapter() {
 			@Override
@@ -1108,7 +1113,10 @@ public class NewOrderGUI {
 				totalPrice += Double.parseDouble(getSelectedMenuItemPrice(sidesMenuTable)) * Integer.parseInt(getQuantity(comboboxSidesMenuQuantity));
 				setTotalPrice(totalPrice);
 
-				orderMenuItemQuantityHashMap.put(getSelectedMenuItemID(sidesMenuTable), getQuantity(comboboxSidesMenuQuantity));
+				//orderMenuItemQuantityHashMap.put(getSelectedMenuItemID(sidesMenuTable), getQuantity(comboboxSidesMenuQuantity));
+				orderMenuItemQuantityMultimap.put(Integer.parseInt(getSelectedMenuItemID(sidesMenuTable)), Integer.parseInt(getQuantity(comboboxSidesMenuQuantity)));
+
+			
 			}
 		});
 
@@ -1183,7 +1191,7 @@ public class NewOrderGUI {
 
 		drinksMenuTable.setFont(new Font("", 0, 14));
 		drinksMenuTable.setRowHeight(drinksMenuTable.getRowHeight() + 10);
-		drinksMenuTable.setAutoCreateRowSorter(true);
+		drinksMenuTable.getTableHeader().setEnabled(false);
 		drinksMenuTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		drinksMenuTable.addMouseListener(new MouseAdapter() {
 			@Override
@@ -1314,7 +1322,9 @@ public class NewOrderGUI {
 				totalPrice += Double.parseDouble(getSelectedMenuItemPrice(drinksMenuTable)) * Integer.parseInt(getQuantity(comboboxDrinksMenuQuantity));
 				setTotalPrice(totalPrice);
 
-				orderMenuItemQuantityHashMap.put(getSelectedMenuItemID(drinksMenuTable), getQuantity(comboboxDrinksMenuQuantity));
+				orderMenuItemQuantityMultimap.put(Integer.parseInt(getSelectedMenuItemID(drinksMenuTable)), Integer.parseInt(getQuantity(comboboxDrinksMenuQuantity)));
+				
+				
 			}
 		});
 
@@ -1389,7 +1399,7 @@ public class NewOrderGUI {
 
 		dessertsMenuTable.setFont(new Font("", 0, 14));
 		dessertsMenuTable.setRowHeight(dessertsMenuTable.getRowHeight() + 10);
-		dessertsMenuTable.setAutoCreateRowSorter(true);
+		dessertsMenuTable.getTableHeader().setEnabled(false);
 		dessertsMenuTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		dessertsMenuTable.addMouseListener(new MouseAdapter() {
 			@Override

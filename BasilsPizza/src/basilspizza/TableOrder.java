@@ -43,6 +43,15 @@ public class TableOrder {
 		this.menuItemPrice = menuItemPrice;
 	}
 	
+	// Select active table order items constructor.
+	public TableOrder(int orderId, int menuItemId, String tableId, String menuItemName, int quantity, double menuItemPrice) {
+		this.orderId = orderId;
+		this.menuItemId = menuItemId;
+		this.tableName = tableId;
+		this.menuItemName = menuItemName;
+		this.quantity = quantity;
+		this.menuItemPrice = menuItemPrice;
+	}
 	
 	
 	public String getCurrentDateTime() {

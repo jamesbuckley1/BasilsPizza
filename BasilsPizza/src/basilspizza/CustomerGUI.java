@@ -555,7 +555,7 @@ public class CustomerGUI {
 			}
 		});
 
-		populateCustomersOrdersTable();
+		//populateCustomersOrdersTable();
 
 		JScrollPane jsp = new JScrollPane(customersOrdersTable,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
@@ -605,15 +605,15 @@ public class CustomerGUI {
 		return panelCustomersOrdersButtons;
 	}
 
+	/*
 	private void populateCustomersOrdersTable() { // TO DO
-		/*
-	}
+		
 		int rows = customersTableModel.getRowCount();
 		for (int i = rows - 1; i >= 0; i --) {
 			customersTableModel.removeRow(i);
 		}
 
-		Database.selectCustomers();
+		Database.selectActiveTableOrderItems(customersTableModel.getValueAt(getSelectedCustomerTableRow(), column));();
 
 		for (int i = 0; i < Database.getCustomersArray().size(); i++) {
 
@@ -637,8 +637,9 @@ public class CustomerGUI {
 
 			customersTableModel.addRow(data);
 
-		 */
+		 
 	}
+*/
 
 	// Display error message.
 	private static void showError(String error) {
@@ -756,6 +757,11 @@ public class CustomerGUI {
 		textFieldCustomerCity.setText("");
 		textFieldCustomerPostcode.setText("");
 		textFieldCustomerPhoneNumber.setText("");
+	}
+	
+	private int getSelectedCustomerTableRow() {
+		int row = customersTable.getSelectedRow();
+		return row;
 	}
 
 	public JPanel getCustomerPanel() {

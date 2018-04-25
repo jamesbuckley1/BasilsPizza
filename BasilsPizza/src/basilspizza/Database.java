@@ -15,6 +15,7 @@ public class Database {
 	private static ArrayList<MenuItem> menuItemArray;
 	private static ArrayList<TableOrder> tableOrdersArray;
 	private static ArrayList<TableOrder> tableOrderItemsArray;
+	private static ArrayList<TableOrder> tableActiveOrderItemsArray;
 	private static ArrayList<CollectionOrder> collectionOrdersArray;
 	private static ArrayList<CollectionOrder> collectionOrderItemsArray;
 	private static ArrayList<DeliveryOrder> deliveryOrdersArray;
@@ -63,6 +64,8 @@ public class Database {
 	private final static String selectTableSpecialRequirementsSql = "SELECT special_requirements FROM tables WHERE table_id = ?;";
 	private final static String selectTableAssignedStaffSql = "SELECT assigned_staff FROM tables WHERE table_id = ?;";
 
+	// ORDERS SQL STRINGS
+	
 	// TABLE ORDERS SQL STRINGS
 	private final static String createTableOrdersTableSql = "CREATE TABLE IF NOT EXISTS table_order (table_order_id INTEGER PRIMARY KEY AUTOINCREMENT, table_id INTEGER NOT NULL REFERENCES tables(table_id), order_time DATETIME NOT NULL);";
 	private final static String insertTableOrderSql = "INSERT INTO table_order(table_id, order_time) VALUES (?, ?);";
@@ -73,7 +76,9 @@ public class Database {
 	private final static String createTableOrderItemTableSql = "CREATE TABLE IF NOT EXISTS table_order_item (table_order_item_id INTEGER PRIMARY KEY AUTOINCREMENT, table_order_id INTEGER NOT NULL REFERENCES table_order(table_order_id), menu_item_id INTEGER NOT NULL REFERENCES menu_item(menu_item_id), quantity INTEGER NOT NULL);";
 	private final static String insertTableOrderItemSql = "INSERT INTO table_order_item(table_order_id, menu_item_id, quantity) VALUES (?, ?, ?);";
 	private final static String selectTableOrderItemsSql = "SELECT table_order_item.table_order_item_id, table_order_item.table_order_id, table_order_item.menu_item_id, menu_item.item_name, table_order_item.quantity, menu_item.item_price FROM table_order_item INNER JOIN menu_item ON table_order_item.menu_item_id = menu_item.menu_item_id WHERE table_order_item.table_order_id = ?;";
-
+	private final static String selectActiveTableOrderItemsSql = "SELECT table_order_item.table_order_item_id, table_order_item.table_order_id, table_order.table_id, table_order_item.menu_item_id, menu_item.item_name, table_order_item.quantity, menu_item.item_price FROM table_order_item INNER JOIN menu_item ON table_order_item.menu_item_id = menu_item.menu_item_id INNER JOIN table_order ON table_order_item.table_order_id = table_order.table_order_id WHERE table_order.table_id = ?;";
+	
+	
 	// COLLECTION ORDERS SQL STRINGS
 	private final static String createCollectionOrdersTableSql = "CREATE TABLE IF NOT EXISTS collection_order (collection_order_id INTEGER PRIMARY KEY AUTOINCREMENT, customer_name TEXT NOT NULL, order_time DATETIME NOT NULL);";
 	private final static String insertCollectionOrderSql = "INSERT INTO collection_order(customer_name, order_time) VALUES (?, ?);";
@@ -832,6 +837,45 @@ public class Database {
 
 	public static ArrayList<TableOrder> getTableOrderItemsArray() {
 		return tableOrderItemsArray;
+	}
+	
+	public static void selectActiveTableOrderItems(String tableId) {
+		try {
+			tableActiveOrderItemsArray = new ArrayList<TableOrder>();
+			openDB();
+
+			PreparedStatement selectActiveTableOrderItems = conn.prepareStatement(selectActiveTableOrderItemsSql);
+
+			selectActiveTableOrderItems.setString(1, tableId);
+
+			ResultSet rs = selectActiveTableOrderItems.executeQuery();
+
+			while (rs.next()) {
+				int tableOrderId = rs.getInt("table_order_id");
+				String tableName = rs.getString("table_id");
+				int menuItemId = rs.getInt("menu_item_id");
+				String menuItemName = rs.getString("item_name");
+				int quantity = rs.getInt("quantity");
+				double menuItemPrice = rs.getDouble("item_price");
+
+				TableOrder o = new TableOrder(tableOrderId, menuItemId, tableName, menuItemName, quantity, menuItemPrice);
+				tableActiveOrderItemsArray.add(o);
+			}
+
+			rs.close();
+			selectActiveTableOrderItems.close();
+			closeDB();
+
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		}
+		System.out.println("SELECT active table order items successful.");
+	}
+	
+	public static ArrayList<TableOrder> getActiveTableOrderItemsArray() {
+		return tableActiveOrderItemsArray;
 	}
 
 	public static void insertTableOrderItem(String orderId, int menuItemId, int quantity) {
