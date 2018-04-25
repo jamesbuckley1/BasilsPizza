@@ -91,7 +91,7 @@ public class Database {
 	private final static String selectCollectionOrderItemsSql = "SELECT collection_order_item.collection_order_item_id, collection_order_item.collection_order_id, collection_order_item.menu_item_id, menu_item.item_name, collection_order_item.quantity, menu_item.item_price FROM collection_order_item INNER JOIN menu_item ON collection_order_item.menu_item_id = menu_item.menu_item_id WHERE collection_order_item.collection_order_id = ?;";
 
 	// DELIVERY ORDERS SQL STRINGS
-	private final static String createDeliveryOrdersTableSql = "CREATE TABLE IF NOT EXISTS delivery_order (delivery_order_id INTEGER PRIMARY KEY AUTOINCREMENT, customer_name TEXT NOT NULL, order_time DATETIME NOT NULL);";
+	private final static String createDeliveryOrdersTableSql = "CREATE TABLE IF NOT EXISTS delivery_order (delivery_order_id INTEGER PRIMARY KEY AUTOINCREMENT, customer_id INTEGER NOT NULL REFERENCES customer(customer_id), order_time DATETIME NOT NULL);";
 	private final static String insertDeliveryOrderSql = "INSERT INTO delivery_order(customer_name, order_time) VALUES (?, ?);";
 	private final static String selectLastDeliveryOrderIdSql = "SELECT seq FROM sqlite_sequence WHERE name = \"delivery_order\";"; // Gets last inserted autoincremented ID
 	private final static String selectDeliveryOrdersSql = "SELECT * FROM delivery_order;";
@@ -101,6 +101,8 @@ public class Database {
 	private final static String insertDeliveryOrderItemSql = "INSERT INTO delivery_order_item(delivery_order_id, menu_item_id, quantity) VALUES (?, ?, ?);";
 	private final static String selectDeliveryOrderItemsSql = "SELECT delivery_order_item.delivery_order_item_id, delivery_order_item.delivery_order_id, delivery_order_item.menu_item_id, menu_item.item_name, delivery_order_item.quantity, menu_item.item_price FROM delivery_order_item INNER JOIN menu_item ON delivery_order_item.menu_item_id = menu_item.menu_item_id WHERE delivery_order_item.delivery_order_id = ?;";
 
+	// DELIVERY ORDER CUSTOMER LOCATION STRINGS
+	//private final static String selectDeliveryCustomerLocation = "SELECT delivery_order_item.delivery_order_item_id, delivery_order_item.delivery_order_id"
 
 	// MENU ITEM SQL STRINGS
 

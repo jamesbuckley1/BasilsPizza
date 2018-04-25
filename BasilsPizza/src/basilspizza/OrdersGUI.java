@@ -4,19 +4,20 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.Timer;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -36,6 +37,10 @@ public class OrdersGUI {
 	private JTable tableOrderView;
 
 	private int selectedTableOrdersRow, selectedCollectionOrdersRow, selectedDeliveryOrdersRow;
+	
+	private JTextField textFieldOrderType, textFieldTableName, textFieldCustomerName, textFieldCustomerHouseNumber,
+						textFieldCustomerAddress, textFieldCustomerCity, textFieldCustomerPostcode,
+						textFieldCustomerPhoneNumber, textFieldTotalPrice;
 
 	public OrdersGUI() {
 		initGUI();
@@ -639,11 +644,58 @@ public class OrdersGUI {
 
 
 	private JPanel orderDetails() {
-		JPanel panelOrderDetails = new JPanel(new BorderLayout());
+		JPanel panelOrderDetailsMain = new JPanel(new BorderLayout());
+		JPanel panelOrderDetails = new JPanel(new GridBagLayout());
 
-		panelOrderDetails.add(new JLabel("panelOrderDetails"), BorderLayout.CENTER);
-
-		return panelOrderDetails;
+		
+		textFieldOrderType = new JTextField(20);
+		textFieldTableName = new JTextField(20);
+		textFieldCustomerName = new JTextField(20);
+		textFieldCustomerHouseNumber = new JTextField(20);
+		textFieldCustomerAddress = new JTextField(20);
+		textFieldCustomerCity = new JTextField(20);
+		textFieldCustomerPostcode = new JTextField(20);
+		textFieldCustomerPhoneNumber = new JTextField(20);
+		textFieldTotalPrice = new JTextField(20);
+		
+		GridBagConstraints gbc = new GridBagConstraints();
+		
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gbc.weightx = 0;
+		gbc.weighty = 0;
+		panelOrderDetails.add(new JLabel("Assigned Staff: "), gbc);
+		
+		gbc.gridy++;
+		panelOrderDetails.add(new JLabel("Total Price:"), gbc);
+		
+		panelOrderDetailsMain.add(panelOrderDetails, BorderLayout.CENTER);
+		panelOrderDetailsMain.add(orderDetailsSouthControls(), BorderLayout.SOUTH);
+		
+		return panelOrderDetailsMain;
+	}
+	
+	public JPanel orderDetailsSouthControls() {
+		//JPanel panelOrderDetailsSouthControlsMain = new JPanel(new BorderLayout());
+		JPanel panelOrderDetailsSouthControls = new JPanel(new GridBagLayout());
+		
+		JButton buttonCustomerInfo = new JButton("Info & Directions");
+		
+		GridBagConstraints gbc = new GridBagConstraints();
+		
+		gbc.gridx = 20;
+		gbc.gridy = 0;
+		gbc.weightx = 1.0;
+		gbc.weighty = 1.0;
+		panelOrderDetailsSouthControls.add(new JLabel(),  gbc);
+		
+		gbc.gridx++;
+		gbc.weightx = 0;
+		gbc.weighty = 0;
+		panelOrderDetailsSouthControls.add(buttonCustomerInfo, gbc);
+		
+		
+		return panelOrderDetailsSouthControls;
 	}
 
 	private void setSelectedTableOrdersRow() {
