@@ -7,7 +7,7 @@ import java.util.Date;
 public class DeliveryOrder {
 	
 	private int orderId;
-	private String customerName;
+	private int customerId;
 	private String dateTime;
 	private int menuItemId;
 	private String menuItemName;
@@ -15,20 +15,20 @@ public class DeliveryOrder {
 	private double menuItemPrice;
 	
 	// Add new delivery order constructor.
-	public DeliveryOrder(String customerName) {
-		this.customerName = customerName;
+	public DeliveryOrder(int customerId) {
+		this.customerId = customerId;
 	}
 	
 	// Select delivery orders constructor.
-	public DeliveryOrder(int orderId, String customerName, String dateTime) {
+	public DeliveryOrder(int orderId, int customerId, String dateTime) {
 		this.orderId = orderId;
-		this.customerName = customerName;
+		this.customerId = customerId;
 		this.dateTime = dateTime;
 	}
 	
 	// Insert delivery orders constructor.
-	public DeliveryOrder(String customerName, String dateTime) {
-		this.customerName = customerName;
+	public DeliveryOrder(int customerId, String dateTime) {
+		this.customerId = customerId;
 		this.dateTime = dateTime;
 	}
 	
@@ -42,8 +42,8 @@ public class DeliveryOrder {
 	}
 	
 	// Insert delivery order order item constructor.
-	public DeliveryOrder(String customerName, int menuItemId, int quantity) {
-		this.customerName = customerName;
+	public DeliveryOrder(int customerId, int menuItemId, int quantity) {
+		this.customerId = customerId;
 		this.menuItemId = menuItemId;
 		this.quantity = quantity;
 	}
@@ -76,8 +76,8 @@ public class DeliveryOrder {
 		return menuItemPrice;
 	}
 	
-	public String getCustomerName() {
-		return customerName;
+	public int getCustomerId() {
+		return customerId;
 	}
 	
 	public String getDateTime() {

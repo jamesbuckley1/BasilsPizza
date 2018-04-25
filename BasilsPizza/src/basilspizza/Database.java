@@ -30,14 +30,17 @@ public class Database {
 	private final static String dropStockTableSql = "DROP TABLE stock;";
 
 	// CUSTOMERS SQL STRINGS
-	private final static String createCustomersTableSql = "CREATE TABLE IF NOT EXISTS customer (customer_id INTEGER PRIMARY KEY AUTOINCREMENT, first_name TEXT NOT NULL, last_name TEXT NOT NULL, house_number TEXT NOT NULL, address TEXT NOT NULL, city TEXT NOT NULL, postcode TEXT NOT NULL, phone_number TEXT NOT NULL);";
+	private final static String createCustomersTableSql = "CREATE TABLE IF NOT EXISTS customer (customer_id INTEGER PRIMARY KEY AUTOINCREMENT, first_name TEXT NOT NULL, last_name TEXT NOT NULL, house_number TEXT NOT NULL, address TEXT NOT NULL, city TEXT NOT NULL, postcode TEXT NOT NULL, phone_number TEXT NOT NULL, distance DOUBLE);";
 	private final static String selectCustomersSql = "SELECT * FROM customer ORDER BY last_name ASC;";
 	private final static String insertCustomersSql = "INSERT INTO customer (first_name, last_name, house_number, address, city, postcode, phone_number) VALUES (?, ?, ?, ?, ?, ?, ?);";
 	private final static String deleteCustomersSql = "DELETE FROM customer WHERE (first_name = ? AND last_name = ? AND house_number = ? AND address = ? AND city = ?);";
 	private final static String dropCustomersTableSql = "DROP TABLE customer;";
+	private final static String selectCustomerFromIdSql = "SELECT * FROM customer WHERE customer_id = ?;";
+	private final static String updateCustomerDistanceSql = "UPDATE customer SET distance = ? WHERE customer_id = ?;";
+	private final static String selectLastCustomerIdSql = "SELECT seq FROM sqlite_sequence WHERE name = \"customer\";";
+	private final static String selectCustomersWithinDeliveryDistanceSql = "SELECT * FROM customer WHERE distance < 10;";
 	
 	
-
 	// STAFF SQL STRINGS
 	private final static String createStaffTableSql = "CREATE TABLE IF NOT EXISTS staff (staff_id INTEGER PRIMARY KEY AUTOINCREMENT, first_name TEXT NOT NULL, last_name TEXT NOT NULL, job_title TEXT NOT NULL, last_clock_in DATETIME, last_clock_out DATETIME);";
 	private final static String selectStaffSql = "SELECT staff_id, first_name, last_name, job_title, last_clock_in, last_clock_out FROM staff ORDER BY last_name ASC;";
@@ -92,7 +95,7 @@ public class Database {
 
 	// DELIVERY ORDERS SQL STRINGS
 	private final static String createDeliveryOrdersTableSql = "CREATE TABLE IF NOT EXISTS delivery_order (delivery_order_id INTEGER PRIMARY KEY AUTOINCREMENT, customer_id INTEGER NOT NULL REFERENCES customer(customer_id), order_time DATETIME NOT NULL);";
-	private final static String insertDeliveryOrderSql = "INSERT INTO delivery_order(customer_name, order_time) VALUES (?, ?);";
+	private final static String insertDeliveryOrderSql = "INSERT INTO delivery_order(customer_id, order_time) VALUES (?, ?);";
 	private final static String selectLastDeliveryOrderIdSql = "SELECT seq FROM sqlite_sequence WHERE name = \"delivery_order\";"; // Gets last inserted autoincremented ID
 	private final static String selectDeliveryOrdersSql = "SELECT * FROM delivery_order;";
 
@@ -314,6 +317,77 @@ public class Database {
 		}
 		System.out.println("SELECT customers successful.");
 	}
+	
+	public static void selectCustomersWithinDeliveryDistance() {
+		try {
+			customersArray = new ArrayList<Customer>();
+			openDB();
+
+			PreparedStatement selectCustomers = conn.prepareStatement(selectCustomersWithinDeliveryDistanceSql);
+			ResultSet rs = selectCustomers.executeQuery();
+
+			while (rs.next()) {
+				int customerId = rs.getInt("customer_id");
+				String firstName = rs.getString("first_name");
+				String lastName = rs.getString("last_name");
+				String houseNumber = rs.getString("house_number");
+				String address = rs.getString("address");
+				String city = rs.getString("city");
+				String postcode = rs.getString("postcode");
+				String phoneNumber = rs.getString("phone_number");
+
+				Customer cust = new Customer(customerId, firstName, lastName, houseNumber, address, city, postcode, phoneNumber);
+				customersArray.add(cust);
+			}
+
+			rs.close();
+			selectCustomers.close();
+			closeDB();
+
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		}
+		System.out.println("SELECT customers within 10 miles successful.");
+	}
+	
+	public static void selectCustomerFromId(int id) {
+		try {
+			customersArray = new ArrayList<Customer>();
+			openDB();
+
+			PreparedStatement selectCustomers = conn.prepareStatement(selectCustomerFromIdSql);
+			selectCustomers.setInt(1, id);
+			ResultSet rs = selectCustomers.executeQuery();
+			
+			
+
+			while (rs.next()) {
+				int customerId = rs.getInt("customer_id");
+				String firstName = rs.getString("first_name");
+				String lastName = rs.getString("last_name");
+				String houseNumber = rs.getString("house_number");
+				String address = rs.getString("address");
+				String city = rs.getString("city");
+				String postcode = rs.getString("postcode");
+				String phoneNumber = rs.getString("phone_number");
+
+				Customer cust = new Customer(customerId, firstName, lastName, houseNumber, address, city, postcode, phoneNumber);
+				customersArray.add(cust);
+			}
+
+			rs.close();
+			selectCustomers.close();
+			closeDB();
+
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		}
+		System.out.println("SELECT customer from ID successful.");
+	}
 
 	public static void insertCustomer(String firstName, String lastName, String houseNumber, String address, String city, String postcode, String phoneNumber) throws Exception {
 		openDB();
@@ -364,6 +438,40 @@ public class Database {
 		System.out.println("DELETE customer successful");
 	}
 
+	public static void updateCustomerDistance(double distance) {
+		try {
+		openDB();
+		
+		PreparedStatement selectLastId = conn.prepareStatement(selectLastCustomerIdSql);
+		ResultSet rs = selectLastId.executeQuery();
+		int lastCustomerId = 0;
+		
+		while(rs.next()) {
+			lastCustomerId = rs.getInt("seq");
+			System.out.println("LAST CUSTOMER ID" + lastCustomerId);
+		}
+		
+		selectLastId.close();
+		rs.close();
+
+		PreparedStatement update = conn.prepareStatement(updateCustomerDistanceSql);
+
+		update.setDouble(1, distance);
+		update.setInt(2, lastCustomerId);
+		
+		System.out.println("THE ID IS " + lastCustomerId + " distnce " + distance);
+
+		update.executeUpdate();
+		update.close();
+
+		closeDB();
+
+		System.out.println("UPDATE customer distance successful.");
+		
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	public static ArrayList<Customer> getCustomersArray() {
 		return customersArray;
@@ -1064,13 +1172,13 @@ public class Database {
 
 	///////// DELIVERY ORDER /////////
 
-	public static void insertDeliveryOrder(String customerName, String dateTime) {
+	public static void insertDeliveryOrder(int customerId, String dateTime) {
 		try {
 			openDB();
 
 			PreparedStatement insert = conn.prepareStatement(insertDeliveryOrderSql);
 
-			insert.setString(1, customerName);
+			insert.setInt(1, customerId);
 			insert.setString(2,  dateTime);
 
 			insert.executeUpdate();
@@ -1094,10 +1202,10 @@ public class Database {
 
 			while (rs.next()) {
 				int deliveryOrderId = rs.getInt("delivery_order_id");
-				String customerName = rs.getString("customer_name");
+				int customerId = rs.getInt("customer_id");
 				String dateTime = rs.getString("order_time");
 
-				DeliveryOrder d = new DeliveryOrder(deliveryOrderId, customerName, dateTime);
+				DeliveryOrder d = new DeliveryOrder(deliveryOrderId, customerId, dateTime);
 				deliveryOrdersArray.add(d);
 			}
 

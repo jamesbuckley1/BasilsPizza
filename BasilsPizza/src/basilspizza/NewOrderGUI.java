@@ -71,7 +71,7 @@ public class NewOrderGUI {
 
 
 	private JTextField textFieldOrderType, textFieldTableName, textFieldCustomerCollectionNameInput, 
-	textFieldCustomerCollectionPhoneNumberInput,	textFieldCustomerName,
+	textFieldCustomerCollectionPhoneNumberInput,	textFieldCustomerName, textFieldCustomerId,
 	textFieldCustomerHouseNumber, textFieldCustomerAddress,
 	textFieldCustomerCity, textFieldCustomerPostcode,
 	textFieldCustomerPhoneNumber, textFieldTotalPrice;
@@ -622,6 +622,7 @@ public class NewOrderGUI {
 
 					setOrderDetailsCustomerName(customerName);
 					setOrderDetailsCustomerHouseNumber(getDeliveryCustomerHouseNumber());
+					setOrderDetailsCustomerId(String.valueOf(getDeliveryCustomerId()));
 					setOrderDetailsCustomerAddress(getDeliveryCustomerAddress());
 					setOrderDetailsCustomerCity(getDeliveryCustomerCity());
 					setOrderDetailsCustomerPostcode(getDeliveryCustomerPostcode());
@@ -654,7 +655,7 @@ public class NewOrderGUI {
 			deliveryCustomersTableModel.removeRow(i);
 		}
 
-		Database.selectCustomers();
+		Database.selectCustomersWithinDeliveryDistance();
 
 		for (int i = 0; i < Database.getCustomersArray().size(); i++) {
 
@@ -1731,6 +1732,9 @@ public class NewOrderGUI {
 
 		textFieldCustomerName = new JTextField(20);
 		textFieldCustomerName.setEditable(false);
+		
+		textFieldCustomerId = new JTextField(20);
+		textFieldCustomerName.setEditable(false);
 
 		textFieldCustomerHouseNumber = new JTextField(20);
 		textFieldCustomerHouseNumber.setEditable(false);
@@ -1769,8 +1773,14 @@ public class NewOrderGUI {
 		gbc.insets = new Insets(0, 20, 0, 0);
 		panelOrderSummary.add(new JLabel("Table Name: "), gbc);
 
+		
+		gbc.gridy++;
+		panelOrderSummary.add(new JLabel("Customer ID: "), gbc);
+		
 		gbc.gridy++;
 		panelOrderSummary.add(new JLabel("Customer Name: "), gbc);
+		
+		
 
 		gbc.gridy++;
 		panelOrderSummary.add(new JLabel("Customer House Number: "), gbc);
@@ -1803,7 +1813,12 @@ public class NewOrderGUI {
 		panelOrderSummary.add(textFieldTableName, gbc);
 
 		gbc.gridy++;
+		panelOrderSummary.add(textFieldCustomerId, gbc);
+		
+		gbc.gridy++;
 		panelOrderSummary.add(textFieldCustomerName, gbc);
+		
+		
 
 		gbc.gridy++;
 		panelOrderSummary.add(textFieldCustomerHouseNumber, gbc);
@@ -1909,11 +1924,11 @@ public class NewOrderGUI {
 						OrdersGUI.populateCollectionOrders();
 
 					} else if (getOrderDetailsOrderType().equals("DELIVERY")) {
-						DeliveryOrder newOrder = new DeliveryOrder(getOrderDetailsCustomerName());
-						Database.insertDeliveryOrder(newOrder.getCustomerName(), newOrder.getCurrentDateTime());
+						DeliveryOrder newOrder = new DeliveryOrder(getOrderDetailsCustomerId());
+						Database.insertDeliveryOrder(newOrder.getCustomerId(), newOrder.getCurrentDateTime());
 
 						for (Map.Entry<Integer, Integer> me : orderMenuItemQuantityMultimap.entries() ) {
-							DeliveryOrder newOrderItem = new DeliveryOrder(getOrderDetailsCustomerName(), Integer.parseInt(me.getKey().toString()), Integer.parseInt(me.getValue().toString()));
+							DeliveryOrder newOrderItem = new DeliveryOrder(getOrderDetailsCustomerId(), Integer.parseInt(me.getKey().toString()), Integer.parseInt(me.getValue().toString()));
 							newOrderItem.databaseInsertDeliveryOrderItem();
 						}
 
@@ -1975,6 +1990,11 @@ public class NewOrderGUI {
 		customerLastName = deliveryCustomersTable.getModel().getValueAt(row, 2).toString();
 
 		return customerLastName;
+	}
+	
+	public int getDeliveryCustomerId() {
+		int row = deliveryCustomersTable.getSelectedRow();
+		return Integer.parseInt(deliveryCustomersTable.getModel().getValueAt(row, 0).toString());
 	}
 
 	public String getDeliveryCustomerHouseNumber() {
@@ -2073,13 +2093,23 @@ public class NewOrderGUI {
 	public String getOrderDetailsTableName() {
 		return textFieldTableName.getText();
 	}
+	
+	
 
 	public String getOrderDetailsCustomerName() {
 		return textFieldCustomerName.getText();
 	}
+	
+	private int getOrderDetailsCustomerId() {
+		return Integer.parseInt(textFieldCustomerId.getText());
+	}
 
 	public void setOrderDetailsCustomerName(String customerName) {
 		textFieldCustomerName.setText(customerName);
+	}
+	
+	private void setOrderDetailsCustomerId(String id) {
+		textFieldCustomerId.setText(id);
 	}
 
 	public void setOrderDetailsCustomerHouseNumber(String houseNumber) {
@@ -2120,6 +2150,8 @@ public class NewOrderGUI {
 		textFieldTableName.setText("");
 		textFieldCustomerName.setBackground(Color.LIGHT_GRAY);
 		textFieldCustomerName.setText("");
+		textFieldCustomerId.setBackground(Color.LIGHT_GRAY);
+		textFieldCustomerId.setText("");
 		textFieldCustomerHouseNumber.setBackground(Color.LIGHT_GRAY);
 		textFieldCustomerHouseNumber.setText("");
 		textFieldCustomerAddress.setBackground(Color.LIGHT_GRAY);
@@ -2147,6 +2179,8 @@ public class NewOrderGUI {
 	private void enableDeliveryTextFields() {
 		textFieldCustomerName.setBackground(Color.WHITE);
 		textFieldCustomerName.setText("");
+		textFieldCustomerId.setBackground(Color.WHITE);
+		textFieldCustomerId.setText("");
 		textFieldCustomerHouseNumber.setBackground(Color.WHITE);
 		textFieldCustomerHouseNumber.setText("");
 		textFieldCustomerAddress.setBackground(Color.WHITE);

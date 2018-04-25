@@ -18,7 +18,6 @@ import net.coobird.thumbnailator.Thumbnails;
 
 
 
-// Talk about the Bing maps API used for the static image and the process I used.
 
 public class CustomerMap {
 

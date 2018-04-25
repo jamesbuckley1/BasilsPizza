@@ -84,7 +84,7 @@ public class CustomerGUI {
 		JPanel panelCustomersTable = new JPanel(new BorderLayout());
 
 		customersTableModel = new DefaultTableModel(new String[] {
-				"First Name", "Last Name", "House Number", "Address",
+				"CustomerID", "First Name", "Last Name", "House Number", "Address",
 				"City", "Postcode", "Phone Number"
 		}, 0);
 
@@ -353,6 +353,7 @@ public class CustomerGUI {
 									
 									cm.getDirectionsData();
 									cm.getStaticMapImage();
+									Database.updateCustomerDistance(Double.parseDouble(cm.getDistance()));
 									
 								} catch (SQLException e) {
 									if (e.getErrorCode() == SQLITE_CONSTRAINT_PRIMARYKEY) {
@@ -663,6 +664,7 @@ public class CustomerGUI {
 
 		for (int i = 0; i < Database.getCustomersArray().size(); i++) {
 
+			int customerId = Database.getCustomersArray().get(i).getCustomerId();
 			String firstName = Database.getCustomersArray().get(i).getCustomerFirstName();
 			String lastName = Database.getCustomersArray().get(i).getCustomerLastName(); 
 			String houseNumber = Database.getCustomersArray().get(i).getCustomerHouseNumber();
@@ -672,7 +674,7 @@ public class CustomerGUI {
 			String phoneNumber = Database.getCustomersArray().get(i).getCustomerPhoneNumber();
 
 
-			Object[] data = {firstName, lastName, houseNumber, address, city,
+			Object[] data = {customerId, firstName, lastName, houseNumber, address, city,
 					postcode, phoneNumber
 			};
 
@@ -757,6 +759,11 @@ public class CustomerGUI {
 		textFieldCustomerCity.setText("");
 		textFieldCustomerPostcode.setText("");
 		textFieldCustomerPhoneNumber.setText("");
+	}
+	
+	private int getCustomerId() {
+		int row = customersTable.getSelectedRow();
+		return Integer.parseInt(customersTable.getModel().getValueAt(row, 0).toString());
 	}
 	
 	private int getSelectedCustomerTableRow() {
