@@ -5,6 +5,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import javax.swing.JOptionPane;
+
 public class Staff {
 
 	private String staffId;
@@ -17,8 +19,8 @@ public class Staff {
 	private String currentDateTime;
 
 	// Add staff constructor.
-	public Staff(String staffId, String firstName, String lastName, String jobTitle) {
-		this.staffId = staffId;
+	public Staff(String firstName, String lastName, String jobTitle) {
+		//this.staffId = staffId;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.jobTitle = jobTitle;
@@ -55,13 +57,16 @@ public class Staff {
 
 	public void clockIn() {
 		// Get system time
-
+		
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		dateTime = new Date();
 		currentDateTime = dateFormat.format(dateTime);
-		Database.clockInStaff(staffId, currentDateTime);
+		
+			Database.clockInStaff(staffId, currentDateTime);
+		
 		Database.updateLastClockIn(staffId, currentDateTime);
 		TablesGUI.populateComboboxStaff();
+		
 	}
 
 	/*
@@ -79,8 +84,12 @@ public class Staff {
 			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 			dateTime = new Date();
 			currentDateTime = dateFormat.format(dateTime);
+			
 			Database.clockOutStaff(staffId);
 			Database.updateStaffClockOutTime(staffId, currentDateTime);
+			
+			
+			
 			TablesGUI.populateComboboxStaff();
 		}
 		catch (Exception e) {

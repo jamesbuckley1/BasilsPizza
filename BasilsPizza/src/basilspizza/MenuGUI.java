@@ -536,13 +536,13 @@ public class MenuGUI {
 			public void actionPerformed(ActionEvent e) {
 				new AddMenuItemDialogGUI();
 				populatePizzaMenuTable();
-				NewOrderGUI.populatePizzaMenuTable();
+				//NewOrderGUI.populatePizzaMenuTable();
 				populateSidesMenuTable();
-				NewOrderGUI.populateSidesMenuTable();
+				//NewOrderGUI.populateSidesMenuTable();
 				populateDrinksMenuTable();
-				NewOrderGUI.populateDrinksMenuTable();
+				//NewOrderGUI.populateDrinksMenuTable();
 				populateDessertsMenuTable();
-				NewOrderGUI.populateDessertsMenuTable();
+				//NewOrderGUI.populateDessertsMenuTable();
 				
 			}
 		});

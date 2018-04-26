@@ -20,6 +20,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EtchedBorder;
@@ -355,6 +356,8 @@ public class CustomerInfoDialogGUI {
 						// If data is not downloaded notify the user.
 					} else if (distance == null && sleepCount > 10) {
 						System.out.println("Map data failed to download");
+						JOptionPane.showMessageDialog(null, "Map data failed to download.\nPlease check customer address and/or internet connection.",
+								"Error", JOptionPane.ERROR_MESSAGE);
 						textFieldDistance.setText("Could not get data.");
 						textFieldDuration.setText("Could not get data.");
 						break;

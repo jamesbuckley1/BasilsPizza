@@ -372,8 +372,8 @@ public class NewOrderGUI {
 		border.setTitleJustification(TitledBorder.LEFT);
 		border.setTitlePosition(TitledBorder.TOP);
 		panelCollectionOrdersMain.setBorder(border);
-		
-		
+
+
 		panelCollectionOrdersMain.add(panelCollectionOrders, BorderLayout.CENTER);
 		panelCollectionOrdersMain.add(collectionOrderPaneSouthControls(), BorderLayout.SOUTH);
 		return panelCollectionOrdersMain;
@@ -935,9 +935,27 @@ public class NewOrderGUI {
 	}
 
 	public static void populatePizzaMenuTable() {
+		
+		int rows = pizzaMenuTableModel.getRowCount();
+		for (int i = rows - 1; i >= 0; i --) {
+			pizzaMenuTableModel.removeRow(i);
+		}
+
 		MenuGUI m = new MenuGUI();
-		pizzaMenuTableModel = m.getPizzaMenuTableModel();
+
+		for(int row = 0; row < m.getPizzaMenuTableModel().getRowCount(); row ++) {
+
+			Object[] data = {m.getPizzaMenuTableModel().getValueAt(row, 0).toString(),
+					m.getPizzaMenuTableModel().getValueAt(row, 1).toString(),
+					m.getPizzaMenuTableModel().getValueAt(row, 2)};
+
+			pizzaMenuTableModel.addRow(data);
+
+		}
+
 		pizzaMenuTable.setModel(pizzaMenuTableModel);
+		
+		
 	}
 
 	public JPanel sidesMenuTable() {
@@ -1114,10 +1132,8 @@ public class NewOrderGUI {
 				totalPrice += Double.parseDouble(getSelectedMenuItemPrice(sidesMenuTable)) * Integer.parseInt(getQuantity(comboboxSidesMenuQuantity));
 				setTotalPrice(totalPrice);
 
-				//orderMenuItemQuantityHashMap.put(getSelectedMenuItemID(sidesMenuTable), getQuantity(comboboxSidesMenuQuantity));
 				orderMenuItemQuantityMultimap.put(Integer.parseInt(getSelectedMenuItemID(sidesMenuTable)), Integer.parseInt(getQuantity(comboboxSidesMenuQuantity)));
 
-			
 			}
 		});
 
@@ -1149,8 +1165,24 @@ public class NewOrderGUI {
 	}
 
 	public static void populateSidesMenuTable() {
+
+		int rows = sidesMenuTableModel.getRowCount();
+		for (int i = rows - 1; i >= 0; i --) {
+			sidesMenuTableModel.removeRow(i);
+		}
+
 		MenuGUI m = new MenuGUI();
-		sidesMenuTableModel = m.getSidesMenuTableModel();
+
+		for(int row = 0; row < m.getSidesMenuTableModel().getRowCount(); row ++) {
+
+			Object[] data = {m.getSidesMenuTableModel().getValueAt(row, 0).toString(),
+					m.getSidesMenuTableModel().getValueAt(row, 1).toString(),
+					m.getSidesMenuTableModel().getValueAt(row, 2)};
+
+			sidesMenuTableModel.addRow(data);
+
+		}
+
 		sidesMenuTable.setModel(sidesMenuTableModel);
 	}
 
@@ -1324,8 +1356,8 @@ public class NewOrderGUI {
 				setTotalPrice(totalPrice);
 
 				orderMenuItemQuantityMultimap.put(Integer.parseInt(getSelectedMenuItemID(drinksMenuTable)), Integer.parseInt(getQuantity(comboboxDrinksMenuQuantity)));
-				
-				
+
+
 			}
 		});
 
@@ -1357,8 +1389,23 @@ public class NewOrderGUI {
 	}
 
 	public static void populateDrinksMenuTable() {
+		int rows = drinksMenuTableModel.getRowCount();
+		for (int i = rows - 1; i >= 0; i --) {
+			drinksMenuTableModel.removeRow(i);
+		}
+
 		MenuGUI m = new MenuGUI();
-		drinksMenuTableModel = m.getDrinksMenuTableModel();
+
+		for(int row = 0; row < m.getDrinksMenuTableModel().getRowCount(); row ++) {
+
+			Object[] data = {m.getDrinksMenuTableModel().getValueAt(row, 0).toString(),
+					m.getDrinksMenuTableModel().getValueAt(row, 1).toString(),
+					m.getDrinksMenuTableModel().getValueAt(row, 2)};
+
+			drinksMenuTableModel.addRow(data);
+
+		}
+
 		drinksMenuTable.setModel(drinksMenuTableModel);
 	}
 
@@ -1526,7 +1573,7 @@ public class NewOrderGUI {
 				totalPrice += Double.parseDouble(getSelectedMenuItemPrice(dessertsMenuTable)) * Integer.parseInt(getQuantity(comboboxDessertsMenuQuantity));
 				setTotalPrice(totalPrice);
 
-				orderMenuItemQuantityHashMap.put(getSelectedMenuItemID(dessertsMenuTable), getQuantity(comboboxDessertsMenuQuantity));
+				orderMenuItemQuantityMultimap.put(Integer.parseInt(getSelectedMenuItemID(dessertsMenuTable)), Integer.parseInt(getQuantity(comboboxDessertsMenuQuantity)));
 			}
 		});
 
@@ -1558,8 +1605,23 @@ public class NewOrderGUI {
 	}
 
 	public static void populateDessertsMenuTable() {
+		int rows = dessertsMenuTableModel.getRowCount();
+		for (int i = rows - 1; i >= 0; i --) {
+			dessertsMenuTableModel.removeRow(i);
+		}
+
 		MenuGUI m = new MenuGUI();
-		dessertsMenuTableModel = m.getDessertsMenuTableModel();
+
+		for(int row = 0; row < m.getDessertsMenuTableModel().getRowCount(); row ++) {
+
+			Object[] data = {m.getDessertsMenuTableModel().getValueAt(row, 0).toString(),
+					m.getDessertsMenuTableModel().getValueAt(row, 1).toString(),
+					m.getDessertsMenuTableModel().getValueAt(row, 2)};
+
+			dessertsMenuTableModel.addRow(data);
+
+		}
+
 		dessertsMenuTable.setModel(dessertsMenuTableModel);
 	}
 
@@ -1732,7 +1794,7 @@ public class NewOrderGUI {
 
 		textFieldCustomerName = new JTextField(20);
 		textFieldCustomerName.setEditable(false);
-		
+
 		textFieldCustomerId = new JTextField(20);
 		textFieldCustomerName.setEditable(false);
 
@@ -1773,14 +1835,14 @@ public class NewOrderGUI {
 		gbc.insets = new Insets(0, 20, 0, 0);
 		panelOrderSummary.add(new JLabel("Table Name: "), gbc);
 
-		
+
 		gbc.gridy++;
 		panelOrderSummary.add(new JLabel("Customer ID: "), gbc);
-		
+
 		gbc.gridy++;
 		panelOrderSummary.add(new JLabel("Customer Name: "), gbc);
-		
-		
+
+
 
 		gbc.gridy++;
 		panelOrderSummary.add(new JLabel("Customer House Number: "), gbc);
@@ -1814,11 +1876,11 @@ public class NewOrderGUI {
 
 		gbc.gridy++;
 		panelOrderSummary.add(textFieldCustomerId, gbc);
-		
+
 		gbc.gridy++;
 		panelOrderSummary.add(textFieldCustomerName, gbc);
-		
-		
+
+
 
 		gbc.gridy++;
 		panelOrderSummary.add(textFieldCustomerHouseNumber, gbc);
@@ -1903,6 +1965,7 @@ public class NewOrderGUI {
 
 
 						for (Map.Entry<Integer, Integer> me : orderMenuItemQuantityMultimap.entries()) {
+							System.out.println("ME" + Integer.parseInt(me.getKey().toString()) + Integer.parseInt(me.getValue().toString()));
 							TableOrder newOrderItem = new TableOrder(getOrderDetailsTableName(), Integer.parseInt(me.getKey().toString()), Integer.parseInt(me.getValue().toString()));
 							newOrderItem.databaseInsertTableOrderItem();
 						}
@@ -1991,7 +2054,7 @@ public class NewOrderGUI {
 
 		return customerLastName;
 	}
-	
+
 	public int getDeliveryCustomerId() {
 		int row = deliveryCustomersTable.getSelectedRow();
 		return Integer.parseInt(deliveryCustomersTable.getModel().getValueAt(row, 0).toString());
@@ -2093,13 +2156,13 @@ public class NewOrderGUI {
 	public String getOrderDetailsTableName() {
 		return textFieldTableName.getText();
 	}
-	
-	
+
+
 
 	public String getOrderDetailsCustomerName() {
 		return textFieldCustomerName.getText();
 	}
-	
+
 	private int getOrderDetailsCustomerId() {
 		return Integer.parseInt(textFieldCustomerId.getText());
 	}
@@ -2107,7 +2170,7 @@ public class NewOrderGUI {
 	public void setOrderDetailsCustomerName(String customerName) {
 		textFieldCustomerName.setText(customerName);
 	}
-	
+
 	private void setOrderDetailsCustomerId(String id) {
 		textFieldCustomerId.setText(id);
 	}

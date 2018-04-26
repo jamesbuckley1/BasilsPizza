@@ -347,13 +347,14 @@ public class CustomerGUI {
 										public void run() {
 											populateCustomersTable();
 											clearCustomerForm();
-											NewOrderGUI.populateDeliveryCustomers();
+											
 										}
 									});
 									
 									cm.getDirectionsData();
 									cm.getStaticMapImage();
 									Database.updateCustomerDistance(Double.parseDouble(cm.getDistance()));
+									NewOrderGUI.populateDeliveryCustomers();
 									
 								} catch (SQLException e) {
 									if (e.getErrorCode() == SQLITE_CONSTRAINT_PRIMARYKEY) {

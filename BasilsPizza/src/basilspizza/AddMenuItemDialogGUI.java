@@ -98,6 +98,12 @@ public class AddMenuItemDialogGUI {
 				
 				Database.insertMenuItem(itemName, itemType, itemPrice);
 				
+
+				NewOrderGUI.populatePizzaMenuTable();
+				NewOrderGUI.populateSidesMenuTable();
+				NewOrderGUI.populateDrinksMenuTable();
+				NewOrderGUI.populateDessertsMenuTable();
+				
 				dialogAddMenuItem.dispose();
 			}
 		});

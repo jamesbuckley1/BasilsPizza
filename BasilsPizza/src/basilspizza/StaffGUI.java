@@ -13,6 +13,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
@@ -138,10 +139,9 @@ public class StaffGUI {
 
 				try {
 					int row = staffClockedInTable.getSelectedRow();
-					String houseNumber = staffClockedInTable.getModel().getValueAt(row, 2).toString();
-					String address = staffClockedInTable.getModel().getValueAt(row, 3).toString();
-					String city = staffClockedInTable.getModel().getValueAt(row, 4).toString();
-					//populateMap(houseNumber, address, city);
+					String staffId = staffClockedInTable.getModel().getValueAt(row, 0).toString();
+					setTextFieldStaffId(staffId);
+					
 				} catch (Exception e) {
 					/*
         				JOptionPane.showMessageDialog(frame, "Please select an item to edit.",
@@ -378,10 +378,9 @@ public class StaffGUI {
 
 				try {
 					int row = allStaffTable.getSelectedRow();
-					String houseNumber = allStaffTable.getModel().getValueAt(row, 2).toString();
-					String address = allStaffTable.getModel().getValueAt(row, 3).toString();
-					String city = allStaffTable.getModel().getValueAt(row, 4).toString();
-					//populateMap(houseNumber, address, city);
+					String staffId = allStaffTable.getModel().getValueAt(row, 0).toString();
+					setTextFieldStaffId(staffId);
+					
 				} catch (Exception e) {
 					/*
         				JOptionPane.showMessageDialog(frame, "Please select an item to edit.",
@@ -601,10 +600,14 @@ public class StaffGUI {
 		clockInBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				
 				Staff s = new Staff(textFieldStaffId.getText());
 				s.clockIn();
 				populateStaffClockedInTable();
 				populateAllStaffTable();
+				
+				
+				
 			}
 		});
 
@@ -619,6 +622,20 @@ public class StaffGUI {
 					s.updateLastClockOut();
 					populateStaffClockedInTable();
 					populateAllStaffTable();
+					
+					
+					Database.selectStaffFromId(Integer.parseInt(textFieldStaffId.getText()));
+					
+					for (int i = 0; i < Database.getStaffArray().size(); i ++) {
+						String id = Database.getStaffArray().get(i).getStaffId();
+						String firstName = Database.getStaffArray().get(i).getFirstName();
+						String lastName = Database.getStaffArray().get(i).getLastName();
+						String jobTitle = Database.getStaffArray().get(i).getJobTitle();
+						
+						Database.unassignTablesOnClockOut(id + " " + firstName + " " + lastName + " " + jobTitle);
+					}
+					
+					
 				} catch (Exception e1) {
 					e1.printStackTrace();
 				}
@@ -716,6 +733,10 @@ public class StaffGUI {
 		selectedCellValuesArray.add(jobTitle);
 
 		return selectedCellValuesArray;
+	}
+	
+	private void setTextFieldStaffId(String id) {
+		textFieldStaffId.setText(id);
 	}
 
 	public JPanel getStaffPanel() {

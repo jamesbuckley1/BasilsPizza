@@ -46,7 +46,7 @@ public class AddStaffDialogGUI {
 		JLabel labelLastName = new JLabel("Last name: ");
 		JLabel labelJobTitle = new JLabel("Job Title: ");
 		
-		JTextField textFieldEmployeeNumber = new JTextField(15);
+		//JTextField textFieldEmployeeNumber = new JTextField(15);
 		JTextField textFieldFirstName = new JTextField(15);
 		JTextField textFieldLastName = new JTextField(15);
 		JTextField textFieldJobTitle = new JTextField(15);
@@ -63,12 +63,12 @@ public class AddStaffDialogGUI {
 		okBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				String employeeNumber = textFieldEmployeeNumber.getText();
-				String firstName = textFieldFirstName.getText();
-				String lastName = textFieldLastName.getText();
-				String jobTitle = textFieldJobTitle.getText();
+				//String employeeNumber = textFieldEmployeeNumber.getText().toUpperCase();
+				String firstName = textFieldFirstName.getText().toUpperCase();
+				String lastName = textFieldLastName.getText().toUpperCase();
+				String jobTitle = textFieldJobTitle.getText().toUpperCase();
 				
-				Staff s = new Staff(employeeNumber, firstName, lastName, jobTitle);
+				Staff s = new Staff(firstName, lastName, jobTitle);
 				
 				System.out.println("ADDING STAFF TO DATABASE");
 				try {
@@ -87,9 +87,9 @@ public class AddStaffDialogGUI {
 		gbc.gridy = 0;
 		gbc.anchor = GridBagConstraints.LINE_END;
 		//gbc.insets = new Insets(10,10,10,10);
-		panelForm.add(labelEmployeeNumber, gbc);
+		//panelForm.add(labelEmployeeNumber, gbc);
 		
-		gbc.gridy++;
+		//gbc.gridy++;
 		panelForm.add(labelFirstName, gbc);
 		
 		gbc.gridy++;
@@ -110,9 +110,9 @@ public class AddStaffDialogGUI {
 		gbc.weightx = 0;
 		gbc.weighty = 0;
 		gbc.anchor = GridBagConstraints.LINE_START;
-		panelForm.add(textFieldEmployeeNumber, gbc);
+		//panelForm.add(textFieldEmployeeNumber, gbc);
 		
-		gbc.gridy++;
+		//gbc.gridy++;
 		panelForm.add(textFieldFirstName, gbc);
 		
 		gbc.gridy++;

@@ -2,6 +2,8 @@ package basilspizza;
 import java.sql.*;
 import java.util.ArrayList;
 
+import javax.swing.JOptionPane;
+
 
 public class Database {
 
@@ -47,9 +49,10 @@ public class Database {
 	private final static String insertStaffSql = "INSERT INTO staff (first_name, last_name, job_title) VALUES (?, ?, ?);";
 	private final static String deleteStaffSql = "DELETE FROM staff WHERE (staff_id = ?);";
 	private final static String dropStaffTableSql = "DROP TABLE staff;";
+	private final static String selectStaffFromIdSql = "SELECT * FROM staff WHERE staff_id = ?;";
 
 	// STAFF CLOCK IN SQL STRINGS
-	private final static String createStaffClockInSql = "CREATE TABLE IF NOT EXISTS staff_clocked_in (staff_clocked_in_id INTEGER PRIMARY KEY AUTOINCREMENT, staff_id INTEGER NOT NULL REFERENCES staff(staff_id), clock_in_time DATETIME);";
+	private final static String createStaffClockInSql = "CREATE TABLE IF NOT EXISTS staff_clocked_in (staff_clocked_in_id INTEGER PRIMARY KEY AUTOINCREMENT, staff_id INTEGER UNIQUE NOT NULL REFERENCES staff(staff_id), clock_in_time DATETIME);";
 	private final static String selectStaffClockInSql = "SELECT staff.staff_id, first_name, last_name, job_title, staff_clocked_in.clock_in_time FROM staff INNER JOIN staff_clocked_in ON staff.staff_id = staff_clocked_in.staff_id;";
 	private final static String clockInStaffSql = "INSERT INTO staff_clocked_in (staff_id, clock_in_time) VALUES (?, ?);";
 	private final static String updateStaffLastClockInSql = "UPDATE staff SET last_clock_in = ? WHERE staff_id = ?;";
@@ -57,7 +60,23 @@ public class Database {
 	// STAFF CLOCK OUT SQL STRINGS
 	private final static String clockOutStaffSql = "DELETE FROM staff_clocked_in WHERE (staff_id = ?);";
 	private final static String updateStaffLastClockOutSql = "UPDATE staff SET last_clock_out = ? WHERE staff_id = ?;";
-
+	private final static String deleteAssignedStaffOnClockOutSql = "UPDATE tables SET assigned_staff = null WHERE assigned_staff = ?;";
+	
+	// ORDERS SQL STRINGS
+	private final static String createOrdersTableSql = "CREATE TABLE IF NOT EXISTS order_table (order_table_id INTEGER PRIMARY KEY AUTOINCREMENT, customer_id INTEGER REFERENCES customer(customer_id), table_id TEXT REFERENCES tables(table_id), collection_id TEXT, order_time DATETIME NOT NULL, order_type TEXT NOT NULL);";
+	private final static String insertTableOrderSql = "INSERT INTO order_table (table_id, order_time, order_type) VALUES (?, ?, ?);";
+	private final static String insertCollectionOrderSql = "INSERT INTO order_table (collection_id, order_time, order_type) VALUES (?, ?, ?);";
+	private final static String insertDeliveryOrderSql = "INSERT INTO order_table (customer_id, order_time, order_type) VALUES (?, ?, ?);";
+	private final static String selectLastOrderIdSql = "SELECT seq FROM sqlite_sequence WHERE name = \"order_table\";"; // Gets last inserted autoincremented ID
+	private final static String selectOrdersByTypeSql = "SELECT * FROM order_table WHERE order_type = ?;";
+	
+	// ORDER ITEM SQL STRINGS
+	private final static String createOrderItemsTableSql = "CREATE TABLE IF NOT EXISTS order_table_item (order_table_item_id INTEGER PRIMARY KEY AUTOINCREMENT, order_table_id INTEGER NOT NULL REFERENCES order_table(order_table_id), menu_item_id INTEGER NOT NULL REFERENCES menu_item(menu_item_id), quantity INTEGER);";
+	private final static String insertOrderItemSql = "INSERT INTO order_table_item (order_table_id, menu_item_id, quantity) VALUES (?, ?, ?);";
+	private final static String selectOrderItemsFromIdSql = "SELECT order_table_item.order_table_item_id, order_table_item.order_table_id, order_table_item.menu_item_id, menu_item.item_name, order_table_item.quantity, menu_item.item_price FROM order_table_item INNER JOIN menu_item on order_table_item.menu_item_id = menu_item.menu_item_id WHERE order_table_item.order_table_id = ?;";
+	private final static String selectActiveOrderItemsFromIdSql = "SELECT order_table_item.order_table_item_id, order_table_item.order_table_id, order_table.table_id, order_table_item.menu_item_id, menu_item.item_name, order_table_item.quantity, menu_item.item_price FROM order_table_item INNER JOIN menu_item ON order_table_item.menu_item_id = menu_item.menu_item_id INNER JOIN order_table ON order_table_item.order_table_id = order_table.order_table_id WHERE order_table.table_id = ?;";
+	
+	
 	// TABLES SQL STRINGS (Had to name the table "tables" as it did not like "table").
 	private final static String createTablesTableSql = "CREATE TABLE IF NOT EXISTS tables (table_id TEXT PRIMARY KEY, assigned_staff TEXT, special_requirements TEXT, order_id INTEGER REFERENCES orders(order_id));"; 
 	private final static String selectTablesSql = "SELECT * FROM tables;";
@@ -67,42 +86,42 @@ public class Database {
 	private final static String selectTableSpecialRequirementsSql = "SELECT special_requirements FROM tables WHERE table_id = ?;";
 	private final static String selectTableAssignedStaffSql = "SELECT assigned_staff FROM tables WHERE table_id = ?;";
 
-	// ORDERS SQL STRINGS
+	
 	
 	// TABLE ORDERS SQL STRINGS
-	private final static String createTableOrdersTableSql = "CREATE TABLE IF NOT EXISTS table_order (table_order_id INTEGER PRIMARY KEY AUTOINCREMENT, table_id INTEGER NOT NULL REFERENCES tables(table_id), order_time DATETIME NOT NULL);";
-	private final static String insertTableOrderSql = "INSERT INTO table_order(table_id, order_time) VALUES (?, ?);";
-	private final static String selectLastTableOrderIdSql = "SELECT seq FROM sqlite_sequence WHERE name = \"table_order\";"; // Gets last inserted autoincremented ID
-	private final static String selectTableOrdersSql = "SELECT * FROM table_order;";
+	//private final static String createTableOrdersTableSql = "CREATE TABLE IF NOT EXISTS table_order (table_order_id INTEGER PRIMARY KEY AUTOINCREMENT, table_id INTEGER NOT NULL REFERENCES tables(table_id), order_time DATETIME NOT NULL);";
+	//private final static String insertTableOrderSql = "INSERT INTO table_order(table_id, order_time) VALUES (?, ?);";
+	//private final static String selectLastTableOrderIdSql = "SELECT seq FROM sqlite_sequence WHERE name = \"table_order\";"; // Gets last inserted autoincremented ID
+	//private final static String selectTableOrdersSql = "SELECT * FROM table_order;";
 
 	// TABLE ORDER ITEM SQL STRINGS
-	private final static String createTableOrderItemTableSql = "CREATE TABLE IF NOT EXISTS table_order_item (table_order_item_id INTEGER PRIMARY KEY AUTOINCREMENT, table_order_id INTEGER NOT NULL REFERENCES table_order(table_order_id), menu_item_id INTEGER NOT NULL REFERENCES menu_item(menu_item_id), quantity INTEGER NOT NULL);";
-	private final static String insertTableOrderItemSql = "INSERT INTO table_order_item(table_order_id, menu_item_id, quantity) VALUES (?, ?, ?);";
-	private final static String selectTableOrderItemsSql = "SELECT table_order_item.table_order_item_id, table_order_item.table_order_id, table_order_item.menu_item_id, menu_item.item_name, table_order_item.quantity, menu_item.item_price FROM table_order_item INNER JOIN menu_item ON table_order_item.menu_item_id = menu_item.menu_item_id WHERE table_order_item.table_order_id = ?;";
-	private final static String selectActiveTableOrderItemsSql = "SELECT table_order_item.table_order_item_id, table_order_item.table_order_id, table_order.table_id, table_order_item.menu_item_id, menu_item.item_name, table_order_item.quantity, menu_item.item_price FROM table_order_item INNER JOIN menu_item ON table_order_item.menu_item_id = menu_item.menu_item_id INNER JOIN table_order ON table_order_item.table_order_id = table_order.table_order_id WHERE table_order.table_id = ?;";
+	//private final static String createTableOrderItemTableSql = "CREATE TABLE IF NOT EXISTS table_order_item (table_order_item_id INTEGER PRIMARY KEY AUTOINCREMENT, table_order_id INTEGER NOT NULL REFERENCES table_order(table_order_id), menu_item_id INTEGER NOT NULL REFERENCES menu_item(menu_item_id), quantity INTEGER NOT NULL);";
+	//private final static String insertTableOrderItemSql = "INSERT INTO table_order_item(table_order_id, menu_item_id, quantity) VALUES (?, ?, ?);";
+	//private final static String selectTableOrderItemsSql = "SELECT table_order_item.table_order_item_id, table_order_item.table_order_id, table_order_item.menu_item_id, menu_item.item_name, table_order_item.quantity, menu_item.item_price FROM table_order_item INNER JOIN menu_item ON table_order_item.menu_item_id = menu_item.menu_item_id WHERE table_order_item.table_order_id = ?;";
+	//private final static String selectActiveTableOrderItemsSql = "SELECT table_order_item.table_order_item_id, table_order_item.table_order_id, table_order.table_id, table_order_item.menu_item_id, menu_item.item_name, table_order_item.quantity, menu_item.item_price FROM table_order_item INNER JOIN menu_item ON table_order_item.menu_item_id = menu_item.menu_item_id INNER JOIN table_order ON table_order_item.table_order_id = table_order.table_order_id WHERE table_order.table_id = ?;";
 	
 	
 	// COLLECTION ORDERS SQL STRINGS
-	private final static String createCollectionOrdersTableSql = "CREATE TABLE IF NOT EXISTS collection_order (collection_order_id INTEGER PRIMARY KEY AUTOINCREMENT, customer_name TEXT NOT NULL, order_time DATETIME NOT NULL);";
-	private final static String insertCollectionOrderSql = "INSERT INTO collection_order(customer_name, order_time) VALUES (?, ?);";
-	private final static String selectLastCollectionOrderIdSql = "SELECT seq FROM sqlite_sequence WHERE name = \"collection_order\";"; // Gets last inserted autoincremented ID
-	private final static String selectCollectionOrdersSql = "SELECT * FROM collection_order;";
+	//private final static String createCollectionOrdersTableSql = "CREATE TABLE IF NOT EXISTS collection_order (collection_order_id INTEGER PRIMARY KEY AUTOINCREMENT, customer_name TEXT NOT NULL, order_time DATETIME NOT NULL);";
+	//private final static String insertCollectionOrderSql = "INSERT INTO collection_order(customer_name, order_time) VALUES (?, ?);";
+	//private final static String selectLastCollectionOrderIdSql = "SELECT seq FROM sqlite_sequence WHERE name = \"collection_order\";"; // Gets last inserted autoincremented ID
+	//private final static String selectCollectionOrdersSql = "SELECT * FROM collection_order;";
 
 	// COLLECTION ORDER ITEM SQL STRINGS
-	private final static String createCollectionOrderItemTableSql = "CREATE TABLE IF NOT EXISTS collection_order_item (collection_order_item_id INTEGER PRIMARY KEY AUTOINCREMENT, collection_order_id INTEGER NOT NULL REFERENCES collection_order(collection_order_id), menu_item_id INTEGER NOT NULL REFERENCES menu_item(menu_item_id), quantity INTEGER NOT NULL);";
-	private final static String insertCollectionOrderItemSql = "INSERT INTO collection_order_item(collection_order_id, menu_item_id, quantity) VALUES (?, ?, ?);";
-	private final static String selectCollectionOrderItemsSql = "SELECT collection_order_item.collection_order_item_id, collection_order_item.collection_order_id, collection_order_item.menu_item_id, menu_item.item_name, collection_order_item.quantity, menu_item.item_price FROM collection_order_item INNER JOIN menu_item ON collection_order_item.menu_item_id = menu_item.menu_item_id WHERE collection_order_item.collection_order_id = ?;";
+	//private final static String createCollectionOrderItemTableSql = "CREATE TABLE IF NOT EXISTS collection_order_item (collection_order_item_id INTEGER PRIMARY KEY AUTOINCREMENT, collection_order_id INTEGER NOT NULL REFERENCES collection_order(collection_order_id), menu_item_id INTEGER NOT NULL REFERENCES menu_item(menu_item_id), quantity INTEGER NOT NULL);";
+	//private final static String insertCollectionOrderItemSql = "INSERT INTO collection_order_item(collection_order_id, menu_item_id, quantity) VALUES (?, ?, ?);";
+	//private final static String selectCollectionOrderItemsSql = "SELECT collection_order_item.collection_order_item_id, collection_order_item.collection_order_id, collection_order_item.menu_item_id, menu_item.item_name, collection_order_item.quantity, menu_item.item_price FROM collection_order_item INNER JOIN menu_item ON collection_order_item.menu_item_id = menu_item.menu_item_id WHERE collection_order_item.collection_order_id = ?;";
 
 	// DELIVERY ORDERS SQL STRINGS
-	private final static String createDeliveryOrdersTableSql = "CREATE TABLE IF NOT EXISTS delivery_order (delivery_order_id INTEGER PRIMARY KEY AUTOINCREMENT, customer_id INTEGER NOT NULL REFERENCES customer(customer_id), order_time DATETIME NOT NULL);";
-	private final static String insertDeliveryOrderSql = "INSERT INTO delivery_order(customer_id, order_time) VALUES (?, ?);";
-	private final static String selectLastDeliveryOrderIdSql = "SELECT seq FROM sqlite_sequence WHERE name = \"delivery_order\";"; // Gets last inserted autoincremented ID
-	private final static String selectDeliveryOrdersSql = "SELECT * FROM delivery_order;";
+	//private final static String createDeliveryOrdersTableSql = "CREATE TABLE IF NOT EXISTS delivery_order (delivery_order_id INTEGER PRIMARY KEY AUTOINCREMENT, customer_id INTEGER NOT NULL REFERENCES customer(customer_id), order_time DATETIME NOT NULL);";
+	//private final static String insertDeliveryOrderSql = "INSERT INTO delivery_order(customer_id, order_time) VALUES (?, ?);";
+	//private final static String selectLastDeliveryOrderIdSql = "SELECT seq FROM sqlite_sequence WHERE name = \"delivery_order\";"; // Gets last inserted autoincremented ID
+	//private final static String selectDeliveryOrdersSql = "SELECT * FROM delivery_order;";
 
 	// DELIVERY ORDER ITEM SQL STRINGS
-	private final static String createDeliveryOrderItemTableSql = "CREATE TABLE IF NOT EXISTS delivery_order_item (delivery_order_item_id INTEGER PRIMARY KEY AUTOINCREMENT, delivery_order_id INTEGER NOT NULL REFERENCES delivery_order(delivery_order_id), menu_item_id INTEGER NOT NULL REFERENCES menu_item(menu_item_id), quantity INTEGER NOT NULL);";
-	private final static String insertDeliveryOrderItemSql = "INSERT INTO delivery_order_item(delivery_order_id, menu_item_id, quantity) VALUES (?, ?, ?);";
-	private final static String selectDeliveryOrderItemsSql = "SELECT delivery_order_item.delivery_order_item_id, delivery_order_item.delivery_order_id, delivery_order_item.menu_item_id, menu_item.item_name, delivery_order_item.quantity, menu_item.item_price FROM delivery_order_item INNER JOIN menu_item ON delivery_order_item.menu_item_id = menu_item.menu_item_id WHERE delivery_order_item.delivery_order_id = ?;";
+	//private final static String createDeliveryOrderItemTableSql = "CREATE TABLE IF NOT EXISTS delivery_order_item (delivery_order_item_id INTEGER PRIMARY KEY AUTOINCREMENT, delivery_order_id INTEGER NOT NULL REFERENCES delivery_order(delivery_order_id), menu_item_id INTEGER NOT NULL REFERENCES menu_item(menu_item_id), quantity INTEGER NOT NULL);";
+	//private final static String insertDeliveryOrderItemSql = "INSERT INTO delivery_order_item(delivery_order_id, menu_item_id, quantity) VALUES (?, ?, ?);";
+	//private final static String selectDeliveryOrderItemsSql = "SELECT delivery_order_item.delivery_order_item_id, delivery_order_item.delivery_order_id, delivery_order_item.menu_item_id, menu_item.item_name, delivery_order_item.quantity, menu_item.item_price FROM delivery_order_item INNER JOIN menu_item ON delivery_order_item.menu_item_id = menu_item.menu_item_id WHERE delivery_order_item.delivery_order_id = ?;";
 
 	// DELIVERY ORDER CUSTOMER LOCATION STRINGS
 	//private final static String selectDeliveryCustomerLocation = "SELECT delivery_order_item.delivery_order_item_id, delivery_order_item.delivery_order_id"
@@ -156,23 +175,12 @@ public class Database {
 			stmt = conn.prepareStatement(createTablesTableSql);
 			stmt.executeUpdate();
 
-			stmt = conn.prepareStatement(createTableOrdersTableSql);
+			stmt = conn.prepareStatement(createOrdersTableSql);
+			stmt.executeUpdate();
+			
+			stmt = conn.prepareStatement(createOrderItemsTableSql);
 			stmt.executeUpdate();
 
-			stmt = conn.prepareStatement(createTableOrderItemTableSql);
-			stmt.executeUpdate();
-
-			stmt = conn.prepareStatement(createCollectionOrdersTableSql);
-			stmt.executeUpdate();
-
-			stmt = conn.prepareStatement(createCollectionOrderItemTableSql);
-			stmt.executeUpdate();
-
-			stmt = conn.prepareStatement(createDeliveryOrdersTableSql);
-			stmt.executeUpdate();
-
-			stmt = conn.prepareStatement(createDeliveryOrderItemTableSql);
-			stmt.executeUpdate();
 
 			stmt = conn.prepareStatement(createMenuItemTableSql);
 			stmt.executeUpdate();
@@ -181,7 +189,7 @@ public class Database {
 			stmt.close();
 			closeDB();
 		} catch (Exception e) {
-			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			e.printStackTrace();
 			System.exit(0);
 		}
 		//selectStock();
@@ -511,6 +519,40 @@ public class Database {
 		}
 		System.out.println("SELECT successful.");
 	}
+	
+	public static void selectStaffFromId(int staffId) {
+		try {
+			staffArray = new ArrayList<Staff>();
+			openDB();
+
+			PreparedStatement selectStaff = conn.prepareStatement(selectStaffFromIdSql);
+			selectStaff.setInt(1, staffId);
+			ResultSet rs = selectStaff.executeQuery();
+
+			while (rs.next()) {
+				String id = rs.getString("staff_id");
+				String firstName = rs.getString("first_name");
+				String lastName = rs.getString("last_name");
+				String jobTitle = rs.getString("job_title");
+				String lastClockIn = rs.getString("last_clock_in");
+				String lastClockOut = rs.getString("last_clock_out");
+
+
+				Staff s = new Staff(id, firstName, lastName, jobTitle, lastClockIn, lastClockOut);
+				staffArray.add(s);
+			}
+
+			rs.close();
+			selectStaff.close();
+			closeDB();
+
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		}
+		System.out.println("SELECT successful.");
+	}
 
 
 
@@ -619,10 +661,16 @@ public class Database {
 			clockIn.close();
 
 			closeDB();
-		} catch (Exception e) {
-			System.err.println(e.getClass().getName() + ": " + e.getMessage());
-			System.exit(0);
+		
+		} catch (SQLException e) {
+			if (e.getErrorCode() == 19) {
+				closeDB();
+				JOptionPane.showMessageDialog(null,  "Staff is already clocked in.", 
+						"Error", JOptionPane.ERROR_MESSAGE);
+			}
 		}
+		
+		
 		System.out.println("Staff clock in successful.");
 	}
 
@@ -679,6 +727,25 @@ public class Database {
 		}
 		System.out.println("Update staff clock out time successful.");
 	}
+	
+	public static void unassignTablesOnClockOut(String staff) {
+		try {
+			openDB();
+
+			PreparedStatement update = conn.prepareStatement(deleteAssignedStaffOnClockOutSql);
+			update.setString(1, staff);
+			
+			update.executeUpdate();
+			update.close();
+
+			closeDB();
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			System.exit(0);
+		}
+		System.out.println("Unassign staff from tables successful.");
+	}
+	
 	public static ArrayList<Staff> getStaffArray() {
 		return staffArray;
 	}
@@ -816,7 +883,7 @@ public class Database {
 	}
 
 	public static String selectTableAssignedStaff(String tableId) {
-		String assignedStaff = null;
+		String assignedStaff = "";
 		try {
 			openDB();
 
@@ -825,7 +892,6 @@ public class Database {
 
 			select.setString(1, tableId);
 			ResultSet rs = select.executeQuery();
-
 			while(rs.next()) {
 				assignedStaff = rs.getString("assigned_staff");
 			}
@@ -858,6 +924,7 @@ public class Database {
 
 			insert.setString(1, tableId);
 			insert.setString(2,  dateTime);
+			insert.setString(3, "TABLE");
 
 			insert.executeUpdate();
 			insert.close();
@@ -876,11 +943,12 @@ public class Database {
 			tableOrdersArray = new ArrayList<TableOrder>();
 			openDB();
 
-			PreparedStatement selectTableOrders = conn.prepareStatement(selectTableOrdersSql);
+			PreparedStatement selectTableOrders = conn.prepareStatement(selectOrdersByTypeSql);
+			selectTableOrders.setString(1, "TABLE");
 			ResultSet rs = selectTableOrders.executeQuery();
 
 			while (rs.next()) {
-				int tableOrderId = rs.getInt("table_order_id");
+				int tableOrderId = rs.getInt("order_table_id");
 				String tableId = rs.getString("table_id");
 				String dateTime = rs.getString("order_time");
 
@@ -915,14 +983,14 @@ public class Database {
 			tableOrderItemsArray = new ArrayList<TableOrder>();
 			openDB();
 
-			PreparedStatement selectTableOrderItems = conn.prepareStatement(selectTableOrderItemsSql);
+			PreparedStatement selectTableOrderItems = conn.prepareStatement(selectOrderItemsFromIdSql);
 
 			selectTableOrderItems.setInt(1, orderId);
 
 			ResultSet rs = selectTableOrderItems.executeQuery();
 
 			while (rs.next()) {
-				int tableOrderId = rs.getInt("table_order_id");
+				int tableOrderId = rs.getInt("order_table_id");
 				int menuItemId = rs.getInt("menu_item_id");
 				String menuItemName = rs.getString("item_name");
 				int quantity = rs.getInt("quantity");
@@ -954,21 +1022,21 @@ public class Database {
 			tableActiveOrderItemsArray = new ArrayList<TableOrder>();
 			openDB();
 
-			PreparedStatement selectActiveTableOrderItems = conn.prepareStatement(selectActiveTableOrderItemsSql);
+			PreparedStatement selectActiveTableOrderItems = conn.prepareStatement(selectActiveOrderItemsFromIdSql);
 
 			selectActiveTableOrderItems.setString(1, tableId);
 
 			ResultSet rs = selectActiveTableOrderItems.executeQuery();
 
 			while (rs.next()) {
-				int tableOrderId = rs.getInt("table_order_id");
+				int orderId = rs.getInt("order_table_id");
 				String tableName = rs.getString("table_id");
 				int menuItemId = rs.getInt("menu_item_id");
 				String menuItemName = rs.getString("item_name");
 				int quantity = rs.getInt("quantity");
 				double menuItemPrice = rs.getDouble("item_price");
 
-				TableOrder o = new TableOrder(tableOrderId, menuItemId, tableName, menuItemName, quantity, menuItemPrice);
+				TableOrder o = new TableOrder(orderId, menuItemId, tableName, menuItemName, quantity, menuItemPrice);
 				tableActiveOrderItemsArray.add(o);
 			}
 
@@ -992,7 +1060,7 @@ public class Database {
 		try {
 			openDB();
 
-			PreparedStatement selectLastId = conn.prepareStatement(selectLastTableOrderIdSql);
+			PreparedStatement selectLastId = conn.prepareStatement(selectLastOrderIdSql);
 
 			ResultSet rs = selectLastId.executeQuery();
 
@@ -1011,7 +1079,7 @@ public class Database {
 
 
 
-			PreparedStatement insert = conn.prepareStatement(insertTableOrderItemSql);
+			PreparedStatement insert = conn.prepareStatement(insertOrderItemSql);
 
 			insert.setInt(1, lastOrderId);
 			insert.setInt(2, menuItemId);
@@ -1039,6 +1107,7 @@ public class Database {
 
 			insert.setString(1, customerName);
 			insert.setString(2,  dateTime);
+			insert.setString(3, "COLLECTION");
 
 			insert.executeUpdate();
 			insert.close();
@@ -1056,12 +1125,13 @@ public class Database {
 			collectionOrdersArray = new ArrayList<CollectionOrder>();
 			openDB();
 
-			PreparedStatement selectCollectionOrders = conn.prepareStatement(selectCollectionOrdersSql);
+			PreparedStatement selectCollectionOrders = conn.prepareStatement(selectOrdersByTypeSql);
+			selectCollectionOrders.setString(1, "COLLECTION");
 			ResultSet rs = selectCollectionOrders.executeQuery();
 
 			while (rs.next()) {
-				int collectionOrderId = rs.getInt("collection_order_id");
-				String customerName = rs.getString("customer_name");
+				int collectionOrderId = rs.getInt("order_table_id");
+				String customerName = rs.getString("collection_id");
 				String dateTime = rs.getString("order_time");
 
 				CollectionOrder c = new CollectionOrder(collectionOrderId, customerName, dateTime);
@@ -1093,20 +1163,20 @@ public class Database {
 			collectionOrderItemsArray = new ArrayList<CollectionOrder>();
 			openDB();
 
-			PreparedStatement selectCollectionOrderItems = conn.prepareStatement(selectCollectionOrderItemsSql);
+			PreparedStatement selectCollectionOrderItems = conn.prepareStatement(selectOrderItemsFromIdSql);
 
 			selectCollectionOrderItems.setInt(1, orderId);
 
 			ResultSet rs = selectCollectionOrderItems.executeQuery();
 
 			while (rs.next()) {
-				int collectionOrderId = rs.getInt("collection_order_id");
+				int collectionOrderId = rs.getInt("order_table_id");
 				int menuItemId = rs.getInt("menu_item_id");
 				String menuItemName = rs.getString("item_name");
 				int quantity = rs.getInt("quantity");
 				double menuItemPrice = rs.getDouble("item_price");
 
-				System.out.println("DATABASE!!! " + collectionOrderId + " " + menuItemId );
+				System.out.println("DATABASE!!! " + orderId + " " + menuItemId );
 
 				CollectionOrder c = new CollectionOrder(collectionOrderId, menuItemId, menuItemName, quantity, menuItemPrice);
 				collectionOrderItemsArray.add(c);
@@ -1134,7 +1204,7 @@ public class Database {
 		try {
 			openDB();
 
-			PreparedStatement selectLastId = conn.prepareStatement(selectLastCollectionOrderIdSql);
+			PreparedStatement selectLastId = conn.prepareStatement(selectLastOrderIdSql);
 
 			ResultSet rs = selectLastId.executeQuery();
 
@@ -1152,7 +1222,7 @@ public class Database {
 
 
 
-			PreparedStatement insert = conn.prepareStatement(insertCollectionOrderItemSql);
+			PreparedStatement insert = conn.prepareStatement(insertOrderItemSql);
 
 			insert.setInt(1, lastOrderId);
 			insert.setInt(2, menuItemId);
@@ -1180,6 +1250,7 @@ public class Database {
 
 			insert.setInt(1, customerId);
 			insert.setString(2,  dateTime);
+			insert.setString(3, "DELIVERY");
 
 			insert.executeUpdate();
 			insert.close();
@@ -1197,11 +1268,12 @@ public class Database {
 			deliveryOrdersArray = new ArrayList<DeliveryOrder>();
 			openDB();
 
-			PreparedStatement selectDeliveryOrders = conn.prepareStatement(selectDeliveryOrdersSql);
+			PreparedStatement selectDeliveryOrders = conn.prepareStatement(selectOrdersByTypeSql);
+			selectDeliveryOrders.setString(1, "DELIVERY");
 			ResultSet rs = selectDeliveryOrders.executeQuery();
 
 			while (rs.next()) {
-				int deliveryOrderId = rs.getInt("delivery_order_id");
+				int deliveryOrderId = rs.getInt("order_table_id");
 				int customerId = rs.getInt("customer_id");
 				String dateTime = rs.getString("order_time");
 
@@ -1234,14 +1306,15 @@ public class Database {
 			deliveryOrderItemsArray = new ArrayList<DeliveryOrder>();
 			openDB();
 
-			PreparedStatement selectDeliveryOrderItems = conn.prepareStatement(selectDeliveryOrderItemsSql);
-
+			PreparedStatement selectDeliveryOrderItems = conn.prepareStatement(selectOrderItemsFromIdSql);
+			
+			
 			selectDeliveryOrderItems.setInt(1, orderId);
 
 			ResultSet rs = selectDeliveryOrderItems.executeQuery();
 
 			while (rs.next()) {
-				int deliveryOrderId = rs.getInt("delivery_order_id");
+				int deliveryOrderId = rs.getInt("order_table_id");
 				int menuItemId = rs.getInt("menu_item_id");
 				String menuItemName = rs.getString("item_name");
 				int quantity = rs.getInt("quantity");
@@ -1274,7 +1347,7 @@ public class Database {
 		try {
 			openDB();
 
-			PreparedStatement selectLastId = conn.prepareStatement(selectLastDeliveryOrderIdSql);
+			PreparedStatement selectLastId = conn.prepareStatement(selectLastOrderIdSql);
 
 			ResultSet rs = selectLastId.executeQuery();
 
@@ -1292,7 +1365,7 @@ public class Database {
 
 
 
-			PreparedStatement insert = conn.prepareStatement(insertDeliveryOrderItemSql);
+			PreparedStatement insert = conn.prepareStatement(insertOrderItemSql);
 
 			insert.setInt(1, lastOrderId);
 			insert.setInt(2, menuItemId);

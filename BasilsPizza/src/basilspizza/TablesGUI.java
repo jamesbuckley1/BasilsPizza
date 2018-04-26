@@ -509,9 +509,13 @@ public class TablesGUI {
 
 	public static void populateComboboxStaff() { // Needs to be public as this method is called from StaffGUI when other staff clock in.
 
+		comboboxStaff.setEnabled(true);
 		comboboxStaff.removeAllItems();
 
+		
 		Database.selectClockedInStaff();
+		
+		
 
 		for (int i = 0; i < Database.getStaffClockedInArray().size(); i++) {
 
@@ -524,17 +528,24 @@ public class TablesGUI {
 
 			//Object[] data = {staffId, firstName, lastName, jobTitle};
 
+			
 			String dataStr = staffId + " " + firstName +  " " + lastName + " " + jobTitle;
 
 			comboboxStaff.addItem(dataStr);
 
 		}
+		
+		if (Database.getStaffClockedInArray().size() == 0) {
+			comboboxStaff.addItem("No clocked in staff available.");
+			comboboxStaff.setEnabled(false);
+			
+		}
 
 
 	}
 
-	public void populateTableOrdersTable(String table) {
-		System.out.println("POPULATE ACTIVE TABLE ORDERS");
+	public void populateTableOrdersTable(String tableId) {
+		System.out.println("POPULATE ACTIVE TABLE ORDERS" + tableId);
 		int rows = tableOrdersTableModel.getRowCount();
 		for (int i = rows - 1; i >= 0; i --) {
 			tableOrdersTableModel.removeRow(i);
@@ -547,7 +558,7 @@ public class TablesGUI {
 		*/
 
 		//if (tableList.getModel().getSize() > 0) {
-			Database.selectActiveTableOrderItems(table);
+			Database.selectActiveTableOrderItems(tableId);
 
 			for (int i = 0; i < Database.getActiveTableOrderItemsArray().size(); i++) {
 

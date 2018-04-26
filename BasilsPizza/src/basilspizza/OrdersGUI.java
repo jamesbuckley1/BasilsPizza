@@ -52,6 +52,8 @@ public class OrdersGUI {
 	private String customerCity = "";
 	private String customerPostcode = "";
 	private String customerPhoneNumber = "";
+	
+	private double totalPrice;
 
 	public OrdersGUI() {
 		initGUI();
@@ -159,8 +161,16 @@ public class OrdersGUI {
 				try {
 					int row = tableTableOrders.getSelectedRow();
 					int orderId = Integer.parseInt(tableTableOrders.getModel().getValueAt(row, 0).toString());
+					String tableId = tableTableOrders.getModel().getValueAt(row, 1).toString();
 					populateTableOrdersView(orderId);
-					selectedTableOrdersRow = row;
+					disableOrderDetailsTextFields();
+					enableOrderDetailsTableTextFields();
+					
+					setTextFieldOrderType("TABLE");
+					setTextFieldAssignedStaff(Database.selectTableAssignedStaff(tableId));
+					
+					
+					
 				} catch (Exception e) {
 					/*
         				JOptionPane.showMessageDialog(frame, "Please select an item to edit.",
@@ -555,7 +565,7 @@ public class OrdersGUI {
 
 		tableOrderView.setFillsViewportHeight(true);
 
-		TitledBorder border = new TitledBorder("Order Contents: ");
+		TitledBorder border = new TitledBorder("Order Items: ");
 		border.setTitleJustification(TitledBorder.LEFT);
 		border.setTitlePosition(TitledBorder.TOP);
 		panelOrderViewMain.setBorder(border);
@@ -585,7 +595,8 @@ public class OrdersGUI {
 			String menuItemName = Database.getTableOrderItemsArray().get(i).getMenuItemName();
 			int quantity = Database.getTableOrderItemsArray().get(i).getQuantity();
 			double menuItemPrice = Database.getTableOrderItemsArray().get(i).getMenuItemPrice();
-
+		
+			totalPrice += menuItemPrice * quantity;
 
 
 			Object[] data = {tableOrderId, menuItemId, menuItemName, quantity, menuItemPrice
@@ -601,13 +612,16 @@ public class OrdersGUI {
 
 
 		}
+		
+		setTextFieldTotalPrice(String.valueOf(totalPrice));
+		totalPrice = 0;
 
 
 	}
 
 	private void populateCollectionOrdersView(int orderId) {
-		int rows = tableOrderViewModel.getRowCount();
-		for (int i = rows - 1; i >= 0; i --) {
+		int row = tableOrderViewModel.getRowCount();
+		for (int i = row - 1; i >= 0; i --) {
 			tableOrderViewModel.removeRow(i);
 		}
 
@@ -615,6 +629,7 @@ public class OrdersGUI {
 
 		Database.selectCollectionOrderItem(orderId);
 
+		
 
 		for (int i = 0; i < Database.getCollectionOrderItemsArray().size(); i++) {
 
@@ -624,12 +639,8 @@ public class OrdersGUI {
 			int quantity = Database.getCollectionOrderItemsArray().get(i).getQuantity();
 			double menuItemPrice = Database.getCollectionOrderItemsArray().get(i).getMenuItemPrice();
 
-			System.out.println("HELOO!!!");
-			System.out.println(collectionOrderId);
-			System.out.println(menuItemId);
-			System.out.println(menuItemName);
-			System.out.println(quantity);
-			System.out.println(menuItemPrice);
+			totalPrice += menuItemPrice * quantity;
+			
 
 			Object[] data = {collectionOrderId, menuItemId, menuItemName, quantity, menuItemPrice
 			};
@@ -643,7 +654,12 @@ public class OrdersGUI {
 			tableOrderView.setModel(tableOrderViewModel);
 
 
+			
 		}
+		
+		
+		setTextFieldTotalPrice(String.valueOf(totalPrice));
+		totalPrice = 0;
 	}
 
 	private void populateDeliveryOrdersView(int orderId) {
@@ -657,6 +673,7 @@ public class OrdersGUI {
 
 		Database.selectDeliveryOrderItem(orderId);
 
+	
 
 		for (int i = 0; i < Database.getDeliveryOrderItemsArray().size(); i++) {
 
@@ -667,7 +684,8 @@ public class OrdersGUI {
 			double menuItemPrice = Database.getDeliveryOrderItemsArray().get(i).getMenuItemPrice();
 
 
-
+			totalPrice += menuItemPrice * quantity;
+			
 			Object[] data = {deliveryOrderId, menuItemId, menuItemName, quantity, menuItemPrice
 			};
 
@@ -681,7 +699,9 @@ public class OrdersGUI {
 
 
 		}
-
+		
+		setTextFieldTotalPrice(String.valueOf(totalPrice));
+		totalPrice = 0;
 
 	}
 
@@ -875,8 +895,9 @@ public class OrdersGUI {
 	private void setTextFieldCustomerPhoneNumber(String phoneNumber) {
 		textFieldCustomerPhoneNumber.setText(phoneNumber);
 	}
+	
 
-	private void setTotalPrice(String totalPrice) {
+	private void setTextFieldTotalPrice(String totalPrice) {
 		textFieldTotalPrice.setText(totalPrice);
 	}
 
