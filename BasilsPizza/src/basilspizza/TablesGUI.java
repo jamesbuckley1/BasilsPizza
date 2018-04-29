@@ -67,7 +67,7 @@ public class TablesGUI {
 
 		panelTablesSelectInfoPaymentGrid.add(tableSelect());
 		panelTablesSelectInfoPaymentGrid.add(tableInfo());
-		panelTablesSelectInfoPaymentGrid.add(tablePayment());
+		//panelTablesSelectInfoPaymentGrid.add(tablePayment());
 		panelTablesMainGrid.add(panelTablesSelectInfoPaymentGrid);
 		panelTablesMainGrid.add(tableOrders());
 
@@ -286,6 +286,7 @@ public class TablesGUI {
 		return panelTableInfoButtons;
 	}
 
+	/*
 	public JPanel tablePayment() {
 		JPanel panelTablePaymentMain = new JPanel(new BorderLayout());
 		JPanel panelTablePayment = new JPanel(new GridBagLayout());
@@ -332,13 +333,13 @@ public class TablesGUI {
 		//gbc.insets = new Insets(0, 0, 0, 0);
 		panelTablePayment.add(labelTotalPrice, gbc);
 
-		/*
+		
 		gbc.gridx = 0;
 		gbc.gridy = 20;
 		gbc.weightx = 1.0;
 		gbc.weighty = 1.0;
 		panelTablePayment.add(new JLabel(), gbc);
-		 */
+		 
 
 		TitledBorder border = new TitledBorder("Payment:");
 		border.setTitleJustification(TitledBorder.LEFT);
@@ -350,6 +351,8 @@ public class TablesGUI {
 
 		return panelTablePaymentMain;
 	}
+
+*/
 
 	public JPanel tablePaymentButtons() {
 		JPanel panelTablePaymentButtons = new JPanel(new GridBagLayout());
@@ -447,7 +450,7 @@ public class TablesGUI {
 		tableOrdersTable.setFillsViewportHeight(true);
 
 		panelTableOrders.add(jsp, BorderLayout.CENTER);
-		panelTableOrders.add(tableOrdersTableButtons(), BorderLayout.SOUTH);
+		//panelTableOrders.add(tableOrdersTableButtons(), BorderLayout.SOUTH);
 		//panelCustomersTable.add(tableOrdersTableSearch(), BorderLayout.NORTH);
 
 		TitledBorder border = new TitledBorder("Active Table Orders:");
@@ -459,6 +462,7 @@ public class TablesGUI {
 		return panelTableOrders;
 	}
 
+	/*
 	public JPanel tableOrdersTableButtons() {
 		JPanel panelTableOrdersTableButtons = new JPanel(new GridBagLayout());
 
@@ -484,6 +488,7 @@ public class TablesGUI {
 
 		return panelTableOrdersTableButtons;
 	}
+	*/
 
 	public static void populateTables() {
 
