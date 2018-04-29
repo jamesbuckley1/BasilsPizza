@@ -13,6 +13,7 @@ public class DeliveryOrder {
 	private String menuItemName;
 	private int quantity;
 	private double menuItemPrice;
+	private double totalPrice;
 	
 	// Add new delivery order constructor.
 	public DeliveryOrder(int customerId) {
@@ -46,6 +47,14 @@ public class DeliveryOrder {
 		this.customerId = customerId;
 		this.menuItemId = menuItemId;
 		this.quantity = quantity;
+	}
+	
+	// Select customer delivery order items constructor.
+	public DeliveryOrder(int customerId, int orderId, String orderTime, double totalPrice) {
+		this.customerId = customerId;
+		this.orderId = orderId;
+		this.dateTime = orderTime;
+		this.totalPrice = totalPrice;
 	}
 	
 	public String getCurrentDateTime() {
@@ -82,6 +91,10 @@ public class DeliveryOrder {
 	
 	public String getDateTime() {
 		return dateTime;
+	}
+	
+	public double getTotalPrice() {
+		return totalPrice;
 	}
 	
 	

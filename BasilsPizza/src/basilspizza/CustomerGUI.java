@@ -39,8 +39,8 @@ import javax.swing.table.TableRowSorter;
 public class CustomerGUI {
 	private static JFrame frame;
 	private static final int SQLITE_CONSTRAINT_PRIMARYKEY = 19; // SQLite error code.
-	private static DefaultTableModel customersTableModel, customersOrdersTableModel;
-	private static JTable customersTable, customersOrdersTable;
+	private static DefaultTableModel customersTableModel, customerOrdersTableModel;
+	private static JTable customersTable, customerOrdersTable;
 	
 	private JPanel panelCustomersMain;
 	private JTextField textFieldCustomerFirstName, textFieldCustomerLastName,
@@ -129,10 +129,15 @@ public class CustomerGUI {
 
 				try {
 					int row = customersTable.getSelectedRow();
-					String houseNumber = customersTable.getModel().getValueAt(row, 2).toString();
-					String address = customersTable.getModel().getValueAt(row, 3).toString();
-					String city = customersTable.getModel().getValueAt(row, 4).toString();
-					//populateMap(houseNumber, address, city);
+					//String houseNumber = customersTable.getModel().getValueAt(row, 2).toString();
+					//String address = customersTable.getModel().getValueAt(row, 3).toString();
+					//String city = customersTable.getModel().getValueAt(row, 4).toString();
+					
+					System.out.println("CUSTOMERS TABLE CLICKED");
+					
+					int customerId = Integer.parseInt(customersTable.getModel().getValueAt(row, 0).toString());
+					populateCustomerOrdersTable(customerId);
+					
 				} catch (Exception e) {
 					/*
         				JOptionPane.showMessageDialog(frame, "Please select an item to edit.",
@@ -501,11 +506,11 @@ public class CustomerGUI {
 		
 		JPanel panelCustomersOrders = new JPanel(new BorderLayout());
 
-		customersOrdersTableModel = new DefaultTableModel(new String[] {
-				"Order", "Date/Time", "Price"
+		customerOrdersTableModel = new DefaultTableModel(new String[] {
+				"Customer ID", "Order ID", "Date/Time"
 		}, 0);
 
-		customersOrdersTable = new JTable(customersOrdersTableModel ) {
+		customerOrdersTable = new JTable(customerOrdersTableModel ) {
 
 			public boolean isCellEditable(int row, int col) {
 				return false;
@@ -529,13 +534,13 @@ public class CustomerGUI {
 			}
 		};
 
-		customersOrdersTable.setFont(new Font("", 0, 14));
-		customersOrdersTable.setRowHeight(customersOrdersTable.getRowHeight() + 10);
-		customersOrdersTable.setAutoCreateRowSorter(true);
-		customersOrdersTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+		customerOrdersTable.setFont(new Font("", 0, 14));
+		customerOrdersTable.setRowHeight(customerOrdersTable.getRowHeight() + 10);
+		customerOrdersTable.setAutoCreateRowSorter(true);
+		customerOrdersTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 
 		// THIS PROBABLY WON'T BE NEEDED.
-		customersOrdersTable.addMouseListener(new MouseAdapter() {
+		customerOrdersTable.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent event) {
 				if (event.getClickCount() == 2) {
@@ -543,8 +548,8 @@ public class CustomerGUI {
 				}
 
 				try {
-					int row = customersOrdersTable.getSelectedRow();
-					//String houseNumber = customersOrdersTable.getModel().getValueAt(row, 2).toString();
+					int row = customerOrdersTable.getSelectedRow();
+					//String houseNumber = customerOrdersTable.getModel().getValueAt(row, 2).toString();
 					//String address = customersTable.getModel().getValueAt(row, 3).toString();
 					//String city = customersTable.getModel().getValueAt(row, 4).toString();
 					//populateMap(houseNumber, address, city);
@@ -557,13 +562,13 @@ public class CustomerGUI {
 			}
 		});
 
-		//populateCustomersOrdersTable();
+		//populatecustomerOrdersTable();
 
-		JScrollPane jsp = new JScrollPane(customersOrdersTable,
+		JScrollPane jsp = new JScrollPane(customerOrdersTable,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
-		customersOrdersTable.setFillsViewportHeight(true);
+		customerOrdersTable.setFillsViewportHeight(true);
 
 		panelCustomersOrders.add(jsp, BorderLayout.CENTER);
 		panelCustomersOrders.add(customersOrdersButtons(), BorderLayout.SOUTH);
@@ -581,13 +586,12 @@ public class CustomerGUI {
 		
 		JPanel panelCustomersOrdersButtons = new JPanel(new GridBagLayout());
 
-		// THIS MIGHT NOT BE NEEDED
 		JButton clearOrdersBtn = new JButton();
-		clearOrdersBtn.setText("Clear");
+		clearOrdersBtn.setText("View Order");
 		clearOrdersBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
-				//editCustomer(frame?);
+				new ViewCustomerOrderDialogGUI(getSelectedCustomerOrderId());
 			}
 		});
 
@@ -607,41 +611,42 @@ public class CustomerGUI {
 		return panelCustomersOrdersButtons;
 	}
 
-	/*
-	private void populateCustomersOrdersTable() { // TO DO
+	
+	private void populateCustomerOrdersTable(int customerId) { // TO DO
 		
-		int rows = customersTableModel.getRowCount();
+		int rows = customerOrdersTable.getRowCount();
+		//System.out.println("CUSTOMER ORDERS TABLE MODEL ROW = " + row);
 		for (int i = rows - 1; i >= 0; i --) {
-			customersTableModel.removeRow(i);
+			customerOrdersTableModel.removeRow(i);
 		}
 
-		Database.selectActiveTableOrderItems(customersTableModel.getValueAt(getSelectedCustomerTableRow(), column));();
+		//int i = customersTable.get
+		//System.out.println("CUSTOMERORDERSTABLEMODEL ID!!" + Integer.parseInt(customersTable.getValueAt(row, 0).toString()));
+		Database.selectCustomerOrderFromCustomerId(customerId);
+		
+		
 
-		for (int i = 0; i < Database.getCustomersArray().size(); i++) {
-
-
-			String firstName = Database.getCustomersArray().get(i).getFirstName();
-			String lastName = Database.getCustomersArray().get(i).getLastName(); 
-			String houseNumber = Database.getCustomersArray().get(i).getHouseNumber();
-			String address = Database.getCustomersArray().get(i).getAddress();
-			String city = Database.getCustomersArray().get(i).getCity();
-			String postcode = Database.getCustomersArray().get(i).getPostcode();
-			String phoneNumber = Database.getCustomersArray().get(i).getPhoneNumber();
+		for (int i = 0; i < Database.getDeliveryOrderItemsArray().size(); i++) {
 
 
+			int returnedCustomerId = Database.getDeliveryOrderItemsArray().get(i).getCustomerId();
+			int returnedOrderId = Database.getDeliveryOrderItemsArray().get(i).getOrderId();
+			String dateTime = Database.getDeliveryOrderItemsArray().get(i).getDateTime(); 
+	
+			//totalPrice = 0;
 
 
-			Object[] data = {firstName, lastName, houseNumber, address, city,
-					postcode, phoneNumber
+			System.out.println("RERERERECUSTOMER ID!!! " + returnedCustomerId);
+			Object[] data = {returnedCustomerId, returnedOrderId, dateTime
 			};
 
 
 
-			customersTableModel.addRow(data);
+			customerOrdersTableModel.addRow(data);
 
-		 
+		}
 	}
-*/
+
 
 	// Display error message.
 	private static void showError(String error) {
@@ -770,6 +775,13 @@ public class CustomerGUI {
 	private int getSelectedCustomerTableRow() {
 		int row = customersTable.getSelectedRow();
 		return row;
+	}
+	
+	private int getSelectedCustomerOrderId() {
+		int row = customerOrdersTable.getSelectedRow();
+		int orderId = Integer.parseInt(customerOrdersTable.getModel().getValueAt(row, 1).toString());
+		
+		return orderId;
 	}
 
 	public JPanel getCustomerPanel() {

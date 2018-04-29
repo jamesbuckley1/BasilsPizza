@@ -572,7 +572,7 @@ public class NewOrderGUI {
 
 		JButton buttonCustmerSearchClear = new JButton("Clear Search");
 
-		JButton buttonNewCustomer = new JButton("New Customer");
+		//JButton buttonNewCustomer = new JButton("New Customer");
 
 
 		GridBagConstraints gbc = new GridBagConstraints();
@@ -591,8 +591,8 @@ public class NewOrderGUI {
 		gbc.gridx++;
 		panelDeliveryOrderNorthControls.add(buttonCustmerSearchClear, gbc);
 
-		gbc.gridx++;
-		panelDeliveryOrderNorthControls.add(buttonNewCustomer, gbc);
+		//gbc.gridx++;
+		//panelDeliveryOrderNorthControls.add(buttonNewCustomer, gbc);
 
 
 

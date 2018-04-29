@@ -15,6 +15,7 @@ import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -45,6 +46,8 @@ public class OrdersGUI {
 	textFieldCustomerAddress, textFieldCustomerCity, textFieldCustomerPostcode,
 	textFieldCustomerPhoneNumber, textFieldTotalPrice;
 
+	private JButton buttonCustomerInfo;
+
 	private String customerFirstName = "";
 	private String customerLastName = "";
 	private String customerHouseNumber = "";
@@ -52,7 +55,7 @@ public class OrdersGUI {
 	private String customerCity = "";
 	private String customerPostcode = "";
 	private String customerPhoneNumber = "";
-	
+
 	private double totalPrice;
 
 	public OrdersGUI() {
@@ -110,7 +113,6 @@ public class OrdersGUI {
 	private JPanel tableOrders() {
 		JPanel panelTableOrdersMain = new JPanel(new BorderLayout());
 
-		//panelTableOrdersMain.add(new JLabel("panelTableOrdersMain"), BorderLayout.CENTER);
 
 		tableTableOrdersModel = new DefaultTableModel(new String[] {
 				"Order ID", "Table ID", "Order Time"
@@ -165,12 +167,12 @@ public class OrdersGUI {
 					populateTableOrdersView(orderId);
 					disableOrderDetailsTextFields();
 					enableOrderDetailsTableTextFields();
-					
+
 					setTextFieldOrderType("TABLE");
 					setTextFieldAssignedStaff(Database.selectTableAssignedStaff(tableId));
-					
-					
-					
+
+
+
 				} catch (Exception e) {
 					/*
         				JOptionPane.showMessageDialog(frame, "Please select an item to edit.",
@@ -578,7 +580,6 @@ public class OrdersGUI {
 
 	private void populateTableOrdersView(int orderId) {
 
-
 		int rows = tableOrderViewModel.getRowCount();
 		for (int i = rows - 1; i >= 0; i --) {
 			tableOrderViewModel.removeRow(i);
@@ -595,7 +596,7 @@ public class OrdersGUI {
 			String menuItemName = Database.getTableOrderItemsArray().get(i).getMenuItemName();
 			int quantity = Database.getTableOrderItemsArray().get(i).getQuantity();
 			double menuItemPrice = Database.getTableOrderItemsArray().get(i).getMenuItemPrice();
-		
+
 			totalPrice += menuItemPrice * quantity;
 
 
@@ -612,7 +613,7 @@ public class OrdersGUI {
 
 
 		}
-		
+
 		setTextFieldTotalPrice(String.valueOf(totalPrice));
 		totalPrice = 0;
 
@@ -629,7 +630,7 @@ public class OrdersGUI {
 
 		Database.selectCollectionOrderItem(orderId);
 
-		
+
 
 		for (int i = 0; i < Database.getCollectionOrderItemsArray().size(); i++) {
 
@@ -640,7 +641,7 @@ public class OrdersGUI {
 			double menuItemPrice = Database.getCollectionOrderItemsArray().get(i).getMenuItemPrice();
 
 			totalPrice += menuItemPrice * quantity;
-			
+
 
 			Object[] data = {collectionOrderId, menuItemId, menuItemName, quantity, menuItemPrice
 			};
@@ -654,10 +655,10 @@ public class OrdersGUI {
 			tableOrderView.setModel(tableOrderViewModel);
 
 
-			
+
 		}
-		
-		
+
+
 		setTextFieldTotalPrice(String.valueOf(totalPrice));
 		totalPrice = 0;
 	}
@@ -673,7 +674,7 @@ public class OrdersGUI {
 
 		Database.selectDeliveryOrderItem(orderId);
 
-	
+
 
 		for (int i = 0; i < Database.getDeliveryOrderItemsArray().size(); i++) {
 
@@ -685,7 +686,7 @@ public class OrdersGUI {
 
 
 			totalPrice += menuItemPrice * quantity;
-			
+
 			Object[] data = {deliveryOrderId, menuItemId, menuItemName, quantity, menuItemPrice
 			};
 
@@ -699,7 +700,7 @@ public class OrdersGUI {
 
 
 		}
-		
+
 		setTextFieldTotalPrice(String.valueOf(totalPrice));
 		totalPrice = 0;
 
@@ -794,22 +795,26 @@ public class OrdersGUI {
 		//JPanel panelOrderDetailsSouthControlsMain = new JPanel(new BorderLayout());
 		JPanel panelOrderDetailsSouthControls = new JPanel(new GridBagLayout());
 
-		JButton buttonCustomerInfo = new JButton("Info & Directions");
+		buttonCustomerInfo = new JButton("Info & Directions");
 		buttonCustomerInfo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//CustomerMap cm = new CustomerMap(customerHouseNumber, customerAddress, customerCity);
-				//cm.getDirectionsData();
-				//cm.getStaticMapImage();
-				ArrayList<String> customerDetailsArray = new ArrayList<String>();
-				customerDetailsArray.add(customerFirstName);
-				customerDetailsArray.add(customerLastName);
-				customerDetailsArray.add(customerHouseNumber);
-				customerDetailsArray.add(customerAddress);
-				customerDetailsArray.add(customerCity);
-				customerDetailsArray.add(customerPostcode);
-				customerDetailsArray.add(customerPhoneNumber);
-				
-				CustomerInfoDialogGUI customerMap = new CustomerInfoDialogGUI(null, customerDetailsArray);
+
+				if (customerFirstName == "") {
+					JOptionPane.showMessageDialog(null, "Please select a delivery order.",
+							"Error", JOptionPane.ERROR_MESSAGE);
+				} else {
+
+					ArrayList<String> customerDetailsArray = new ArrayList<String>();
+					customerDetailsArray.add(customerFirstName);
+					customerDetailsArray.add(customerLastName);
+					customerDetailsArray.add(customerHouseNumber);
+					customerDetailsArray.add(customerAddress);
+					customerDetailsArray.add(customerCity);
+					customerDetailsArray.add(customerPostcode);
+					customerDetailsArray.add(customerPhoneNumber);
+
+					CustomerInfoDialogGUI customerMap = new CustomerInfoDialogGUI(null, customerDetailsArray);
+				}
 			}
 		});
 
@@ -895,7 +900,7 @@ public class OrdersGUI {
 	private void setTextFieldCustomerPhoneNumber(String phoneNumber) {
 		textFieldCustomerPhoneNumber.setText(phoneNumber);
 	}
-	
+
 
 	private void setTextFieldTotalPrice(String totalPrice) {
 		textFieldTotalPrice.setText(totalPrice);

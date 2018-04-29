@@ -22,6 +22,7 @@ public class Database {
 	private static ArrayList<CollectionOrder> collectionOrderItemsArray;
 	private static ArrayList<DeliveryOrder> deliveryOrdersArray;
 	private static ArrayList<DeliveryOrder> deliveryOrderItemsArray;
+	
 
 	// STOCK SQL STRINGS
 	private final static String createStockTableSql = "CREATE TABLE IF NOT EXISTS stock (stock_id INTEGER PRIMARY KEY NOT NULL, item TEXT NOT NULL, price DOUBLE NOT NULL, quantity INT NOT NULL);";
@@ -69,12 +70,16 @@ public class Database {
 	private final static String insertDeliveryOrderSql = "INSERT INTO order_table (customer_id, order_time, order_type) VALUES (?, ?, ?);";
 	private final static String selectLastOrderIdSql = "SELECT seq FROM sqlite_sequence WHERE name = \"order_table\";"; // Gets last inserted autoincremented ID
 	private final static String selectOrdersByTypeSql = "SELECT * FROM order_table WHERE order_type = ?;";
+	private final static String selectCustomerOrdersFromIdSql = "SELECT * FROM order_table WHERE customer_id = ?;";
+	//private final static String selectCustomerOrdersFromCustomerId = "SELECT * FROM order_table"
+	
 	
 	// ORDER ITEM SQL STRINGS
 	private final static String createOrderItemsTableSql = "CREATE TABLE IF NOT EXISTS order_table_item (order_table_item_id INTEGER PRIMARY KEY AUTOINCREMENT, order_table_id INTEGER NOT NULL REFERENCES order_table(order_table_id), menu_item_id INTEGER NOT NULL REFERENCES menu_item(menu_item_id), quantity INTEGER);";
 	private final static String insertOrderItemSql = "INSERT INTO order_table_item (order_table_id, menu_item_id, quantity) VALUES (?, ?, ?);";
 	private final static String selectOrderItemsFromIdSql = "SELECT order_table_item.order_table_item_id, order_table_item.order_table_id, order_table_item.menu_item_id, menu_item.item_name, order_table_item.quantity, menu_item.item_price FROM order_table_item INNER JOIN menu_item on order_table_item.menu_item_id = menu_item.menu_item_id WHERE order_table_item.order_table_id = ?;";
 	private final static String selectActiveOrderItemsFromIdSql = "SELECT order_table_item.order_table_item_id, order_table_item.order_table_id, order_table.table_id, order_table_item.menu_item_id, menu_item.item_name, order_table_item.quantity, menu_item.item_price FROM order_table_item INNER JOIN menu_item ON order_table_item.menu_item_id = menu_item.menu_item_id INNER JOIN order_table ON order_table_item.order_table_id = order_table.order_table_id WHERE order_table.table_id = ?;";
+	
 	
 	
 	// TABLES SQL STRINGS (Had to name the table "tables" as it did not like "table").
@@ -1382,6 +1387,60 @@ public class Database {
 		}
 		System.out.println("INSERT delivery order item successful.");
 	}
+	
+	
+	///////// CUSTOMER ORDERS /////////
+	
+	
+	public static void selectCustomerOrderFromCustomerId(int customerId) {
+		try {
+			deliveryOrderItemsArray = new ArrayList<DeliveryOrder>();
+			openDB();
+
+			PreparedStatement selectCustomerOrders = conn.prepareStatement(selectCustomerOrdersFromIdSql);
+			PreparedStatement selectCustomerOrderItems = conn.prepareStatement(selectOrderItemsFromIdSql);
+			
+			
+			selectCustomerOrders.setInt(1, customerId);
+
+			ResultSet ordersResults = selectCustomerOrders.executeQuery();
+			ResultSet orderItemsResults = null;
+
+			while (ordersResults.next()) {
+				int returnedCustomerId = ordersResults.getInt("customer_id");
+				int orderId = ordersResults.getInt("order_table_id");
+				String orderTime = ordersResults.getString("order_time");
+				
+				selectCustomerOrderItems.setInt(1, orderId);
+				orderItemsResults = selectCustomerOrderItems.executeQuery();
+				
+				double totalPrice = 0;
+				
+				while (orderItemsResults.next()) {
+					totalPrice += orderItemsResults.getDouble("item_price");
+					
+				}
+
+				System.out.println("DATABASE HERE!!!" + returnedCustomerId +" " +  orderId + " " + orderTime + " " + totalPrice);
+				DeliveryOrder d = new DeliveryOrder(returnedCustomerId, orderId, orderTime, totalPrice);
+				deliveryOrderItemsArray.add(d);
+			}
+
+			ordersResults.close();
+			//orderItemsResults.close();
+			selectCustomerOrders.close();
+			selectCustomerOrderItems.close();
+			
+			closeDB();
+
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		}
+		System.out.println("SELECT delivery order items successful.");
+	}
+	
 
 
 	///////// MENU ITEMS //////////
