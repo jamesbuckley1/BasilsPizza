@@ -1796,7 +1796,7 @@ public class NewOrderGUI {
 		textFieldCustomerName.setEditable(false);
 
 		textFieldCustomerId = new JTextField(20);
-		textFieldCustomerName.setEditable(false);
+		textFieldCustomerId.setEditable(false);
 
 		textFieldCustomerHouseNumber = new JTextField(20);
 		textFieldCustomerHouseNumber.setEditable(false);
@@ -1971,20 +1971,20 @@ public class NewOrderGUI {
 						}
 
 
-						OrdersGUI.populateTableOrders();
+						OpenOrdersGUI.populateTableOrders();
 
 
 					} else if (getOrderDetailsOrderType().equals("COLLECTION")) {
 
-						CollectionOrder newOrder = new CollectionOrder(getOrderDetailsCustomerName());
-						Database.insertCollectionOrder(newOrder.getCustomerName(), newOrder.getCurrentDateTime());
+						CollectionOrder newOrder = new CollectionOrder(getOrderDetailsCustomerName(), getOrderDetailsCustomerPhoneNumber());
+						Database.insertCollectionOrder(newOrder.getCustomerName(), newOrder.getCustomerPhoneNumber(), newOrder.getCurrentDateTime());
 
 						for (Map.Entry<Integer, Integer> me : orderMenuItemQuantityMultimap.entries()) {
 							CollectionOrder newOrderItem = new CollectionOrder(getOrderDetailsCustomerName(), Integer.parseInt(me.getKey().toString()), Integer.parseInt(me.getValue().toString()));
 							newOrderItem.databaseInsertCollectionOrderItem();
 						}
 
-						OrdersGUI.populateCollectionOrders();
+						OpenOrdersGUI.populateCollectionOrders();
 
 					} else if (getOrderDetailsOrderType().equals("DELIVERY")) {
 						DeliveryOrder newOrder = new DeliveryOrder(getOrderDetailsCustomerId());
@@ -1995,7 +1995,7 @@ public class NewOrderGUI {
 							newOrderItem.databaseInsertDeliveryOrderItem();
 						}
 
-						OrdersGUI.populateDeliveryOrders();
+						OpenOrdersGUI.populateDeliveryOrders();
 					}
 
 					resetOrder();
@@ -2162,6 +2162,10 @@ public class NewOrderGUI {
 	public String getOrderDetailsCustomerName() {
 		return textFieldCustomerName.getText();
 	}
+	
+	public String getOrderDetailsCustomerPhoneNumber() {
+		return textFieldCustomerPhoneNumber.getText();
+	}
 
 	private int getOrderDetailsCustomerId() {
 		return Integer.parseInt(textFieldCustomerId.getText());
@@ -2320,6 +2324,7 @@ public class NewOrderGUI {
 		setOrderDetailsOrderType("");
 		setOrderDetailsTableName("");
 		setOrderDetailsCustomerName("");
+		setOrderDetailsCustomerId("");
 		setOrderDetailsCustomerHouseNumber("");
 		setOrderDetailsCustomerAddress("");
 		setOrderDetailsCustomerCity("");

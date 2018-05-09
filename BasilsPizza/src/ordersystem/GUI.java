@@ -35,7 +35,8 @@ public class GUI {
     	    		//newOrderPanel();
     	    		//ordersPanel();
     	        tabbedPane("New Order", new NewOrderGUI().getOrdersPanel());
-    	        tabbedPane("Orders", new OrdersGUI().getOrdersPanel());
+    	        tabbedPane("Open Orders", new OpenOrdersGUI().getOpenOrdersPanel());
+    	        //tabbedPane("Closed Orders", new ClosedOrdersGUI().getClosedOrdersPanel());
     	        tabbedPane("Tables", new TablesGUI().getTablesPanel());
     	        tabbedPane("Stock", new StockGUI().getStockPanel());
     	        tabbedPane("Customers", new CustomerGUI().getCustomerPanel());

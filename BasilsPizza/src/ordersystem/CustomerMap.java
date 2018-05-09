@@ -81,10 +81,7 @@ public class CustomerMap {
 				JSONObject objRoot = (JSONObject) parser.parse(jsonIn.toString());
 				JSONArray routesArray = (JSONArray) objRoot.get("routes");
 
-
 				for (int i = 0; i < routesArray.size(); i ++) {
-
-
 
 					JSONObject objRoutes = (JSONObject) routesArray.get(i);
 
@@ -96,7 +93,6 @@ public class CustomerMap {
 						distanceKm = (String) objDistance.get("text");
 						duration = (String) objDuration.get("text");
 					}
-
 
 					JSONObject objPoints = (JSONObject) objRoutes.get("overview_polyline");
 					polyline = (String) objPoints.get("points");

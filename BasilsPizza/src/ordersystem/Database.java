@@ -64,15 +64,20 @@ public class Database {
 	private final static String deleteAssignedStaffOnClockOutSql = "UPDATE tables SET assigned_staff = null WHERE assigned_staff = ?;";
 	
 	// ORDERS SQL STRINGS
-	private final static String createOrdersTableSql = "CREATE TABLE IF NOT EXISTS order_table (order_table_id INTEGER PRIMARY KEY AUTOINCREMENT, customer_id INTEGER REFERENCES customer(customer_id), table_id TEXT REFERENCES tables(table_id), collection_id TEXT, order_time DATETIME NOT NULL, order_type TEXT NOT NULL);";
-	private final static String insertTableOrderSql = "INSERT INTO order_table (table_id, order_time, order_type) VALUES (?, ?, ?);";
-	private final static String insertCollectionOrderSql = "INSERT INTO order_table (collection_id, order_time, order_type) VALUES (?, ?, ?);";
-	private final static String insertDeliveryOrderSql = "INSERT INTO order_table (customer_id, order_time, order_type) VALUES (?, ?, ?);";
+	private final static String createOrdersTableSql = "CREATE TABLE IF NOT EXISTS order_table (order_table_id INTEGER PRIMARY KEY AUTOINCREMENT, customer_id INTEGER REFERENCES customer(customer_id), table_id TEXT REFERENCES tables(table_id), collection_id TEXT, collection_phone_number INTEGER, order_time DATETIME NOT NULL, order_type TEXT NOT NULL, order_status TEXT NOT NULL);";
+	private final static String insertTableOrderSql = "INSERT INTO order_table (table_id, order_time, order_type, order_status) VALUES (?, ?, ?, ?);";
+	private final static String insertCollectionOrderSql = "INSERT INTO order_table (collection_id, collection_phone_number, order_time, order_type, order_status) VALUES (?, ?, ?, ?, ?);";
+	private final static String insertDeliveryOrderSql = "INSERT INTO order_table (customer_id, order_time, order_type, order_status) VALUES (?, ?, ?, ?);";
 	private final static String selectLastOrderIdSql = "SELECT seq FROM sqlite_sequence WHERE name = \"order_table\";"; // Gets last inserted autoincremented ID
 	private final static String selectOrdersByTypeSql = "SELECT * FROM order_table WHERE order_type = ?;";
+	private final static String selectTableOrdersSql = "SELECT * FROM order_table WHERE order_type = ? AND order_status = ?;";
 	private final static String selectCustomerOrdersFromIdSql = "SELECT * FROM order_table WHERE customer_id = ?;";
+	private final static String closeOrderSql = "UPDATE order_table SET order_status = ? WHERE order_table_id = ?;";
+	//private final static String selectClosedTableOrdersSql = "SELECT * FROM order_table WHERE order_type = ? AND order"
+	private final static String selectCustomerPhoneNumberFromOrderIdSql = "SELECT collection_phone_number FROM order_table WHERE order_table_id = ?;";
 	//private final static String selectCustomerOrdersFromCustomerId = "SELECT * FROM order_table"
-	
+	private final static String selectCollectionOrdersSql = "SELECT * FROM order_table WHERE order_type = ? AND order_status = ?;";
+	private final static String selectDeliveryOrdersSql = "SELECT * FROM order_table WHERE order_type = ? AND order_status = ?;"; //Duplicate SQL but easier for me to understand what the method that uses it is doing.
 	
 	// ORDER ITEM SQL STRINGS
 	private final static String createOrderItemsTableSql = "CREATE TABLE IF NOT EXISTS order_table_item (order_table_item_id INTEGER PRIMARY KEY AUTOINCREMENT, order_table_id INTEGER NOT NULL REFERENCES order_table(order_table_id), menu_item_id INTEGER NOT NULL REFERENCES menu_item(menu_item_id), quantity INTEGER);";
@@ -930,6 +935,7 @@ public class Database {
 			insert.setString(1, tableId);
 			insert.setString(2,  dateTime);
 			insert.setString(3, "TABLE");
+			insert.setString(4, "OPEN");
 
 			insert.executeUpdate();
 			insert.close();
@@ -940,6 +946,26 @@ public class Database {
 			e.printStackTrace();
 		}
 		System.out.println("INSERT table order successful.");
+	}
+	
+	public static void closeOrder(int orderId) {
+		try {
+			openDB();
+
+			PreparedStatement close = conn.prepareStatement(closeOrderSql);
+
+			close.setString(1, "CLOSED");
+			close.setInt(2, orderId);
+
+			close.executeUpdate();
+			close.close();
+
+			closeDB();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		System.out.println("Close order successful.");
 	}
 
 
@@ -972,11 +998,135 @@ public class Database {
 		}
 		System.out.println("SELECT table orders successful.");
 	}
+	
+	public static void selectOpenTableOrders() {
+		try {
+			tableOrdersArray = new ArrayList<TableOrder>();
+			openDB();
+
+			PreparedStatement selectOpenTableOrders = conn.prepareStatement(selectTableOrdersSql);
+			selectOpenTableOrders.setString(1, "TABLE");
+			selectOpenTableOrders.setString(2,  "OPEN");
+			ResultSet rs = selectOpenTableOrders.executeQuery();
+
+			while (rs.next()) {
+				int tableOrderId = rs.getInt("order_table_id");
+				String tableId = rs.getString("table_id");
+				String dateTime = rs.getString("order_time");
+
+				TableOrder o = new TableOrder(tableOrderId, tableId, dateTime);
+				tableOrdersArray.add(o);
+			}
+
+			rs.close();
+			selectOpenTableOrders.close();
+			closeDB();
+
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		}
+		System.out.println("SELECT OPEN table orders successful.");
+	}
+	
+	public static void selectClosedTableOrders(int orderId) {
+		try {
+			tableOrdersArray = new ArrayList<TableOrder>();
+			openDB();
+
+			PreparedStatement selectClosedTableOrders = conn.prepareStatement(selectTableOrdersSql);
+			selectClosedTableOrders.setString(1, "TABLE");
+			selectClosedTableOrders.setString(2,  "CLOSED");
+			ResultSet rs = selectClosedTableOrders.executeQuery();
+
+			while (rs.next()) {
+				int tableOrderId = rs.getInt("order_table_id");
+				String tableId = rs.getString("table_id");
+				String dateTime = rs.getString("order_time");
+
+				TableOrder o = new TableOrder(tableOrderId, tableId, dateTime);
+				tableOrdersArray.add(o);
+			}
+
+			rs.close();
+			selectClosedTableOrders.close();
+			closeDB();
+
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		}
+		System.out.println("SELECT CLOSED table orders successful.");
+	}
 
 	public static ArrayList<TableOrder> getTableOrdersArray() {
 		return tableOrdersArray;
 	}
 
+
+	public static void selectOpenCollectionOrders() {
+		try {
+			collectionOrdersArray = new ArrayList<CollectionOrder>();
+			openDB();
+
+			PreparedStatement selectOpenCollectionOrders = conn.prepareStatement(selectCollectionOrdersSql);
+			selectOpenCollectionOrders.setString(1, "COLLECTION");
+			selectOpenCollectionOrders.setString(2,  "OPEN");
+			ResultSet rs = selectOpenCollectionOrders.executeQuery();
+
+			while (rs.next()) {
+				int collectionOrderId = rs.getInt("order_table_id");
+				String collectionId = rs.getString("collection_id");
+				String dateTime = rs.getString("order_time");
+
+				CollectionOrder o = new CollectionOrder(collectionOrderId, collectionId, dateTime);
+				collectionOrdersArray.add(o);
+			}
+
+			rs.close();
+			selectOpenCollectionOrders.close();
+			closeDB();
+
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		}
+		System.out.println("SELECT OPEN collection orders successful.");
+	}
+	
+	public static void selectOpenDeliveryOrders() {
+		try {
+			deliveryOrdersArray = new ArrayList<DeliveryOrder>();
+			openDB();
+
+			PreparedStatement selectOpenDeliveryOrders = conn.prepareStatement(selectDeliveryOrdersSql);
+			selectOpenDeliveryOrders.setString(1, "DELIVERY");
+			selectOpenDeliveryOrders.setString(2,  "OPEN");
+			ResultSet rs = selectOpenDeliveryOrders.executeQuery();
+
+			while (rs.next()) {
+				int deliveryOrderId = rs.getInt("order_table_id");
+				int customerId = rs.getInt("customer_id");
+				String dateTime = rs.getString("order_time");
+
+				DeliveryOrder o = new DeliveryOrder(deliveryOrderId, customerId, dateTime);
+				deliveryOrdersArray.add(o);
+			}
+
+			rs.close();
+			selectOpenDeliveryOrders.close();
+			closeDB();
+
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		}
+		System.out.println("SELECT OPEN delivery orders successful.");
+	}
 
 
 
@@ -1104,15 +1254,19 @@ public class Database {
 
 	///////// COLLECTION ORDER /////////
 
-	public static void insertCollectionOrder(String customerName, String dateTime) {
+	public static void insertCollectionOrder(String customerName, int customerPhoneNumber, String dateTime) {
 		try {
 			openDB();
 
 			PreparedStatement insert = conn.prepareStatement(insertCollectionOrderSql);
 
+			System.out.println("COLLECTION ORDER VALUES " + customerName + " " + customerPhoneNumber);
+			
 			insert.setString(1, customerName);
-			insert.setString(2,  dateTime);
-			insert.setString(3, "COLLECTION");
+			insert.setInt(2, customerPhoneNumber);
+			insert.setString(3,  dateTime);
+			insert.setString(4, "COLLECTION");
+			insert.setString(5, "OPEN");
 
 			insert.executeUpdate();
 			insert.close();
@@ -1123,6 +1277,36 @@ public class Database {
 			e.printStackTrace();
 		}
 		System.out.println("INSERT collection order successful.");
+	}
+	
+	public static String selectCustomerPhoneNumberFromOrderId(int orderId) {
+		String customerPhoneNumber = "";
+		try {
+			openDB();
+
+			PreparedStatement select = conn.prepareStatement(selectCustomerPhoneNumberFromOrderIdSql);
+
+			
+			select.setInt(1, orderId);
+			
+			ResultSet rs = select.executeQuery();
+			
+			while (rs.next()) {
+				customerPhoneNumber = rs.getString("collection_phone_number");
+			}
+			
+			rs.close();
+			select.close();
+
+			closeDB();
+			
+			return customerPhoneNumber;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		System.out.println("SELECT customer phone number from order ID successful.");
+		return customerPhoneNumber;
 	}
 
 	public static void selectCollectionOrders() {
@@ -1253,9 +1437,11 @@ public class Database {
 
 			PreparedStatement insert = conn.prepareStatement(insertDeliveryOrderSql);
 
+			System.out.println("QWERTY " + customerId + " " + dateTime);
 			insert.setInt(1, customerId);
 			insert.setString(2,  dateTime);
 			insert.setString(3, "DELIVERY");
+			insert.setString(4, "OPEN");
 
 			insert.executeUpdate();
 			insert.close();
@@ -1421,7 +1607,6 @@ public class Database {
 					
 				}
 
-				System.out.println("DATABASE HERE!!!" + returnedCustomerId +" " +  orderId + " " + orderTime + " " + totalPrice);
 				DeliveryOrder d = new DeliveryOrder(returnedCustomerId, orderId, orderTime, totalPrice);
 				deliveryOrderItemsArray.add(d);
 			}

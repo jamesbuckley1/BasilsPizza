@@ -29,7 +29,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
-public class OrdersGUI {
+public class OpenOrdersGUI {
 
 	private JPanel panelOrdersMain;
 
@@ -58,7 +58,7 @@ public class OrdersGUI {
 
 	private double totalPrice;
 
-	public OrdersGUI() {
+	public OpenOrdersGUI() {
 		initGUI();
 		//startRefreshTablesTimer();
 	}
@@ -91,11 +91,20 @@ public class OrdersGUI {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				if (tabbedPane.getSelectedIndex() == 0 && tableTableOrdersModel.getRowCount() > 0) { // Row count must be higher than 0 or ArrayOutOfBounds exception occurs as nothing is in the table.
-					populateTableOrdersView(getSelectedTableOrdersOrderId(getSelectedTableOrdersRow()));
+					int row = tableTableOrders.getSelectedRow();
+					if (!(row == -1)) {
+						populateTableOrdersView(getSelectedTableOrdersOrderId(getSelectedTableOrdersRow()));
+					}
 				} else if (tabbedPane.getSelectedIndex() == 1 && tableCollectionOrdersModel.getRowCount() > 0 ) {
-					populateCollectionOrdersView(getSelectedCollectionOrdersOrderId(getSelectedCollectionOrdersRow()));
+					int row = tableCollectionOrders.getSelectedRow();
+					if (!(row == -1)) {
+						populateCollectionOrdersView(getSelectedCollectionOrdersOrderId(getSelectedCollectionOrdersRow()));
+					}
 				} else if (tabbedPane.getSelectedIndex() == 2 && tableDeliveryOrdersModel.getRowCount() > 0) {
-					populateDeliveryOrdersView(getSelectedDeliveryOrdersOrderId(getSelectedDeliveryOrdersRow()));
+					int row = tableDeliveryOrders.getSelectedRow();
+					if (!(row == -1)) {
+						populateDeliveryOrdersView(getSelectedDeliveryOrdersOrderId(getSelectedDeliveryOrdersRow()));
+					}
 				}
 			}
 		});
@@ -195,10 +204,56 @@ public class OrdersGUI {
 
 
 		panelTableOrdersMain.add(jsp, BorderLayout.CENTER);
+		panelTableOrdersMain.add(tableOrdersSouthControls(), BorderLayout.SOUTH);
 
 
 
 		return panelTableOrdersMain;
+	}
+
+	private JPanel tableOrdersSouthControls() {
+		JPanel panelTableOrdersSouth = new JPanel(new GridBagLayout());
+		GridBagConstraints gbc = new GridBagConstraints();
+
+		JButton buttonCloseOrder = new JButton("Close Order");
+		buttonCloseOrder.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				int tableOrdersRow = tableTableOrders.getSelectedRow();
+				int collectionOrdersRow = tableCollectionOrders.getSelectedRow();
+				int deliveryOrdersRow = tableDeliveryOrders.getSelectedRow();
+				if (!(tableOrdersRow == -1) || collectionOrdersRow == -1 || deliveryOrdersRow == -1) {
+
+					Database.closeOrder(getSelectedTableOrdersOrderId(getSelectedTableOrdersRow()));
+					populateTableOrders();
+					//ClosedOrdersGUI.populateClosedTableOrdersTable();
+
+				} else {
+					JOptionPane.showMessageDialog(null, "Please select an order to close.", "Error",
+							JOptionPane.ERROR_MESSAGE);
+				}
+
+
+
+
+
+
+			}
+		});
+
+		gbc.gridx = 20;
+		gbc.gridy = 0;
+		gbc.weightx = 1.0;
+		gbc.weighty = 1.0;
+		panelTableOrdersSouth.add(new JLabel(), gbc);
+
+		gbc.gridx++;
+		gbc.weightx = 0;
+		gbc.weighty = 0;
+		panelTableOrdersSouth.add(buttonCloseOrder, gbc);
+
+		return panelTableOrdersSouth;
+
 	}
 
 	public static void populateTableOrders() {
@@ -208,7 +263,7 @@ public class OrdersGUI {
 		}
 
 
-		Database.selectTableOrders();
+		Database.selectOpenTableOrders();
 
 		for (int i = 0; i < Database.getTableOrdersArray().size(); i++) {
 
@@ -280,19 +335,23 @@ public class OrdersGUI {
 		tableCollectionOrders.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent event) {
-				if (event.getClickCount() == 2) {
-					// EDIT CUSTOMER - Do this is there's time.
-				}
+				
 
 				try {
 					int row = tableCollectionOrders.getSelectedRow();
 					int orderId = Integer.parseInt(tableCollectionOrders.getModel().getValueAt(row, 0).toString());
-
-					//selectedCollectionOrdersRow = row;
-
+					String customerName = tableCollectionOrders.getModel().getValueAt(row, 1).toString();
+					String customerPhoneNumber = Database.selectCustomerPhoneNumberFromOrderId(orderId);
+					
 					populateCollectionOrdersView(orderId);
-
-
+					disableOrderDetailsTextFields();
+					enableOrderDetailsCollectionTextFields();
+					
+					setTextFieldOrderType("COLLECTION");
+					setTextFieldCustomerName(customerName);
+					setTextFieldCustomerPhoneNumber(customerPhoneNumber);
+					
+					
 
 
 				} catch (Exception e) {
@@ -315,8 +374,54 @@ public class OrdersGUI {
 		tableCollectionOrders.setFillsViewportHeight(true);
 
 		panelCollectionOrdersMain.add(jsp, BorderLayout.CENTER);
+		panelCollectionOrdersMain.add(collectionOrdersSouthControls(), BorderLayout.SOUTH);
 
 		return panelCollectionOrdersMain;
+	}
+	
+	private JPanel collectionOrdersSouthControls() {
+		JPanel panelCollectionOrdersSouth = new JPanel(new GridBagLayout());
+		GridBagConstraints gbc = new GridBagConstraints();
+
+		JButton buttonCloseOrder = new JButton("Close Order");
+		buttonCloseOrder.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				//int tableOrdersRow = tableTableOrders.getSelectedRow();
+				int collectionOrdersRow = tableCollectionOrders.getSelectedRow();
+				//int deliveryOrdersRow = tableDeliveryOrders.getSelectedRow();
+				if (!(collectionOrdersRow == -1)) {
+
+					Database.closeOrder(getSelectedCollectionOrdersOrderId(getSelectedCollectionOrdersRow()));
+					populateCollectionOrders();
+					//ClosedOrdersGUI.populateClosedTableOrdersTable();
+
+				} else {
+					JOptionPane.showMessageDialog(null, "Please select an order to close.", "Error",
+							JOptionPane.ERROR_MESSAGE);
+				}
+
+
+
+
+
+
+			}
+		});
+
+		gbc.gridx = 20;
+		gbc.gridy = 0;
+		gbc.weightx = 1.0;
+		gbc.weighty = 1.0;
+		panelCollectionOrdersSouth.add(new JLabel(), gbc);
+
+		gbc.gridx++;
+		gbc.weightx = 0;
+		gbc.weighty = 0;
+		panelCollectionOrdersSouth.add(buttonCloseOrder, gbc);
+
+		return panelCollectionOrdersSouth;
+
 	}
 
 	public static void populateCollectionOrders() {
@@ -326,7 +431,7 @@ public class OrdersGUI {
 		}
 
 
-		Database.selectCollectionOrders();
+		Database.selectOpenCollectionOrders();
 
 		for (int i = 0; i < Database.getCollectionOrdersArray().size(); i++) {
 
@@ -401,13 +506,35 @@ public class OrdersGUI {
 				}
 
 				try {
+					
+					
+					
+					
+					
 					int row = tableDeliveryOrders.getSelectedRow();
 					int orderId = Integer.parseInt(tableDeliveryOrders.getModel().getValueAt(row, 0).toString());
 					int customerId = Integer.parseInt(tableDeliveryOrders.getModel().getValueAt(row, 1).toString());
+					
+					
+					populateDeliveryOrdersView(orderId);
+					disableOrderDetailsTextFields();
+					enableOrderDetailsDeliveryTextFields();
+
+					setTextFieldOrderType("DELIVERY");
+
+					
+					
+					
+					
+					
+					
+				//	int row = tableDeliveryOrders.getSelectedRow();
+				//	int orderId = Integer.parseInt(tableDeliveryOrders.getModel().getValueAt(row, 0).toString());
+				//	int customerId = Integer.parseInt(tableDeliveryOrders.getModel().getValueAt(row, 1).toString());
 
 
 					Database.selectCustomerFromId(customerId);
-
+					//Database.selectOpenDeliveryOrders();
 
 					for (int i = 0; i < Database.getCustomersArray().size(); i++) {
 
@@ -463,8 +590,54 @@ public class OrdersGUI {
 		tableDeliveryOrders.setFillsViewportHeight(true);
 
 		panelDeliveryOrdersMain.add(jsp, BorderLayout.CENTER);
+		panelDeliveryOrdersMain.add(deliveryOrdersSouthControls(), BorderLayout.SOUTH);
 
 		return panelDeliveryOrdersMain;
+	}
+	
+	private JPanel deliveryOrdersSouthControls() {
+		JPanel panelDeliveryOrdersSouth = new JPanel(new GridBagLayout());
+		GridBagConstraints gbc = new GridBagConstraints();
+
+		JButton buttonCloseOrder = new JButton("Close Order");
+		buttonCloseOrder.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				//int tableOrdersRow = tableTableOrders.getSelectedRow();
+				int deliveryOrdersRow = tableDeliveryOrders.getSelectedRow();
+				//int deliveryOrdersRow = tableDeliveryOrders.getSelectedRow();
+				if (!(deliveryOrdersRow == -1)) {
+
+					Database.closeOrder(getSelectedDeliveryOrdersOrderId(getSelectedDeliveryOrdersRow()));
+					populateDeliveryOrders();
+					//ClosedOrdersGUI.populateClosedTableOrdersTable();
+
+				} else {
+					JOptionPane.showMessageDialog(null, "Please select an order to close.", "Error",
+							JOptionPane.ERROR_MESSAGE);
+				}
+
+
+
+
+
+
+			}
+		});
+
+		gbc.gridx = 20;
+		gbc.gridy = 0;
+		gbc.weightx = 1.0;
+		gbc.weighty = 1.0;
+		panelDeliveryOrdersSouth.add(new JLabel(), gbc);
+
+		gbc.gridx++;
+		gbc.weightx = 0;
+		gbc.weighty = 0;
+		panelDeliveryOrdersSouth.add(buttonCloseOrder, gbc);
+
+		return panelDeliveryOrdersSouth;
+
 	}
 
 	public static void populateDeliveryOrders() {
@@ -474,7 +647,7 @@ public class OrdersGUI {
 		}
 
 
-		Database.selectDeliveryOrders();
+		Database.selectOpenDeliveryOrders();
 
 		for (int i = 0; i < Database.getDeliveryOrdersArray().size(); i++) {
 
@@ -953,7 +1126,7 @@ public class OrdersGUI {
 
 
 
-	public JPanel getOrdersPanel() {
+	public JPanel getOpenOrdersPanel() {
 		return panelOrdersMain;
 	}
 

@@ -6,13 +6,14 @@ import java.util.Date;
 
 public class CollectionOrder {
 	
-	private int orderId, menuItemId, quantity;
+	private int orderId, menuItemId, quantity, customerPhoneNumber;
 	private String customerName, dateTime, menuItemName;
 	private double menuItemPrice;
 	
 	// Add new collection order constructor
-	public CollectionOrder(String customerName) {
+	public CollectionOrder(String customerName, String customerPhoneNumber) {
 		this.customerName = customerName;
+		this.customerPhoneNumber = Integer.parseInt(customerPhoneNumber);
 	}
 	
 
@@ -76,6 +77,10 @@ public class CollectionOrder {
 	
 	public int getQuantity() {
 		return quantity;
+	}
+	
+	public int getCustomerPhoneNumber() {
+		return customerPhoneNumber;
 	}
 	
 	public void databaseInsertCollectionOrderItem() {
