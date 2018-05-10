@@ -173,7 +173,14 @@ public class CustomerMap {
 			sb.append(polyline);
 			sb.append(key);
 			
-		
+			File mapsFile = new File("maps/");
+			if (!mapsFile.exists()) {
+				if (mapsFile.mkdir()) {
+					System.out.println("Maps directory created.");
+				} else {
+					System.out.println("Failed to create directory.");
+				}
+			}
 
 			boolean fileExists = new File("maps/", imageFileName).exists();
 			if (fileExists) {

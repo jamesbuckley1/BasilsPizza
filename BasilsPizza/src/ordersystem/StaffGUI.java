@@ -647,7 +647,7 @@ public class StaffGUI {
 		gbc.weightx = 0;
 		gbc.weighty = 0;
 		//gbc.anchor = GridBagConstraints.LINE_END;
-		panelStaffClockInOutForm.add(new JLabel("Employee Number: "), gbc);
+		panelStaffClockInOutForm.add(new JLabel("Staff ID: "), gbc);
 
 		gbc.gridy = 1;
 		panelStaffClockInOutForm.add(new JLabel(" "), gbc);

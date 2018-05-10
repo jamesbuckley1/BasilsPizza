@@ -222,7 +222,7 @@ public class OpenOrdersGUI {
 				int tableOrdersRow = tableTableOrders.getSelectedRow();
 				int collectionOrdersRow = tableCollectionOrders.getSelectedRow();
 				int deliveryOrdersRow = tableDeliveryOrders.getSelectedRow();
-				if (!(tableOrdersRow == -1) || collectionOrdersRow == -1 || deliveryOrdersRow == -1) {
+				if (!(tableOrdersRow == -1)) {
 
 					Database.closeOrder(getSelectedTableOrdersOrderId(getSelectedTableOrdersRow()));
 					populateTableOrders();
